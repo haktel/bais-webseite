@@ -1,3 +1,5 @@
 # BAIS Website
 
-Production website source for https://bais-solutions.de
+Static production website for https://bais-solutions.de.
+
+Deployed on Cloudflare Pages as project bais-solutions.
