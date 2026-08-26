@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bais-solutions.de/sitemap.xml
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
