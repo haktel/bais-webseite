@@ -1,3 +1,4 @@
 Contact: mailto:info@bais-solutions.de
-Preferred-Languages: de, tr, en
 Canonical: https://bais-solutions.de/.well-known/security.txt
+Preferred-Languages: de, en
+Expires: 2027-08-26T23:59:59Z
