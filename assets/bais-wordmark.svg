@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="232" height="54" viewBox="0 0 232 54" role="img" aria-labelledby="title desc">
+<title id="title">BAIS</title>
+<desc id="desc">BAIS wordmark for secure AI, security and automation</desc>
+<rect width="232" height="54" rx="10" fill="#07131F"/>
+<path d="M18 14h19c8 0 13 4 13 10 0 4-2 7-6 9 5 2 8 5 8 10 0 7-5 11-14 11H18V14Zm17 16c4 0 6-2 6-5s-2-5-6-5h-8v10h8Zm1 18c4 0 7-2 7-6s-3-6-7-6h-9v12h9Z" fill="#FFFFFF"/>
+<path d="M69 14h10l19 40H87l-3-8H64l-4 8H50l19-40Zm11 24-6-14-6 14h12Zm25-24h10v40h-10V14Zm21 28c5 4 10 6 16 6 5 0 8-2 8-5 0-3-2-4-11-6-10-3-17-6-17-13 0-8 7-12 17-12 8 0 14 2 19 6l-5 7c-5-3-9-5-14-5s-7 2-7 4c0 3 2 4 11 7 11 3 16 6 16 13 0 9-7 13-18 13-8 0-16-3-22-8l6-7Z" fill="#FFFFFF"/>
+<path d="M173 17h36" stroke="#087F70" stroke-width="4" stroke-linecap="round"/>
+<path d="M173 28h27" stroke="#B88435" stroke-width="4" stroke-linecap="round"/>
+<path d="M173 39h43" stroke="#FFFFFF" stroke-opacity=".78" stroke-width="4" stroke-linecap="round"/>
+</svg>
