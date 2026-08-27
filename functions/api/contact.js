@@ -1,0 +1,19 @@
+import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../_lib/api.js";
+const TOPICS=new Set(["AI Engineering","Cybersecurity","Automation / n8n","BAIS Academy","AI Governance / CAIO","Project Portal","Sonstiges"]);
+export const onRequestPost=async({request,env,waitUntil})=>{
+ const id=requestId(request);
+ try{
+  const db=assertDatabase(env),body=await readJson(request);
+  const name=cleanText(body.name,120),company=cleanText(body.company,160),email=cleanText(body.email,254).toLowerCase();
+  const phone=cleanText(body.phone,60),topic=cleanText(body.topic,80),timeline=cleanText(body.timeline,80),message=cleanText(body.message,4000);
+  if(name.length<2||!validEmail(email)||message.length<20) throw new ApiError(422,"validation_failed","Name, gültige E-Mail und eine Nachricht mit mindestens 20 Zeichen sind erforderlich.");
+  if(topic&&!TOPICS.has(topic)) throw new ApiError(422,"invalid_topic","Das gewählte Thema ist ungültig.");
+  await verifyTurnstile(body.turnstileToken,request,env.TURNSTILE_SECRET);
+  const leadId=crypto.randomUUID(),createdAt=new Date().toISOString();
+  await db.prepare("INSERT INTO contacts(id,name,company,email,phone,topic,timeline,message,status,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
+   .bind(leadId,name,company||null,email,phone||null,topic||"Sonstiges",timeline||null,message,"new",createdAt).run();
+  waitUntil(Promise.resolve().then(()=>console.log(JSON.stringify({level:"info",event:"contact_created",leadId,requestId:id}))));
+  return json({ok:true,id:leadId,message:"Vielen Dank. Ihre Anfrage wurde sicher übermittelt.",requestId:id},201);
+ }catch(error){return handleError(error,id);}
+};
+export const onRequest=({request})=>json({ok:false,error:{code:"method_not_allowed",message:"Methode nicht erlaubt."}},405,{allow:"POST"});
