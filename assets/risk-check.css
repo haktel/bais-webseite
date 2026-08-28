@@ -16,3 +16,7 @@
 @media(max-width:980px){.registerHeader{grid-template-columns:1fr}.registerProgress{text-align:left}.registerStats{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.riskRegister{padding:17px}.registerStats{grid-template-columns:1fr}.registerTrack{width:100%}}
 @media print{.riskRegister{background:#fff!important;color:#000!important;border:1px solid #bbb;break-before:page}.registerHeader p,.localHint{color:#333}.registerToolbar,.statusCheck input,.registerTrack{display:none}.riskTable{font-size:8px}.riskTable th,.riskTable td{padding:6px}.tableScroll{overflow:visible}}
+.riskCatalog{margin:0 0 10px;border:1px solid #49616e;border-radius:8px;color:#dbe4e8}.riskCatalog summary{padding:11px 13px;font-weight:800;cursor:pointer}.riskCatalog>p{margin:0;padding:0 13px 10px;color:#a8b7be;font-size:11px}.riskCatalogGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:0 12px 12px}.riskCatalogGrid div{display:grid;grid-template-columns:auto 1fr;gap:8px;background:#fff;color:var(--ink);border-radius:6px;padding:9px}.riskCatalogGrid b,.stableRiskId{color:var(--teal);font:900 10px monospace;white-space:nowrap}.riskCatalogGrid span{font-size:10px}.stableRiskId{display:inline-flex;background:#e5f4f1;border-radius:4px;padding:4px 6px}
+@media(max-width:760px){.riskCatalogGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.riskCatalogGrid{grid-template-columns:1fr}}
+@media print{.riskCatalog{display:none}}
