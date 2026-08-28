@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Governance Risk Check | BAIS</title>
+<meta name="description" content="Interaktiver BAIS AI Governance Risk Check: Risiken, Handlungsfelder und priorisierte Controls für ein AI-System nachvollziehbar einordnen.">
+<link rel="canonical" href="https://bais-solutions.de/ai-governance/risk-check/">
+<link rel="stylesheet" href="../../assets/site.css?v=49.5">
+<link rel="stylesheet" href="../../assets/risk-check.css?v=1.0">
+<script src="../../assets/risk-check.js?v=1.0" defer></script>
+</head>
+<body>
+<header><div class="c"><nav>
+<a class="brand" href="../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../assets/bais-wordmark.svg" alt="BAIS"></a>
+<div class="links"><a href="../../loesungen/">Lösungen</a><a href="../../academy/">Academy</a><a href="../../project-portal/">Project Portal</a><a href="../../ai-governance/">AI Governance</a><a href="../../ueber-bais/">Über BAIS</a><a href="../../kontakt/">Kontakt</a><a class="cta" href="../../kontakt/">Projekt einordnen</a></div>
+<span class="menu">BAIS</span>
+</nav></div></header>
+
+<main>
+<section class="riskHero"><div class="c riskHeroGrid">
+<div><div class="ey">BAIS LAB · INTERAKTIVER DEMONSTRATOR</div><h1>AI Governance<br>Risk Check</h1><p class="lead">Ordnen Sie ein AI-System in wenigen Minuten strukturiert ein. Das Ergebnis zeigt Risikotreiber, Handlungsfelder und priorisierte Controls – transparent und ohne Datenspeicherung.</p></div>
+<aside class="trustPanel" aria-label="Hinweise zum Risk Check"><strong>Privacy by design</strong><ul><li>Keine Übertragung an BAIS</li><li>Keine Registrierung erforderlich</li><li>Nachvollziehbare Bewertungslogik</li></ul><p>Orientierungshilfe, keine Rechtsberatung oder verbindliche EU-AI-Act-Klassifizierung.</p></aside>
+</div></section>
+
+<section class="sec"><div class="c riskLayout">
+<section class="assessmentPanel" aria-labelledby="check-title">
+<div class="assessmentTop"><div><div class="ey">SYSTEM-CHECK</div><h2 id="check-title">Ihr AI-System einordnen</h2></div><div class="progressText"><span id="answeredCount">0</span>/12 beantwortet</div></div>
+<div class="progressTrack" role="progressbar" aria-label="Bearbeitungsfortschritt" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><span id="progressBar"></span></div>
+
+<form id="riskForm" novalidate>
+<div id="questions"></div>
+<div class="formActions"><button class="submit" type="submit">Risikoauswertung erstellen</button><button class="resetButton" type="reset">Eingaben zurücksetzen</button></div>
+<p id="formError" class="formStatus error" role="alert" hidden>Bitte beantworten Sie alle 12 Fragen.</p>
+</form>
+</section>
+
+<aside class="methodPanel" aria-label="Bewertungsmethode">
+<div class="ey">METHODIK</div><h2>Vier Perspektiven.</h2>
+<ol><li><b>Zweck & Auswirkung</b><span>Entscheidungen, Betroffene, Folgen.</span></li><li><b>Daten & Sicherheit</b><span>Datenarten, Schutzbedarf, externe Modelle.</span></li><li><b>Kontrolle & Transparenz</b><span>Human Oversight, Erklärbarkeit, Kennzeichnung.</span></li><li><b>Betrieb & Nachweise</b><span>Monitoring, Owner, Dokumentation, Reviews.</span></li></ol>
+<p class="methodNote">Jede Antwort ist gewichtet. Kritische Konstellationen werden zusätzlich sichtbar markiert. Ein niedriger Score ersetzt keine fachliche Prüfung.</p>
+</aside>
+</div></section>
+
+<section id="results" class="resultsSection" aria-labelledby="result-title" hidden><div class="c">
+<div class="resultHeader"><div><div class="ey">AUSWERTUNG</div><h2 id="result-title" tabindex="-1">Governance-Profil</h2><p id="resultSummary"></p></div><div id="scoreRing" class="scoreRing" aria-label="Risikoscore"><strong id="scoreValue">0</strong><span>/100</span></div></div>
+
+<div class="resultGrid">
+<article class="riskLevelCard"><span>GESAMTEINORDNUNG</span><div id="riskBadge" class="riskBadge">–</div><h3 id="riskTitle">–</h3><p id="riskText">–</p></article>
+<article class="dimensionCard"><span>RISIKOFELDER</span><div id="dimensionBars"></div></article>
+</div>
+
+<div class="resultGrid lower">
+<article class="resultCard"><span>KRITISCHE SIGNALE</span><h3>Was besondere Aufmerksamkeit braucht</h3><ul id="criticalSignals"></ul></article>
+<article class="resultCard"><span>PRIORISIERTE CONTROLS</span><h3>Nächste sinnvolle Maßnahmen</h3><ol id="recommendedControls"></ol></article>
+</div>
+
+<div class="boundaryBox"><div><strong>Wichtige Bewertungsgrenze</strong><p>Dieses Ergebnis ist eine technische und organisatorische Vorprüfung. Die rechtliche Einordnung nach EU AI Act, DSGVO und branchenspezifischen Vorschriften muss anhand des konkreten Systems und Einsatzkontexts erfolgen.</p></div><div class="resultActions"><button id="printResult" class="btn" type="button">Ergebnis drucken</button><a class="btn secondary" href="../../kontakt/">System professionell einordnen</a></div></div>
+</div></section>
+
+<section class="soft"><div class="c twocol"><div><div class="ey">TRANSPARENZ</div><h2>Keine Blackbox-Bewertung.</h2></div><div><p>Die Auswertung basiert ausschließlich auf Ihren ausgewählten Antworten. Weder Namen noch Unternehmensdaten werden abgefragt. Die Berechnung erfolgt lokal im Browser und verschwindet beim Schließen oder Neuladen der Seite.</p></div></div></section>
+</main>
+
+<footer class="footer"><div class="c footerTop"><div class="footBrand"><strong>BAIS</strong><p>Secure AI Engineering, Cybersecurity, Automation, Governance und transparente Projektabwicklung aus Dortmund.</p><p class="mini">Build. Automate. Secure. Govern.</p></div><div class="fcol"><h3>GOVERNANCE</h3><a href="../">AI Governance</a><a href="./">Risk Check</a><a href="../../academy/ai-governance/">Academy</a></div><div class="fcol"><h3>PLATTFORM</h3><a href="../../project-portal/">Project Portal</a><a href="../../docs/">Doku & Handover</a></div><div class="fcol"><h3>BAIS</h3><a href="../../ueber-bais/">Über BAIS</a><a href="../../kontakt/">Kontakt</a></div><div class="fcol"><h3>RECHT</h3><a href="../../impressum/">Impressum</a><a href="../../datenschutz/">Datenschutz</a></div></div><div class="c legalbar"><span>BAIT Solution · Inhaber: Bünyamin Atik · Dortmund</span><span>Interaktiver Demonstrator · Keine Rechtsberatung</span></div></footer>
+</body></html>
