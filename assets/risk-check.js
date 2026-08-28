@@ -213,7 +213,8 @@
       row.dataset.riskId = stableId;
       row.dataset.level = levelClass;
       row.dataset.status = 'open';
-      row.innerHTML = `<td><span class="stableRiskId">${stableId}</span><small>${catalogName}</small></td><td><strong>${answer.title}</strong><small>${selected}</small></td><td><span class="tableLevel ${levelClass}">${levelLabel}</span><small>${answer.score}/10</small></td><td>${riskOwners[answer.id]}</td><td>${controls[answer.id]}</td><td>${riskEvidence[answer.id]}</td><td>${target}</td><td><label class="statusCheck"><input type="checkbox" aria-label="${stableId} ${answer.title}: als behandelt markieren"><span aria-hidden="true"></span><b>Offen</b></label></td>`;
+      const wikiAnchor = stableId.toLowerCase();
+      row.innerHTML = `<td><a class="stableRiskId" href="../../docs/ai-governance/#${wikiAnchor}" aria-label="${stableId} im AI Governance Wiki öffnen">${stableId}</a><small>${catalogName}</small></td><td><strong>${answer.title}</strong><small>${selected}</small></td><td><span class="tableLevel ${levelClass}">${levelLabel}</span><small>${answer.score}/10</small></td><td>${riskOwners[answer.id]}</td><td>${controls[answer.id]}</td><td>${riskEvidence[answer.id]}</td><td>${target}</td><td><label class="statusCheck"><input type="checkbox" aria-label="${stableId} ${answer.title}: als behandelt markieren"><span aria-hidden="true"></span><b>Offen</b></label></td>`;
       body.append(row);
     });
 
