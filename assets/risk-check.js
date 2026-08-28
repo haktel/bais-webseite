@@ -77,6 +77,15 @@
     monitoring: 'KPI-, Monitoring- und Incident-Runbook', evidence: 'AI-Systemakte mit Review-Historie'
   };
 
+  const riskCatalog = {
+    use: ['R-001', 'Use Case & Purpose'], consequence: ['R-002', 'Consequence & Impact'],
+    scale: ['R-003', 'Affected Persons & Scale'], dataType: ['R-004', 'Personal Data & Classification'],
+    provider: ['R-005', 'Provider & Supply Chain'], security: ['R-006', 'AI Security Controls'],
+    human: ['R-007', 'Human Oversight'], transparency: ['R-008', 'Transparency & Disclosure'],
+    explainability: ['R-009', 'Explainability & Traceability'], owner: ['R-010', 'Ownership & Accountability'],
+    monitoring: ['R-011', 'Monitoring & Incident Management'], evidence: ['R-012', 'Evidence & Documentation']
+  };
+
   const form = document.querySelector('#riskForm');
   const questionRoot = document.querySelector('#questions');
   const results = document.querySelector('#results');
@@ -196,14 +205,24 @@
     const ranked = [...answers].sort((a, b) => b.score - a.score);
     const body = document.querySelector('#riskRegisterBody');
     body.replaceChildren();
-    ranked.forEach((answer, index) => {
+    ranked.forEach(answer => {
       const [levelClass, levelLabel, target] = riskLevel(answer.score);
+      const [stableId, catalogName] = riskCatalog[answer.id];
       const selected = form.querySelector(`input[name="${answer.id}"]:checked`)?.dataset.label || '';
       const row = document.createElement('tr');
+      row.dataset.riskId = stableId;
       row.dataset.level = levelClass;
       row.dataset.status = 'open';
-      row.innerHTML = `<td><b>R-${String(index + 1).padStart(3, '0')}</b></td><td><strong>${answer.title}</strong><small>${selected}</small></td><td><span class="tableLevel ${levelClass}">${levelLabel}</span><small>${answer.score}/10</small></td><td>${riskOwners[answer.id]}</td><td>${controls[answer.id]}</td><td>${riskEvidence[answer.id]}</td><td>${target}</td><td><label class="statusCheck"><input type="checkbox" aria-label="${answer.title}: als behandelt markieren"><span aria-hidden="true"></span><b>Offen</b></label></td>`;
+      row.innerHTML = `<td><span class="stableRiskId">${stableId}</span><small>${catalogName}</small></td><td><strong>${answer.title}</strong><small>${selected}</small></td><td><span class="tableLevel ${levelClass}">${levelLabel}</span><small>${answer.score}/10</small></td><td>${riskOwners[answer.id]}</td><td>${controls[answer.id]}</td><td>${riskEvidence[answer.id]}</td><td>${target}</td><td><label class="statusCheck"><input type="checkbox" aria-label="${stableId} ${answer.title}: als behandelt markieren"><span aria-hidden="true"></span><b>Offen</b></label></td>`;
       body.append(row);
+    });
+
+    const catalogRoot = document.querySelector('#riskCatalogGrid');
+    catalogRoot.replaceChildren();
+    Object.values(riskCatalog).forEach(([id, name]) => {
+      const item = document.createElement('div');
+      item.innerHTML = `<b>${id}</b><span>${name}</span>`;
+      catalogRoot.append(item);
     });
 
     const counts = { critical: 0, high: 0, moderate: 0, controlled: 0 };
