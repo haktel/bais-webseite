@@ -62,6 +62,21 @@
     evidence: 'Zentrale Systemakte mit Risk Assessment, Tests, Freigaben, Änderungen und Review-Terminen führen.'
   };
 
+  const riskOwners = {
+    use: 'Business Owner', consequence: 'Risk Owner', scale: 'Business Owner', dataType: 'Data Owner / Datenschutz',
+    provider: 'Vendor Manager', security: 'IT Security', human: 'Fachlicher Owner', transparency: 'Compliance',
+    explainability: 'AI/ML Owner', owner: 'Geschäftsführung', monitoring: 'Operations', evidence: 'Governance Lead'
+  };
+
+  const riskEvidence = {
+    use: 'Freigegebene Zweck- und Use-Case-Beschreibung', consequence: 'Impact- und Fehlerszenarioanalyse',
+    scale: 'Betroffenen- und Stakeholderanalyse', dataType: 'Dateninventar, Rechtsgrundlage, Löschkonzept',
+    provider: 'Anbieter-, Modell- und Datenflussakte', security: 'Security-Testbericht und Control-Matrix',
+    human: 'Human-Oversight- und Eskalationskonzept', transparency: 'Transparenzinformation und Nutzerhinweise',
+    explainability: 'Logging-, Quellen- und Versionsnachweise', owner: 'RACI- und Freigabedokument',
+    monitoring: 'KPI-, Monitoring- und Incident-Runbook', evidence: 'AI-Systemakte mit Review-Historie'
+  };
+
   const form = document.querySelector('#riskForm');
   const questionRoot = document.querySelector('#questions');
   const results = document.querySelector('#results');
@@ -170,6 +185,64 @@
     triggers.forEach(item => { const li = document.createElement('li'); li.textContent = item; triggerRoot.append(li); });
   }
 
+  function riskLevel(score) {
+    if (score >= 8) return ['critical', 'Kritisch', '7 Tage'];
+    if (score >= 6) return ['high', 'Hoch', '14 Tage'];
+    if (score >= 3) return ['moderate', 'Moderat', '30 Tage'];
+    return ['controlled', 'Kontrolliert', '90 Tage'];
+  }
+
+  function renderRiskRegister(answers) {
+    const ranked = [...answers].sort((a, b) => b.score - a.score);
+    const body = document.querySelector('#riskRegisterBody');
+    body.replaceChildren();
+    ranked.forEach((answer, index) => {
+      const [levelClass, levelLabel, target] = riskLevel(answer.score);
+      const selected = form.querySelector(`input[name="${answer.id}"]:checked`)?.dataset.label || '';
+      const row = document.createElement('tr');
+      row.dataset.level = levelClass;
+      row.dataset.status = 'open';
+      row.innerHTML = `<td><b>R-${String(index + 1).padStart(3, '0')}</b></td><td><strong>${answer.title}</strong><small>${selected}</small></td><td><span class="tableLevel ${levelClass}">${levelLabel}</span><small>${answer.score}/10</small></td><td>${riskOwners[answer.id]}</td><td>${controls[answer.id]}</td><td>${riskEvidence[answer.id]}</td><td>${target}</td><td><label class="statusCheck"><input type="checkbox" aria-label="${answer.title}: als behandelt markieren"><span aria-hidden="true"></span><b>Offen</b></label></td>`;
+      body.append(row);
+    });
+
+    const counts = { critical: 0, high: 0, moderate: 0, controlled: 0 };
+    ranked.forEach(answer => { counts[riskLevel(answer.score)[0]] += 1; });
+    const stats = document.querySelector('#registerStats'); stats.replaceChildren();
+    [['Kritisch', counts.critical, 'critical'], ['Hoch', counts.high, 'high'], ['Moderat', counts.moderate, 'moderate'], ['Kontrolliert', counts.controlled, 'controlled']].forEach(([label, value, type]) => {
+      const item = document.createElement('div'); item.className = `registerStat ${type}`; item.innerHTML = `<span>${label}</span><strong>${value}</strong>`; stats.append(item);
+    });
+
+    const empty = document.querySelector('#registerEmpty');
+    function applyFilter(filter) {
+      let visible = 0;
+      body.querySelectorAll('tr').forEach(row => {
+        const show = filter === 'all' || (filter === 'open' && row.dataset.status === 'open') || (filter === 'treated' && row.dataset.status === 'treated') || (filter === 'critical' && ['critical', 'high'].includes(row.dataset.level));
+        row.hidden = !show; if (show) visible += 1;
+      });
+      empty.hidden = visible !== 0;
+    }
+
+    body.querySelectorAll('.statusCheck input').forEach(input => input.addEventListener('change', () => {
+      const row = input.closest('tr'); row.dataset.status = input.checked ? 'treated' : 'open';
+      const label = input.closest('.statusCheck').querySelector('b'); label.textContent = input.checked ? 'Behandelt' : 'Offen';
+      const treated = body.querySelectorAll('.statusCheck input:checked').length;
+      document.querySelector('#treatedCount').textContent = String(treated);
+      document.querySelector('.registerTrack').setAttribute('aria-valuenow', String(treated));
+      document.querySelector('#registerBar').style.width = `${(treated / 12) * 100}%`;
+      const active = document.querySelector('.filterButton.active')?.dataset.riskFilter || 'all'; applyFilter(active);
+    }));
+
+    document.querySelectorAll('.filterButton').forEach(button => button.onclick = () => {
+      document.querySelectorAll('.filterButton').forEach(item => item.classList.toggle('active', item === button));
+      applyFilter(button.dataset.riskFilter);
+    });
+    document.querySelector('#treatedCount').textContent = '0';
+    document.querySelector('.registerTrack').setAttribute('aria-valuenow', '0');
+    document.querySelector('#registerBar').style.width = '0%';
+    applyFilter('all');
+  }
+
   function renderResults(answers) {
     const total = answers.reduce((sum, answer) => sum + answer.score, 0);
     const score = Math.round((total / 120) * 100);
@@ -219,6 +292,7 @@
     });
 
     renderExecutiveDecision(score, answers, dimensionScores);
+    renderRiskRegister(answers);
 
     results.hidden = false;
     results.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
