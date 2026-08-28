@@ -7,8 +7,8 @@
 <meta name="description" content="Interaktiver BAIS AI Governance Risk Check: Risiken, Handlungsfelder und priorisierte Controls für ein AI-System nachvollziehbar einordnen.">
 <link rel="canonical" href="https://bais-solutions.de/ai-governance/risk-check/">
 <link rel="stylesheet" href="../../assets/site.css?v=49.5">
-<link rel="stylesheet" href="../../assets/risk-check.css?v=1.1">
-<script src="../../assets/risk-check.js?v=1.1" defer></script>
+<link rel="stylesheet" href="../../assets/risk-check.css?v=1.2">
+<script src="../../assets/risk-check.js?v=1.2" defer></script>
 </head>
 <body>
 <header><div class="c"><nav>
@@ -60,6 +60,14 @@
 <div class="decisionColumns"><article><span>ENTSCHEIDUNGSGRUNDLAGE</span><h4>Warum diese Entscheidung?</h4><ul id="decisionReasons"></ul></article><article><span>BETRIEBSGRENZE</span><h4>Was ist bis zur Freigabe erlaubt?</h4><ul id="operatingBoundary"></ul></article></div>
 <div class="gatesBlock"><div class="gatesHead"><div><span>GO-LIVE GATES</span><h4>Pflichtkontrollen vor Produktivbetrieb</h4></div><p><b id="gateCount">0/5</b> Gates geschlossen</p></div><div id="goLiveGates" class="gateList"></div></div>
 <div class="decisionColumns bottom"><article><span>FREIGABEKETTE</span><h4>Wer muss entscheiden?</h4><ol id="approvalChain"></ol></article><article><span>RE-ASSESSMENT TRIGGER</span><h4>Wann muss neu bewertet werden?</h4><ul id="reassessmentTriggers"></ul></article></div>
+</section>
+
+<section class="riskRegister" aria-labelledby="risk-register-title">
+<div class="registerHeader"><div><span>02 · DYNAMIC RISK REGISTER</span><h3 id="risk-register-title">Risiken steuerbar machen</h3><p>Alle zwölf Bewertungsfelder werden in konkrete Risk Items mit Owner, Control, Evidence, Zielhorizont und lokalem Bearbeitungsstatus übersetzt.</p></div><div class="registerProgress"><strong id="treatedCount">0</strong><span>/12 behandelt</span><div class="registerTrack" role="progressbar" aria-label="Bearbeitete Risiken" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><i id="registerBar"></i></div></div></div>
+<div id="registerStats" class="registerStats" aria-label="Risk Register Zusammenfassung"></div>
+<div class="registerToolbar" role="group" aria-label="Risk Register filtern"><button type="button" class="filterButton active" data-risk-filter="all">Alle</button><button type="button" class="filterButton" data-risk-filter="open">Offen</button><button type="button" class="filterButton" data-risk-filter="critical">Kritisch/Hoch</button><button type="button" class="filterButton" data-risk-filter="treated">Behandelt</button></div>
+<div class="tableScroll"><table class="riskTable"><thead><tr><th scope="col">ID</th><th scope="col">Risiko</th><th scope="col">Stufe</th><th scope="col">Owner</th><th scope="col">Erforderlicher Control</th><th scope="col">Evidence</th><th scope="col">Ziel</th><th scope="col">Status</th></tr></thead><tbody id="riskRegisterBody"></tbody></table></div>
+<p id="registerEmpty" class="registerEmpty" hidden>Für diesen Filter sind keine Einträge vorhanden.</p><p class="localHint">Statusänderungen dienen nur der interaktiven Demonstration. Sie werden weder übertragen noch gespeichert.</p>
 </section>
 
 <div class="boundaryBox"><div><strong>Wichtige Bewertungsgrenze</strong><p>Dieses Ergebnis ist eine technische und organisatorische Vorprüfung. Die rechtliche Einordnung nach EU AI Act, DSGVO und branchenspezifischen Vorschriften muss anhand des konkreten Systems und Einsatzkontexts erfolgen.</p></div><div class="resultActions"><button id="printResult" class="btn" type="button">Ergebnis drucken</button><a class="btn secondary" href="../../kontakt/">System professionell einordnen</a></div></div>
