@@ -12,3 +12,13 @@ CREATE TABLE IF NOT EXISTS enrollment_request_interests(
 );
 CREATE INDEX IF NOT EXISTS idx_enrollment_interests_request ON enrollment_request_interests(request_id,interest_type);
 CREATE INDEX IF NOT EXISTS idx_enrollment_interests_course ON enrollment_request_interests(course_id,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS enrollment_request_preferences(
+ request_id TEXT PRIMARY KEY,
+ delivery_mode TEXT NOT NULL CHECK(delivery_mode IN('self-paced','live-online','onsite','blended')),
+ participants INTEGER NOT NULL CHECK(participants BETWEEN 1 AND 50),
+ indicative_price_cents INTEGER NOT NULL,
+ currency TEXT NOT NULL DEFAULT 'EUR',
+ created_at TEXT NOT NULL,
+ FOREIGN KEY(request_id) REFERENCES enrollment_requests(id) ON DELETE CASCADE
+);
