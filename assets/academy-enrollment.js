@@ -1,0 +1,3 @@
+const primary=document.querySelector("#courseSlug"),boxes=[...document.querySelectorAll('input[name="additionalCourses"]')],count=document.querySelector("[data-interest-count]");
+const sync=()=>{let selected=0;for(const box of boxes){const same=box.value===primary?.value;if(same)box.checked=false;box.disabled=same;box.closest("label")?.classList.toggle("is-disabled",same);if(box.checked)selected++;}if(count)count.textContent=selected?selected+" zusätzliche Programme markiert":"Optional: weitere Programme markieren";};
+primary?.addEventListener("change",sync);for(const box of boxes)box.addEventListener("change",sync);sync();
