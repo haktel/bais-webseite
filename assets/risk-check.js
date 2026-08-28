@@ -123,6 +123,53 @@
     return ['critical', 'Kritisches Risikoprofil', 'Die Konstellation enthält sehr hohe Auswirkungen oder wesentliche Kontrolllücken. Produktiver Einsatz sollte bis zur fachlichen Prüfung und Risikobehandlung begrenzt werden.'];
   }
 
+  function renderExecutiveDecision(score, answers, dimensionScores) {
+    const byId = id => answers.find(answer => answer.id === id);
+    const criticalCount = answers.filter(answer => answer.score >= 8).length;
+    let decisionClass = 'go', decision = 'GO WITH CONTROLS', review = 'Quartalsweise';
+    let text = 'Ein kontrollierter Betrieb ist grundsätzlich vertretbar. Bestehende Controls, Evidence und regelmäßige Reviews müssen aktiv bleiben.';
+    if (score >= 75 || criticalCount >= 4) {
+      decisionClass = 'no-go'; decision = 'NO-GO'; review = 'Wöchentlich';
+      text = 'Kein unkontrollierter Produktivbetrieb. Kritische Risiken müssen zuerst behandelt, getestet, dokumentiert und durch die verantwortlichen Rollen freigegeben werden.';
+    } else if (score >= 50 || criticalCount >= 2) {
+      decisionClass = 'conditional'; decision = 'CONDITIONAL GO'; review = 'Zweiwöchentlich';
+      text = 'Nur ein begrenzter Pilotbetrieb ist vertretbar: mit benanntem Owner, Human Oversight, Monitoring, Exit-Kriterien und dokumentierter Risikobehandlung.';
+    } else if (score >= 25) {
+      decisionClass = 'conditional'; decision = 'CONDITIONAL GO'; review = 'Monatlich';
+      text = 'Betrieb nur mit terminiertem Maßnahmenplan. Offene Go-Live Gates müssen vor einer Skalierung geschlossen und nachgewiesen werden.';
+    }
+    const badge = document.querySelector('#decisionBadge');
+    badge.className = `decisionBadge ${decisionClass}`; badge.textContent = decision;
+    document.querySelector('#decisionText').textContent = text;
+    document.querySelector('#decisionReview').textContent = review;
+    document.querySelector('#decisionOwner').textContent = byId('owner').score >= 7 ? 'Geschäftsführung festlegen' : 'Business Owner';
+
+    const rankedDimensions = Object.entries(dimensionScores).sort((a, b) => b[1] - a[1]);
+    const reasons = [`${dimensions[rankedDimensions[0][0]]} ist mit ${rankedDimensions[0][1]}% das stärkste Risikofeld.`, `${criticalCount} von 12 Antworten enthalten ein sehr hohes Einzelsignal.`, byId('consequence').score >= 7 ? 'Fehler können erhebliche Auswirkungen auf Personen oder den Betrieb haben.' : 'Die angegebenen Fehlerfolgen sind derzeit begrenzt oder kontrollierbar.', byId('evidence').score >= 7 ? 'Belastbare Nachweise und Review-Historie fehlen.' : 'Eine dokumentierte Evidence-Basis ist zumindest teilweise vorhanden.'];
+    const reasonRoot = document.querySelector('#decisionReasons'); reasonRoot.replaceChildren();
+    reasons.forEach(reason => { const li = document.createElement('li'); li.textContent = reason; reasonRoot.append(li); });
+
+    const boundaries = decisionClass === 'no-go' ? ['Nur isolierter Test mit synthetischen oder freigegebenen Daten.', 'Keine autonomen Entscheidungen und keine Wirkung auf betroffene Personen.', 'Ausgaben müssen vor Nutzung vollständig menschlich geprüft werden.', 'Kein Rollout, keine Skalierung und keine neuen Datenquellen.'] : decisionClass === 'conditional' ? ['Begrenzter Pilot mit definiertem Nutzerkreis und dokumentiertem Zweck.', 'Human Review vor Entscheidungen mit Außenwirkung.', 'Monitoring, Incident-Kanal und Stop-Kriterium müssen aktiv sein.', 'Keine Erweiterung von Zweck, Daten oder Nutzerkreis ohne Review.'] : ['Freigegebener Zweck und dokumentierter Nutzerkreis.', 'Monitoring und Incident-Prozess bleiben aktiv.', 'Wesentliche Ergebnisse werden risikobasiert menschlich geprüft.', 'Änderungen lösen ein Re-Assessment aus.'];
+    const boundaryRoot = document.querySelector('#operatingBoundary'); boundaryRoot.replaceChildren();
+    boundaries.forEach(item => { const li = document.createElement('li'); li.textContent = item; boundaryRoot.append(li); });
+
+    const gates = [['Owner & RACI', byId('owner').score <= 3, 'Verantwortung, Freigabe und Eskalation'], ['Human Oversight', byId('human').score <= 3, 'Stop, Override und qualifizierte Prüfung'], ['Security Review', byId('security').score <= 3, 'Zugriff, Secrets, Logging und Tests'], ['Monitoring & Incident', byId('monitoring').score <= 3, 'KPIs, Alerts, Runbook und Reaktion'], ['Evidence Pack', byId('evidence').score <= 3, 'Systemakte, Tests, Risiken und Reviews']];
+    const gateRoot = document.querySelector('#goLiveGates'); gateRoot.replaceChildren();
+    gates.forEach(([label, passed, detail]) => { const item = document.createElement('div'); item.className = passed ? 'gate passed' : 'gate open'; item.innerHTML = `<span aria-hidden="true">${passed ? '✓' : '!'}</span><b>${label}</b><small>${detail}</small><em>${passed ? 'GESCHLOSSEN' : 'OFFEN'}</em>`; gateRoot.append(item); });
+    document.querySelector('#gateCount').textContent = `${gates.filter(gate => gate[1]).length}/5`;
+
+    const approvals = ['Business Owner: Zweck, Nutzen und Restrisiko', 'Technical Owner: Architektur und Betriebsfähigkeit'];
+    if (byId('dataType').score >= 4) approvals.push('Datenschutz: Datenverarbeitung und Betroffenenrechte');
+    if (byId('security').score >= 4) approvals.push('IT Security: technische Controls und Security Tests');
+    if (score >= 50) approvals.push('Geschäftsführung/Risk Owner: dokumentierte Restrisikoakzeptanz');
+    const approvalRoot = document.querySelector('#approvalChain'); approvalRoot.replaceChildren();
+    approvals.forEach(item => { const li = document.createElement('li'); li.textContent = item; approvalRoot.append(li); });
+
+    const triggers = ['Änderung von Zweck, Nutzergruppe oder Entscheidungswirkung', 'Neues Modell, neuer Anbieter, Plugin oder Datenfluss', 'Neue oder sensiblere Datenarten', 'Security Incident, Beschwerde oder erheblicher Qualitätsfehler', 'Drift, KPI-Verletzung oder Änderung der Rechtslage'];
+    const triggerRoot = document.querySelector('#reassessmentTriggers'); triggerRoot.replaceChildren();
+    triggers.forEach(item => { const li = document.createElement('li'); li.textContent = item; triggerRoot.append(li); });
+  }
+
   function renderResults(answers) {
     const total = answers.reduce((sum, answer) => sum + answer.score, 0);
     const score = Math.round((total / 120) * 100);
@@ -170,6 +217,8 @@
       li.textContent = controls[answer.id];
       controlList.append(li);
     });
+
+    renderExecutiveDecision(score, answers, dimensionScores);
 
     results.hidden = false;
     results.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
