@@ -7,8 +7,8 @@
 <meta name="description" content="Interaktiver BAIS AI Governance Risk Check: Risiken, Handlungsfelder und priorisierte Controls für ein AI-System nachvollziehbar einordnen.">
 <link rel="canonical" href="https://bais-solutions.de/ai-governance/risk-check/">
 <link rel="stylesheet" href="../../assets/site.css?v=49.5">
-<link rel="stylesheet" href="../../assets/risk-check.css?v=1.2">
-<script src="../../assets/risk-check.js?v=1.2" defer></script>
+<link rel="stylesheet" href="../../assets/risk-check.css?v=1.3">
+<script src="../../assets/risk-check.js?v=1.3" defer></script>
 </head>
 <body>
 <header><div class="c"><nav>
@@ -66,6 +66,7 @@
 <div class="registerHeader"><div><span>02 · DYNAMIC RISK REGISTER</span><h3 id="risk-register-title">Risiken steuerbar machen</h3><p>Alle zwölf Bewertungsfelder werden in konkrete Risk Items mit Owner, Control, Evidence, Zielhorizont und lokalem Bearbeitungsstatus übersetzt.</p></div><div class="registerProgress"><strong id="treatedCount">0</strong><span>/12 behandelt</span><div class="registerTrack" role="progressbar" aria-label="Bearbeitete Risiken" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><i id="registerBar"></i></div></div></div>
 <div id="registerStats" class="registerStats" aria-label="Risk Register Zusammenfassung"></div>
 <div class="registerToolbar" role="group" aria-label="Risk Register filtern"><button type="button" class="filterButton active" data-risk-filter="all">Alle</button><button type="button" class="filterButton" data-risk-filter="open">Offen</button><button type="button" class="filterButton" data-risk-filter="critical">Kritisch/Hoch</button><button type="button" class="filterButton" data-risk-filter="treated">Behandelt</button></div>
+<details class="riskCatalog"><summary>Stabilen Risikokatalog R-001 bis R-012 anzeigen</summary><p>Die Tabelle wird nach Priorität sortiert. Die Risk-ID bleibt trotzdem in jeder Bewertung unverändert.</p><div id="riskCatalogGrid" class="riskCatalogGrid"></div></details>
 <div class="tableScroll"><table class="riskTable"><thead><tr><th scope="col">ID</th><th scope="col">Risiko</th><th scope="col">Stufe</th><th scope="col">Owner</th><th scope="col">Erforderlicher Control</th><th scope="col">Evidence</th><th scope="col">Ziel</th><th scope="col">Status</th></tr></thead><tbody id="riskRegisterBody"></tbody></table></div>
 <p id="registerEmpty" class="registerEmpty" hidden>Für diesen Filter sind keine Einträge vorhanden.</p><p class="localHint">Statusänderungen dienen nur der interaktiven Demonstration. Sie werden weder übertragen noch gespeichert.</p>
 </section>
