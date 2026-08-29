@@ -27,6 +27,15 @@ Die statische Website bleibt unverändert. Dieses Fundament fügt noch keine öf
 - `POST /api/academy/enrollments`
 - `GET /api/certificates/:code`
 
+## Admin-Rolle vergeben
+Neue Accounts werden immer mit `role='student'` angelegt (siehe `functions/api/academy/auth/register.js`). Es gibt bewusst keine API, um sich selbst zu Admin zu befördern. Ein bestehendes Konto wird per Skript in D1 hochgestuft:
+
+```
+npm run admin:promote -- person@bais.de
+```
+
+Führt `wrangler d1 execute bais-platform --remote --command "UPDATE users SET role='admin' WHERE email='...'"` aus. Mit `--local` gegen die lokale D1-Instanz testen.
+
 ## Sicherheitsgrenzen
 - Keine Admin-, Schüler- oder Projekt-Lese-API ohne Authentifizierung.
 - Keine Passwörter in D1; Identity Provider / passwortlose Anmeldung verwenden.
