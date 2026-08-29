@@ -50,6 +50,8 @@ const general={
 '/impressum/':{label:'VERANTWORTUNG',title:'Anbieter- und Kontaktstruktur',img:null,steps:['Anbieter','Vertretung','Kontakt','Recht'],lenses:['Identität','Erreichbarkeit','Steuer','Inhalt']},
 '/datenschutz/':{label:'DATENSCHUTZ-LIFECYCLE',title:'Datenverarbeitung nachvollziehbar einordnen',img:null,steps:['Erhebung','Zweck','Schutz','Löschung'],lenses:['Rechtsgrundlage','Betroffene','TOM','Frist']},
 '/referenzen/':{label:'DEMONSTRATOR SYSTEM',title:'Technische Substanz transparent zeigen',img:'ai-engineering',steps:['Problem','Architektur','Demo','Grenze'],lenses:['Funktion','Security','Evidence','Status']},
+'/referenzen/beispielprojekt-wissensassistent/':{label:'BEISPIELPROJEKT (FIKTIV)',title:'Vom Ausgangspunkt zur Übergabe',img:'ai-engineering',steps:['Discovery','Architektur','Build','Handover'],lenses:['Quellen','Zugriff','Review','Betrieb']},
+'/preise/':{label:'PREISLOGIK',title:'Wie sich ein Tagessatz zusammensetzt',img:null,steps:['Anfrage','Einordnung','Leistungsart','Tagessatz'],lenses:['Beratung','Engineering','Workshop','Nebenkosten']},
 '/projektablauf/':{label:'DELIVERY FLOW',title:'Jede Phase erzeugt ein Ergebnis',img:'bais-ecosystem',steps:['Discovery','Build','Validate','Handover'],lenses:['Scope','Owner','Review','Evidence']},
 '/academy/pakete/':{label:'PROGRAMM-LOGIK',title:'Lernumfang passend zum Ziel',img:'academy-lab',steps:['Bedarf','Pfad','Praxis','Nachweis'],lenses:['Rolle','Tiefe','Format','Transfer']},
 '/academy/anmeldung/':{label:'ANMELDEPROZESS',title:'Vom Lernziel zum passenden Programm',img:'academy-lab',steps:['Interesse','Beratung','Zuordnung','Start'],lenses:['Ziel','Vorkenntnis','Termin','Format']},
