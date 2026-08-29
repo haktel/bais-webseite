@@ -1,4 +1,4 @@
-const N8N_WEBHOOK = "https://6wejmb5u.rpcld.co/webhook/bais-lead-qualification";
+import { callLeadQualificationWebhook } from "../_lib/n8n.js";
 
 const DEMO_PAYLOAD = Object.freeze({
   name: "Max Mustermann",
@@ -22,14 +22,7 @@ export async function onRequestPost({ request }) {
   }
 
   try {
-    const upstream = await fetch(N8N_WEBHOOK, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "BAIS-Live-Demo/1.0"
-      },
-      body: JSON.stringify(DEMO_PAYLOAD)
-    });
+    const upstream = await callLeadQualificationWebhook(DEMO_PAYLOAD);
 
     const body = await upstream.text();
     return new Response(body, {
