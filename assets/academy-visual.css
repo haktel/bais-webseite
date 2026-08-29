@@ -2,3 +2,4 @@
 @media(max-width:800px){.academyNavHead,.academyTrackPanel{grid-template-columns:1fr}.academyNavigator{padding:52px 0}.academyMetrics,.academyProofStrip{grid-template-columns:1fr 1fr}.academyOutcome,.academyJourney{min-height:auto}}
 @media(max-width:480px){.academyMetrics,.academyProofStrip{grid-template-columns:1fr}.academyTrackTabs{display:grid;grid-template-columns:1fr 1fr}.academyTrackTabs button{padding:10px 8px;font-size:.8rem}}
 @media(prefers-reduced-motion:reduce){.academyCardEnhanced{transition:none}}
+.academyMetric strong{font-size:1.05rem;line-height:1.25}.academyMetric span{display:block;margin-top:.45rem;line-height:1.45;color:#bdd0d8}.academyMetric{min-width:0}
