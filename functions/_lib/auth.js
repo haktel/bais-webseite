@@ -63,6 +63,16 @@ export async function deleteSession(db,request){
  const token=parseCookies(request)[SESSION_COOKIE];if(!token)return;
  await db.prepare("DELETE FROM user_sessions WHERE token_hash=?").bind(await sha256(token)).run();
 }
+
+export async function ensureAuthSchema(db){
+ await db.batch([
+  db.prepare("CREATE TABLE IF NOT EXISTS user_credentials(user_id TEXT PRIMARY KEY,password_hash TEXT NOT NULL,password_salt TEXT NOT NULL,password_algorithm TEXT NOT NULL,password_iterations INTEGER NOT NULL,updated_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS user_sessions(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,token_hash TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,last_seen_at TEXT NOT NULL,expires_at TEXT NOT NULL,user_agent_hash TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS auth_rate_limits(id TEXT PRIMARY KEY,attempts INTEGER NOT NULL,window_started_at TEXT NOT NULL,updated_at TEXT NOT NULL)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS course_progress(user_id TEXT NOT NULL,course_id TEXT NOT NULL,progress_percent INTEGER NOT NULL DEFAULT 0 CHECK(progress_percent BETWEEN 0 AND 100),status TEXT NOT NULL DEFAULT 'not_started' CHECK(status IN('not_started','in_progress','completed')),updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)")
+ ]);
+}
+
 export async function consumeRateLimit(db,request,action,email,maxAttempts=8){
  const ip=request.headers.get("cf-connecting-ip")||"unknown",key=await sha256(action+":"+ip+":"+normalizeEmail(email));
  const now=Date.now(),windowStart=new Date(now-15*60*1000).toISOString(),current=await db.prepare("SELECT attempts,window_started_at FROM auth_rate_limits WHERE id=?").bind(key).first();

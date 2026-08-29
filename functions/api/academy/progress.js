@@ -1,11 +1,11 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{coursePath}from"../../_lib/academy.js";
-import{assertSameOrigin,requireSession}from"../../_lib/auth.js";
+import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 const list=async(db,userId)=>{
  const result=await db.prepare("SELECT c.slug,c.title,e.status AS enrollment_status,COALESCE(p.progress_percent,0) AS progress_percent,COALESCE(p.status,'not_started') AS progress_status,p.updated_at FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id LEFT JOIN course_progress p ON p.user_id=e.user_id AND p.course_id=c.id WHERE e.user_id=? ORDER BY e.enrolled_at DESC").bind(userId).all();
  return(result.results||[]).map(course=>({...course,path:coursePath(course.slug)}));
 };
-export const onRequestGet=async({request,env})=>{const traceId=requestId(request);try{const db=assertDatabase(env),user=await requireSession(db,request);return json({ok:true,courses:await list(db,user.user_id),requestId:traceId});}catch(error){return handleError(error,traceId);}};
+export const onRequestGet=async({request,env})=>{const traceId=requestId(request);try{const db=assertDatabase(env);await ensureAuthSchema(db);const user=await requireSession(db,request);return json({ok:true,courses:await list(db,user.user_id),requestId:traceId});}catch(error){return handleError(error,traceId);}};
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{

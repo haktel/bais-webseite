@@ -1,10 +1,10 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../../_lib/api.js";
 import{academyProgram}from"../../../_lib/academy.js";
-import{assertSameOrigin,consumeRateLimit,createSession,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
+import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,createSession,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{
-  assertSameOrigin(request);const db=assertDatabase(env),body=await readJson(request),displayName=cleanText(body.displayName,120),email=normalizeEmail(body.email),password=body.password,slug=cleanText(body.courseSlug,120),title=academyProgram(slug);
+  assertSameOrigin(request);const db=assertDatabase(env);await ensureAuthSchema(db);const body=await readJson(request),displayName=cleanText(body.displayName,120),email=normalizeEmail(body.email),password=body.password,slug=cleanText(body.courseSlug,120),title=academyProgram(slug);
   if(displayName.length<2||!validEmail(email)||!validPassword(password)||!title)throw new ApiError(422,"validation_failed","Name, gültige E-Mail, mindestens 12 Zeichen Passwort und ein Academy-Programm sind erforderlich.");
   await verifyTurnstile(body.turnstileToken,request,env.TURNSTILE_SECRET);
   const rateKey=await consumeRateLimit(db,request,"register",email,5),existing=await db.prepare("SELECT id FROM users WHERE email=? LIMIT 1").bind(email).first();
