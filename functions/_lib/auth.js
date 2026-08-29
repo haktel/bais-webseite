@@ -1,0 +1,74 @@
+import{ApiError}from"./api.js";
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24*7,PBKDF2_ITERATIONS=120000;
+
+const bytesToBase64Url=bytes=>{
+ let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
+ return btoa(value).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+};
+const base64UrlToBytes=value=>{
+ const normalized=value.replace(/-/g,"+").replace(/_/g,"/");
+ const padded=normalized+"=".repeat((4-normalized.length%4)%4),binary=atob(padded);
+ return Uint8Array.from(binary,char=>char.charCodeAt(0));
+};
+export const normalizeEmail=value=>typeof value==="string"?value.trim().toLowerCase():"";
+export const validPassword=value=>typeof value==="string"&&value.length>=12&&value.length<=128;
+export const randomToken=(size=32)=>{const bytes=new Uint8Array(size);crypto.getRandomValues(bytes);return bytesToBase64Url(bytes);};
+export async function sha256(value){
+ const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
+ return bytesToBase64Url(new Uint8Array(digest));
+}
+export async function hashPassword(password,salt=randomToken(16),iterations=PBKDF2_ITERATIONS){
+ const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
+ const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:base64UrlToBytes(salt),iterations},key,256);
+ return{hash:bytesToBase64Url(new Uint8Array(bits)),salt,iterations};
+}
+const safeEqual=(left,right)=>{
+ if(typeof left!=="string"||typeof right!=="string"||left.length!==right.length)return false;
+ let result=0;for(let index=0;index<left.length;index++)result|=left.charCodeAt(index)^right.charCodeAt(index);
+ return result===0;
+};
+export async function verifyPassword(password,credential){
+ const result=await hashPassword(password,credential.password_salt,credential.password_iterations);
+ return safeEqual(result.hash,credential.password_hash);
+}
+export function assertSameOrigin(request){
+ const origin=request.headers.get("origin"),expected=new URL(request.url).origin;
+ if(!origin||origin!==expected)throw new ApiError(403,"invalid_origin","Die Anfrage wurde aus Sicherheitsgründen abgelehnt.");
+}
+export function parseCookies(request){
+ const values={};for(const part of(request.headers.get("cookie")||"").split(";")){
+  const index=part.indexOf("=");if(index>0)values[part.slice(0,index).trim()]=part.slice(index+1).trim();
+ }return values;
+}
+export function sessionCookie(token,maxAge=SESSION_SECONDS){
+ return SESSION_COOKIE+"="+token+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age="+maxAge;
+}
+export function clearSessionCookie(){return sessionCookie("",0);}
+export async function createSession(db,userId,request){
+ const token=randomToken(),tokenHash=await sha256(token),now=new Date(),expires=new Date(now.getTime()+SESSION_SECONDS*1000);
+ await db.prepare("INSERT INTO user_sessions(id,user_id,token_hash,created_at,last_seen_at,expires_at,user_agent_hash) VALUES(?,?,?,?,?,?,?)")
+  .bind(crypto.randomUUID(),userId,tokenHash,now.toISOString(),now.toISOString(),expires.toISOString(),await sha256(request.headers.get("user-agent")||"unknown")).run();
+ return{token,cookie:sessionCookie(token)};
+}
+export async function requireSession(db,request){
+ const token=parseCookies(request)[SESSION_COOKIE];
+ if(!token)throw new ApiError(401,"authentication_required","Bitte melden Sie sich an.");
+ const tokenHash=await sha256(token),now=new Date().toISOString();
+ const session=await db.prepare("SELECT s.id AS session_id,s.user_id,s.expires_at,u.display_name,u.email,u.role,u.status FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? LIMIT 1").bind(tokenHash).first();
+ if(!session||session.expires_at<=now||session.status!=="active")throw new ApiError(401,"session_expired","Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.");
+ await db.prepare("UPDATE user_sessions SET last_seen_at=? WHERE id=?").bind(now,session.session_id).run();
+ return session;
+}
+export async function deleteSession(db,request){
+ const token=parseCookies(request)[SESSION_COOKIE];if(!token)return;
+ await db.prepare("DELETE FROM user_sessions WHERE token_hash=?").bind(await sha256(token)).run();
+}
+export async function consumeRateLimit(db,request,action,email,maxAttempts=8){
+ const ip=request.headers.get("cf-connecting-ip")||"unknown",key=await sha256(action+":"+ip+":"+normalizeEmail(email));
+ const now=Date.now(),windowStart=new Date(now-15*60*1000).toISOString(),current=await db.prepare("SELECT attempts,window_started_at FROM auth_rate_limits WHERE id=?").bind(key).first();
+ if(!current||current.window_started_at<windowStart){
+  await db.prepare("INSERT INTO auth_rate_limits(id,attempts,window_started_at,updated_at) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET attempts=excluded.attempts,window_started_at=excluded.window_started_at,updated_at=excluded.updated_at").bind(key,1,new Date(now).toISOString(),new Date(now).toISOString()).run();return key;
+ }
+ if(current.attempts>=maxAttempts)throw new ApiError(429,"too_many_attempts","Zu viele Versuche. Bitte warten Sie 15 Minuten.");
+ await db.prepare("UPDATE auth_rate_limits SET attempts=attempts+1,updated_at=? WHERE id=?").bind(new Date(now).toISOString(),key).run();return key;
+}
