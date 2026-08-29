@@ -1,0 +1,2 @@
+import test from"node:test";import assert from"node:assert/strict";import{validAdminStatus}from"../functions/_lib/admin.js";
+test("admin status allowlists reject arbitrary values",()=>{assert.equal(validAdminStatus("request","qualified"),true);assert.equal(validAdminStatus("contact","in_progress"),true);assert.equal(validAdminStatus("contact","deleted"),false);assert.equal(validAdminStatus("other","new"),false);});
