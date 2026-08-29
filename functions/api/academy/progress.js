@@ -9,7 +9,7 @@ export const onRequestGet=async({request,env})=>{const traceId=requestId(request
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{
-  assertSameOrigin(request);const db=assertDatabase(env),user=await requireSession(db,request),body=await readJson(request),slug=cleanText(body.courseSlug,120),percent=Number(body.progressPercent);
+  assertSameOrigin(request);const db=assertDatabase(env);await ensureAuthSchema(db);const user=await requireSession(db,request),body=await readJson(request),slug=cleanText(body.courseSlug,120),percent=Number(body.progressPercent);
   if(!slug||!Number.isInteger(percent)||percent<0||percent>100)throw new ApiError(422,"validation_failed","Programm und Lernfortschritt zwischen 0 und 100 sind erforderlich.");
   const course=await db.prepare("SELECT c.id FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug=? LIMIT 1").bind(user.user_id,slug).first();
   if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
