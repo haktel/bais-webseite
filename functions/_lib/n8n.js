@@ -12,7 +12,11 @@ export function buildLeadPayload({name,email,company,topic,message}){
   return{
     name,
     email,
-    company:company||"",
+    // n8n's own Input Validation node requires a non-empty company field.
+    // Most of our forms treat company as optional, so fall back to an
+    // honest placeholder rather than silently failing qualification for
+    // every submission without one.
+    company:company||"Privatperson",
     topic:topic||"Sonstiges",
     message,
     consent:true
