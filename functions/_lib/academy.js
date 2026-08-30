@@ -5,5 +5,6 @@ export function academyProgram(slug){
 }
 
 export function coursePath(slug){
+ if(slug==="n8n-bootcamp")return"/academy/n8n-bootcamp/modul-01/";
  return ACADEMY_PROGRAMS[slug]?"/academy/"+slug+"/":"/academy/";
 }
