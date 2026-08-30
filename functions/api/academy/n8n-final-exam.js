@@ -68,13 +68,138 @@ q("M12-04",12,"Security Review schlägt fehl, ROI ist positiv. Darf trotzdem Go-
 ];
 
 const shuffle=array=>{const x=[...array];for(let i=x.length-1;i>0;i--){const bytes=new Uint32Array(1);crypto.getRandomValues(bytes);const j=bytes[0]%(i+1);[x[i],x[j]]=[x[j],x[i]];}return x;};
+
+const DYNAMIC_EXPLANATIONS={
+  1:"Debugging beginnt an der ersten beobachtbaren Grenze: Request, Trigger, Execution und danach der erste fehlerhafte Node.",
+  2:"Expressions und Mapping müssen exakt zur tatsächlichen JSON-Struktur und Item-Granularität passen.",
+  3:"Pagination und Request-Anzahl werden aus Datenmenge, Page Size und sauberer Abbruchbedingung abgeleitet.",
+  4:"401 betrifft typischerweise Authentication/Token, 403 Authorization/Scopes. Credentials werden nicht durch blindes Retry repariert.",
+  5:"Batching und Routing begrenzen Last und machen Verarbeitung reproduzierbar; Anzahl Batches ergibt sich aus Items geteilt durch Batch Size.",
+  6:"Backoff verteilt Wiederholungen über die Zeit. Retry bleibt begrenzt und wird nur für retryable Fehler eingesetzt.",
+  7:"Ein stabiler fachlicher Key sorgt dafür, dass Wiederholungen nicht mehrere fachliche Datensätze oder Seiteneffekte erzeugen.",
+  8:"Base64 kodiert Binärdaten mit ungefähr 4/3 Größenfaktor; für große Dateien ist Blob/Object Storage meist geeigneter.",
+  9:"Grounded Generation ist nur bei ausreichender Retrieval-Evidenz erlaubt; unter dem Threshold muss das System abstain.",
+  10:"Ein Breaking Change in einer Shared Component kann alle abhängigen Caller betreffen. Versionierung begrenzt diesen Blast Radius.",
+  11:"Outbound-Ziele aus User-Input werden gegen Protocol-/Host-Policy geprüft; private, loopback und link-local Ziele werden blockiert.",
+  12:"Business Value wird mit Volumen, Zeit, Personalkosten und Projektaufwand gerechnet; technische Machbarkeit allein rechtfertigt kein Projekt."
+};
+
+function dynamicCandidates(module){
+  if(module===1){
+    const cases=[
+      ["no-execution","Das Website-Formular zeigt „gesendet“, aber in n8n existiert keine Execution. Wo beginnt die Diagnose?","Webhook-URL, HTTP-Methode, Workflow-Aktivierung und Request-Zustellung",["CRM-Feldmapping","Datenbank-Upsert","Output-Formatter"]],
+      ["401","Eine Execution existiert; der erste rote Node ist ein HTTP Request mit 401. Was prüfst du zuerst?","Credential, Token-Gültigkeit und Authorization-Header",["Webhook-DNS","CSV-Encoding","Batch Size"]],
+      ["422","Eine Execution erreicht die Validierung und endet mit 422. Was ist der sinnvollste erste Schritt?","Payload gegen erwartetes Schema und Pflichtfelder prüfen",["Token rotieren","Retry-Backoff erhöhen","Workflow duplizieren"]],
+      ["429","Eine Execution endet am externen API-Node mit 429. Welche Schicht ist primär betroffen?","Upstream-Kapazität/Rate-Limit und Retry-Policy",["JSON-Syntax des Webhooks zwingend","DNS-Auflösung zwingend","Credential Store zwingend"]]
+    ];
+    return cases.map(([code,prompt,correct,wrong])=>q("D01-"+code,1,prompt,correct,wrong,DYNAMIC_EXPLANATIONS[1]));
+  }
+  if(module===2){
+    const cases=[
+      ["profile-email","Input: {customer:{profile:{email:'a@example.com'}}}. Welche Expression liest die E-Mail?","{{$json.customer.profile.email}}",["{{$json.email}}","{{$json.profile.customer.email}}","{{$json.customer.email.profile}}"]],
+      ["order-id","Input: {order:{id:'O-42',total:99}}. Welche Expression liest die Order-ID?","{{$json.order.id}}",["{{$json.id}}","{{$json.orderId}}","{{$json.order.total.id}}"]],
+      ["items","Ein Code Node erhält 50 Items. Welche Aussage ist korrekt?","$input.all() kann alle 50 Items liefern",["$input.first() enthält automatisch alle 50","n8n reduziert immer auf ein Item","Mehrere Items sind nur mit Binary Data möglich"]],
+      ["normalize","Upstream A liefert customerId, Upstream B liefert customer_id. Was ist der sauberste Downstream-Entwurf?","Beide früh auf einen gemeinsamen kanonischen Feldnamen normalisieren",["Jede spätere Node kennt beide Varianten","Alle Felder als Text serialisieren","Nur den zweiten Upstream unterstützen"]]
+    ];
+    return cases.map(([code,prompt,correct,wrong])=>q("D02-"+code,2,prompt,correct,wrong,DYNAMIC_EXPLANATIONS[2]));
+  }
+  if(module===3){
+    const totals=[240,350,910],sizes=[50,100,200],out=[];
+    for(const total of totals)for(const size of sizes){
+      const correct=Math.ceil(total/size),wrong=[Math.max(1,correct-1),correct+1,correct+2].filter(v=>v!==correct).slice(0,3).map(v=>String(v)+" Requests");
+      out.push(q("D03-"+total+"-"+size,3,`Eine API liefert maximal ${size} Datensätze pro Seite. Für ${total} Datensätze: Wie viele Requests sind mindestens nötig?`,String(correct)+" Requests",wrong,DYNAMIC_EXPLANATIONS[3]));
+    }
+    return out;
+  }
+  if(module===4){
+    const cases=[
+      ["401-expired","Ein bisher funktionierender SaaS-Call liefert plötzlich 401 und der Access Token ist abgelaufen. Was ist korrekt?","Token gemäß Provider-Flow refreshen/erneuern und danach erneut versuchen",["100-mal denselben Request senden","Scope erweitern ohne Prüfung","401 in 200 umwandeln"]],
+      ["403-scope","Login/Token ist gültig, aber ein API-Call liefert 403 auf /admin/users. Was prüfst du?","Scopes/Rolle/Berechtigung für diese Ressource",["Webhook-Pagination","CSV-Delimiter","DNS TTL"]],
+      ["secret-git","Ein Entwickler findet einen produktiven API-Key im Workflow-JSON im Git-Repo. Was ist die richtige Reaktion?","Key sofort widerrufen/rotieren und Repository-/Audit-Spuren prüfen",["Nur die Zeile löschen und denselben Key weiterverwenden","Key Base64-kodieren","Repository öffentlich lassen"]],
+      ["master-key","Fünf Workflows nutzen einen globalen Admin-Key, obwohl jeder nur Read-Zugriff braucht. Welches Prinzip ist verletzt?","Least Privilege",["Pagination","Idempotency","Binary Separation"]]
+    ];
+    return cases.map(([code,prompt,correct,wrong])=>q("D04-"+code,4,prompt,correct,wrong,DYNAMIC_EXPLANATIONS[4]));
+  }
+  if(module===5){
+    const items=[120,240,600],sizes=[20,50,100],out=[];
+    for(const total of items)for(const size of sizes){
+      const correct=Math.ceil(total/size),wrong=[Math.max(1,correct-1),correct+1,correct+2].filter(v=>v!==correct).slice(0,3).map(v=>String(v)+" Batches");
+      out.push(q("D05-"+total+"-"+size,5,`${total} Items werden in Batches zu ${size} verarbeitet. Wie viele Batches entstehen mindestens?`,String(correct)+" Batches",wrong,DYNAMIC_EXPLANATIONS[5]));
+    }
+    return out;
+  }
+  if(module===6){
+    const bases=[1,2,3],phases=[3,4],out=[];
+    for(const base of bases)for(const count of phases){
+      const waits=Array.from({length:count},(_,i)=>base*(2**i)),correct=waits.reduce((a,b)=>a+b,0);
+      const wrong=[Math.max(1,correct-base),correct+base,base*count].filter(v=>v!==correct).slice(0,3).map(v=>String(v)+" s");
+      out.push(q("D06-"+base+"-"+count,6,`Exponential Backoff startet bei ${base}s und hat ${count} Wartephasen (${waits.join(", ")}s). Wie viel Wartezeit entsteht insgesamt?`,String(correct)+" s",wrong,DYNAMIC_EXPLANATIONS[6]));
+    }
+    return out;
+  }
+  if(module===7){
+    return [2,3,5,8].map(repeats=>q("D07-repeat-"+repeats,7,`Dasselbe Event mit eventId evt-42 wird wegen Retries ${repeats}-mal zugestellt. Bei korrekter Dedupe/Idempotency: Wie viele fachliche Event-Datensätze sollen entstehen?`,"1",["0",String(repeats),String(repeats+1)],DYNAMIC_EXPLANATIONS[7]));
+  }
+  if(module===8){
+    return [3,6,12,15].map(size=>{
+      const correct=size*4/3;
+      const wrong=[size,size+3,correct+4].filter(v=>v!==correct).slice(0,3).map(v=>String(v)+" MB");
+      return q("D08-base64-"+size,8,`Eine Binärdatei ist ${size} MB groß. Base64 benötigt grob 4/3 der Binärgröße. Welche Payload-Größe ist näherungsweise zu erwarten?`,String(correct)+" MB",wrong,DYNAMIC_EXPLANATIONS[8]);
+    });
+  }
+  if(module===9){
+    const scores=[0.12,0.22,0.41,0.68],thresholds=[0.18,0.30,0.50],out=[];
+    for(const score of scores)for(const threshold of thresholds){
+      const grounded=score>=threshold,correct=grounded?"Grounded Answer erlauben":"Abstain / keine unbelegte Antwort";
+      out.push(q("D09-"+score+"-"+threshold,9,`RAG maxScore=${score.toFixed(2)}, Evidence Threshold=${threshold.toFixed(2)}. Welche Policy greift?`,correct,[grounded?"Abstain trotz ausreichender Evidenz":"Trotz schwacher Evidenz antworten","Secrets aus dem System Prompt ergänzen","Threshold ignorieren"],DYNAMIC_EXPLANATIONS[9]));
+    }
+    return out;
+  }
+  if(module===10){
+    return [4,12,25,60].map(callers=>q("D10-callers-"+callers,10,`Ein Shared Sub-Workflow wird von ${callers} produktiven Caller-Workflows verwendet. Ein Breaking Change wird ohne Versionierung deployed. Wie viele Caller können potenziell betroffen sein?`,String(callers),["1",String(Math.max(0,callers-1)),String(callers+10)],DYNAMIC_EXPLANATIONS[10]));
+  }
+  if(module===11){
+    const targets=[
+      ["safe-api","https://api.partner.example/v1/orders",true],
+      ["safe-hook","https://hooks.example.com/events",true],
+      ["metadata","http://169.254.169.254/latest/meta-data/",false],
+      ["loopback","http://127.0.0.1/admin",false],
+      ["private","http://10.0.0.5/internal",false]
+    ];
+    return targets.map(([code,target,allow])=>q("D11-"+code,11,`Egress-Policy: nur HTTPS + öffentliche erlaubte Ziele. User liefert Target ${target}. Entscheidung?`,allow?"Allow, sofern Host zusätzlich in der Allowlist liegt":"Block", [allow?"Block wegen Private/Link-Local":"Allow","Blind folgen, wenn Redirect kommt","Nur im Log warnen"],DYNAMIC_EXPLANATIONS[11]));
+  }
+  if(module===12){
+    const cases=[
+      [60,10,60,6000],
+      [120,10,60,9000],
+      [80,15,80,8000],
+      [40,15,80,5000],
+      [120,5,60,6000],
+      [60,15,80,9000]
+    ];
+    return cases.map(([runs,minutes,hourly,project])=>{
+      const annual=runs*minutes/60*hourly*12;
+      const wrong=[annual/2,annual+project,project].filter(v=>v!==annual).slice(0,3).map(v=>Math.round(v)+" €");
+      return q("D12-roi-"+runs+"-"+minutes+"-"+hourly+"-"+project,12,`Ein Prozess läuft ${runs}×/Monat, braucht manuell ${minutes} Minuten und kostet ${hourly} €/h. Wie hoch sind die jährlichen manuellen Personalkosten vor Projektkosten?`,Math.round(annual)+" €",wrong,DYNAMIC_EXPLANATIONS[12]);
+    });
+  }
+  return[];
+}
+
+function dynamicQuestion(module,excluded){
+  const all=dynamicCandidates(module),fresh=all.filter(item=>!excluded.has(item.id));
+  return shuffle(fresh.length?fresh:all)[0]||null;
+}
+
 export function gradeFor(score){return score>=92?1:score>=81?2:score>=67?3:score>=50?4:5;}
 export function buildExam(excludeIds=[]){
  const excluded=new Set(excludeIds.map(String)),selected=[];
  for(let module=1;module<=MODULE_COUNT;module++){
   const all=FINAL_EXAM_BANK.filter(item=>item.module===module),fresh=all.filter(item=>!excluded.has(item.id));
-  const pool=shuffle(fresh.length>=QUESTIONS_PER_MODULE?fresh:all).slice(0,QUESTIONS_PER_MODULE);
-  selected.push(...pool);
+  const staticQuestion=shuffle(fresh.length?fresh:all)[0];
+  const dynamic=dynamicQuestion(module,new Set([...excluded,staticQuestion?.id].filter(Boolean)));
+  if(staticQuestion)selected.push(staticQuestion);
+  if(dynamic)selected.push(dynamic);
  }
  const questions=[],answerKey={};
  for(const item of shuffle(selected)){
@@ -173,7 +298,7 @@ export const onRequestPost=async({request,env})=>{
     const selected=Number(answers[question.id]),isCorrect=selected===Number(key[question.id]);
     if(isCorrect)correct++;
     const def=FINAL_EXAM_BANK.find(item=>item.id===question.id);
-    review.push({id:question.id,module:question.module,correct:isCorrect,explanation:def?.explanation||""});
+    review.push({id:question.id,module:question.module,correct:isCorrect,explanation:def?.explanation||DYNAMIC_EXPLANATIONS[question.module]||""});
    }
    const score=Math.round(correct/questions.length*100),grade=gradeFor(score),passed=score>=PASS_SCORE,status=passed?"passed":"failed";
    await db.prepare("UPDATE academy_final_exam_attempts SET answers_json=?,score=?,status=?,completed_at=? WHERE id=?").bind(JSON.stringify(answers),score,status,nowIso,row.id).run();
