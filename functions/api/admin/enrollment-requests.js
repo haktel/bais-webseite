@@ -7,6 +7,16 @@ const load=async db=>{
  return result.results||[];
 };
 
+async function ensureRun(db,courseId,courseSlug,courseTitle,now){
+ let run=await db.prepare("SELECT id FROM course_runs WHERE course_id=? AND status IN('open','planned') ORDER BY created_at ASC LIMIT 1")
+  .bind(courseId).first();
+ if(run)return run.id;
+ const runId="run-"+courseSlug+"-"+crypto.randomUUID();
+ await db.prepare("INSERT INTO course_runs(id,course_id,title,status,created_at) VALUES(?,?,?,?,?)")
+  .bind(runId,courseId,courseTitle+" · Self-paced","open",now).run();
+ return runId;
+}
+
 export const onRequestGet=async({request,env})=>{
  const traceId=requestId(request);
  try{
@@ -20,25 +30,34 @@ export const onRequestPatch=async({request,env})=>{
  const traceId=requestId(request);
  try{
   assertSameOrigin(request);
-  const db=assertDatabase(env),admin=await requireAdmin(db,request),body=await readJson(request,4096),id=cleanText(body.id,80),status=cleanText(body.status,40);
-  if(!id||!validAdminStatus("request",status))throw new ApiError(422,"validation_failed","Gültige Anfrage und Status sind erforderlich.");
+  const db=assertDatabase(env),
+   admin=await requireAdmin(db,request),
+   body=await readJson(request,4096),
+   id=cleanText(body.id,80),
+   status=cleanText(body.status,40);
 
-  const entry=await db.prepare("SELECT r.id,r.email,r.course_id,c.slug AS course_slug,c.title AS course_title FROM enrollment_requests r JOIN courses c ON c.id=r.course_id WHERE r.id=? LIMIT 1").bind(id).first();
+  if(!id||!validAdminStatus("request",status))
+   throw new ApiError(422,"validation_failed","Gültige Anfrage und Status sind erforderlich.");
+
+  const entry=await db.prepare(
+   "SELECT r.id,r.email,r.course_id,c.slug AS course_slug,c.title AS course_title FROM enrollment_requests r JOIN courses c ON c.id=r.course_id WHERE r.id=? LIMIT 1"
+  ).bind(id).first();
   if(!entry)throw new ApiError(404,"request_not_found","Academy-Anfrage wurde nicht gefunden.");
 
   const now=new Date().toISOString();
-  let accessGranted=false,userId=null;
+  let accessGranted=false,userId=null,runId=null;
   const statements=[db.prepare("UPDATE enrollment_requests SET status=? WHERE id=?").bind(status,id)];
 
   if(status==="approved"){
-   const user=await db.prepare("SELECT id FROM users WHERE email=? AND status='active' LIMIT 1").bind(String(entry.email).toLowerCase()).first();
+   const user=await db.prepare("SELECT id FROM users WHERE lower(email)=lower(?) AND status='active' LIMIT 1").bind(entry.email).first();
    if(user){
     userId=user.id;
-    const runId="run-"+entry.course_slug+"-self-paced";
+    runId=await ensureRun(db,entry.course_id,entry.course_slug,entry.course_title,now);
     statements.push(
-     db.prepare("INSERT OR IGNORE INTO course_runs(id,course_id,title,status,created_at) VALUES(?,?,?,?,?)").bind(runId,entry.course_id,entry.course_title+" · Self-paced","open",now),
-     db.prepare("INSERT OR IGNORE INTO enrollments(id,user_id,course_run_id,status,enrolled_at) VALUES(?,?,?,?,?)").bind(crypto.randomUUID(),user.id,runId,"active",now),
-     db.prepare("INSERT OR IGNORE INTO course_progress(user_id,course_id,progress_percent,status,updated_at) VALUES(?,?,?,?,?)").bind(user.id,entry.course_id,0,"not_started",now)
+     db.prepare("INSERT OR IGNORE INTO enrollments(id,user_id,course_run_id,status,enrolled_at) VALUES(?,?,?,?,?)")
+      .bind(crypto.randomUUID(),user.id,runId,"active",now),
+     db.prepare("INSERT OR IGNORE INTO course_progress(user_id,course_id,progress_percent,status,updated_at) VALUES(?,?,?,?,?)")
+      .bind(user.id,entry.course_id,0,"not_started",now)
     );
     accessGranted=true;
    }
@@ -46,10 +65,10 @@ export const onRequestPatch=async({request,env})=>{
 
   statements.push(
    db.prepare("INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)")
-    .bind(crypto.randomUUID(),admin.user_id,"admin.enrollment_request.status","enrollment_request",id,JSON.stringify({status,accessGranted,userId,courseSlug:entry.course_slug}),now)
+    .bind(crypto.randomUUID(),admin.user_id,"admin.enrollment_request.status","enrollment_request",id,JSON.stringify({status,accessGranted,userId,runId,courseSlug:entry.course_slug}),now)
   );
-  await db.batch(statements);
 
+  await db.batch(statements);
   return json({ok:true,accessGranted,requests:await load(db),requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
