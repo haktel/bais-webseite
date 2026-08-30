@@ -1,5 +1,5 @@
 (()=> {
-  const COURSE="n8n-bootcamp",MODULE=document.body.dataset.module||"modul-01";
+  const COURSE=document.body.dataset.course||"n8n-bootcamp",MODULE=document.body.dataset.module||"modul-01";
   const lessons=[...document.querySelectorAll("[data-lesson]")];
   const bar=document.querySelector("[data-progress-bar]");
   const text=document.querySelector("[data-progress-text]");
@@ -52,14 +52,21 @@
   // A learner can no longer unlock "Lerneinheit abschließen" just by
   // opening the "Vertiefung" - the button stays disabled with a live
   // countdown until enough time has actually been spent with it open.
-  // Required time scales with how much there is to read (min 20s, max
-  // 110s at ~200 words/minute), tracked cumulatively across close/reopen
-  // so closing early never punishes you, just doesn't count more time.
-  const READ_WPM=200,MIN_READ_SECONDS=20,MAX_READ_SECONDS=110;
+  // Required time scales with how much there is to read, at a careful
+  // (not skimming) reading pace, with a generous floor so even short
+  // lessons demand real engagement - tracked cumulatively across
+  // close/reopen so closing early never punishes you, just doesn't count
+  // more time. Only one lesson's "Vertiefung" can be open at a time
+  // (accordion behaviour below), so the clock always reflects time
+  // actually spent on that one lesson - it can't be padded by opening
+  // several sections at once and waiting once for all of them.
+  const READ_WPM=130,MIN_READ_SECONDS=45,MAX_READ_SECONDS=240;
   const estimateReadSeconds=text=>{
     const words=text.trim().split(/\s+/).filter(Boolean).length;
     return Math.min(MAX_READ_SECONDS,Math.max(MIN_READ_SECONDS,Math.round(words/READ_WPM*60)));
   };
+
+  const openLessons=[];
 
   lessons.forEach(lesson=>{
     const details=lesson.querySelector("details"),button=lesson.querySelector("[data-done]");
@@ -106,8 +113,24 @@
       }
     };
 
+    const pause=()=>{
+      if(openedAt){accumulated+=(Date.now()-openedAt)/1000;openedAt=null;}
+      if(timer){clearInterval(timer);timer=null;}
+      updateButton();
+    };
+
+    const entry={details,pause};
+
     details.addEventListener("toggle",()=>{
       if(details.open){
+        // Accordion: opening this lesson's "Vertiefung" forces every other
+        // currently open one shut and pauses its clock, so the required
+        // time always reflects attention actually spent on this lesson -
+        // not several sections left open in parallel during one wait.
+        openLessons.forEach(other=>{
+          if(other!==entry&&other.details.open){other.details.open=false;other.pause();}
+        });
+        if(!openLessons.includes(entry))openLessons.push(entry);
         banner.hidden=button.classList.contains("done");
         openedAt=Date.now();
         if(button.dataset.unlocked!=="true"){
@@ -115,9 +138,7 @@
           timer=setInterval(updateButton,1000);
         }
       }else{
-        if(openedAt){accumulated+=(Date.now()-openedAt)/1000;openedAt=null;}
-        if(timer){clearInterval(timer);timer=null;}
-        updateButton();
+        pause();
       }
     });
 
