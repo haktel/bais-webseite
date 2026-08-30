@@ -1,0 +1,418 @@
+{
+  "name": "BAIS Academy · Modul 03 · Webhooks REST APIs Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-03",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -820,
+        0
+      ],
+      "id": "a7df4f1e-9634-4a55-9b0e-6dbe68a7d301",
+      "name": "Webhook",
+      "webhookId": "f84f31ad-95ae-4144-8960-55c6ac8062a1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body=$input.first().json.body??{};\nconst operation=String(body.operation??\"\").trim().toUpperCase();\nconst customerId=String(body.customerId??\"\").trim();\nconst name=String(body.name??\"\").trim();\nconst email=String(body.email??\"\").trim().toLowerCase();\nconst validOperation=[\"GET\",\"POST\"].includes(operation);\nconst validBase=Boolean(customerId);\nconst validPost=operation!==\"POST\"||Boolean(name&&/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email));\nreturn [{json:{\n  valid:validOperation&&validBase&&validPost,\n  operation,\n  customerId,\n  name,\n  email,\n  validation:{\n    validOperation,\n    customerId:Boolean(customerId),\n    postBody:validPost\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -590,
+        0
+      ],
+      "id": "0e5633d0-30fc-4f58-9db8-8209fd459b9d",
+      "name": "Validate & Prepare"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0e4bb456-3240-4c69-9b12-85d8207c22f4",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -350,
+        0
+      ],
+      "id": "87d3142f-eaf0-4ba9-822b-0ec85b239b5f",
+      "name": "Valid Request?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "70af534a-1dd9-4539-a4ad-1630d0ac54cc",
+              "leftValue": "={{ $json.operation }}",
+              "rightValue": "GET",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        -80
+      ],
+      "id": "8aad5e7d-a83a-4a35-b8ee-80868afe77cd",
+      "name": "GET or POST?"
+    },
+    {
+      "parameters": {
+        "url": "https://postman-echo.com/get",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "customerId",
+              "value": "={{ $('Validate & Prepare').item.json.customerId }}"
+            },
+            {
+              "name": "source",
+              "value": "bais-academy"
+            },
+            {
+              "name": "module",
+              "value": "03"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-BAIS-Lab",
+              "value": "module-03"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        -180
+      ],
+      "id": "b47234d2-c8d3-47ec-8b10-04cbde6b49d2",
+      "name": "HTTP GET"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://postman-echo.com/post",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-BAIS-Lab",
+              "value": "module-03"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({customerId: $('Validate & Prepare').item.json.customerId, name: $('Validate & Prepare').item.json.name, email: $('Validate & Prepare').item.json.email, source: 'bais-academy', module: '03'}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        20
+      ],
+      "id": "76909f48-9570-45d0-bfa8-4c2e8c38da6a",
+      "name": "HTTP POST"
+    },
+    {
+      "parameters": {
+        "jsCode": "const upstream=$input.first().json;\nconst prepared=$('Validate & Prepare').item.json;\nreturn [{json:{\n  ok:true,\n  module:\"03\",\n  case:\"get\",\n  request:{\n    method:\"GET\",\n    url:\"https://postman-echo.com/get\",\n    query:{customerId:prepared.customerId,source:\"bais-academy\",module:\"03\"},\n    headers:{\"X-BAIS-Lab\":\"module-03\",\"Accept\":\"application/json\"}\n  },\n  response:{\n    echoedArgs:upstream.args??{},\n    echoedHeaders:{\n      xBaisLab:upstream.headers?.[\"x-bais-lab\"]??upstream.headers?.[\"X-Bais-Lab\"]??null\n    },\n    url:upstream.url??null\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -180
+      ],
+      "id": "c1b94fb1-b3fa-4f40-93bb-dfd8f39e657a",
+      "name": "Explain GET"
+    },
+    {
+      "parameters": {
+        "jsCode": "const upstream=$input.first().json;\nconst prepared=$('Validate & Prepare').item.json;\nreturn [{json:{\n  ok:true,\n  module:\"03\",\n  case:\"post\",\n  request:{\n    method:\"POST\",\n    url:\"https://postman-echo.com/post\",\n    body:{customerId:prepared.customerId,name:prepared.name,email:prepared.email,source:\"bais-academy\",module:\"03\"},\n    headers:{\"X-BAIS-Lab\":\"module-03\",\"Accept\":\"application/json\",\"Content-Type\":\"application/json\"}\n  },\n  response:{\n    echoedJson:upstream.json??{},\n    url:upstream.url??null\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        20
+      ],
+      "id": "9b0cdb83-bcc1-4984-99db-b46d8129059b",
+      "name": "Explain POST"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d67660b-33f7-4bb7-9d16-24aa8808a7f9",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "e57c17fd-d506-44a8-8e76-39a72c631e4a",
+              "name": "module",
+              "value": "03",
+              "type": "string"
+            },
+            {
+              "id": "04efc257-e742-40ed-ad41-7e24f9742500",
+              "name": "case",
+              "value": "invalid",
+              "type": "string"
+            },
+            {
+              "id": "54eb47fb-e4ef-47ea-b003-f6b1e4cdfab6",
+              "name": "status",
+              "value": 422,
+              "type": "number"
+            },
+            {
+              "id": "39c176a6-26d0-4029-972d-39d5f094e4ea",
+              "name": "error",
+              "value": "Ungültige Operation oder Pflichtfelder fehlen.",
+              "type": "string"
+            },
+            {
+              "id": "6670ecda-cc69-498e-a0fe-2214c4b38dbd",
+              "name": "validation",
+              "value": "={{ $json.validation }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        180
+      ],
+      "id": "6471ef78-fcbd-47ff-9d51-e7aac825e55e",
+      "name": "Invalid Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        680,
+        -80
+      ],
+      "id": "6c557a73-3302-49d9-9c8b-e7e97a29c541",
+      "name": "Respond OK"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        180,
+        180
+      ],
+      "id": "6204e952-5ef0-4587-9195-a498671736bd",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Prepare": {
+      "main": [
+        [
+          {
+            "node": "Valid Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Request?": {
+      "main": [
+        [
+          {
+            "node": "GET or POST?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET or POST?": {
+      "main": [
+        [
+          {
+            "node": "HTTP GET",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP GET": {
+      "main": [
+        [
+          {
+            "node": "Explain GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP POST": {
+      "main": [
+        [
+          {
+            "node": "Explain POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain GET": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain POST": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-03",
+    "body": {
+      "operation": "GET",
+      "customerId": "C-1042"
+    },
+    "expect": {
+      "filter": ".case",
+      "value": "get"
+    }
+  }
+}
