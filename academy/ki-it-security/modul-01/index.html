@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 01 – AI-Architektur & Datenfluss | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: AI-Datenflüsse, Vertrauensgrenzen, Cloud vs. on-premise und Anbieter-/Subprozessor-Ketten – mit echtem Trust-Boundary-Analyzer als Live-Lab.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-it-security/modul-01/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/kis-module-01.css?v=1.0">
+</head><body data-module="modul-01" data-course="ki-it-security">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein IT &amp; Security</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 01 · PRIVATER LERNBEREICH</span><h1>AI-Architektur &amp; Datenfluss</h1><p class="lead">Du lernst, wie AI-Datenflüsse technisch ablaufen, was eine Vertrauensgrenze ist, warum Cloud- und on-premise-Lösungen unterschiedliche Risiken haben – und prüfst das an einem echten Trust-Boundary-Analyzer.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive Anmeldung für KI-Führerschein IT &amp; Security.</div></div>
+<div class="heroDiagram" aria-label="Modul-01 Lernarchitektur"><div class="courseMap"><div><b>DATENFLUSS</b><span>Vom Prompt zur Antwort</span></div><div><b>GRENZEN</b><span>Intern vs. extern</span></div><div><b>ANBIETER</b><span>Subprozessor-Ketten</span></div><div><b>PRAXIS</b><span>Vor Rollout prüfen</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 01 · Lernpfad</strong>
+<a href="#l1">01 · Wie ein AI-Datenfluss abläuft</a><a href="#l2">02 · Was eine Vertrauensgrenze ist</a><a href="#l3">03 · On-premise vs. Cloud</a><a href="#l4">04 · Transportverschlüsselung reicht nicht</a><a href="#l5">05 · Datenfluss nachzeichnen</a><a href="#l6">06 · EU-Hosting als Kontrolle</a><a href="#l7">07 · Subprozessor-Ketten</a><a href="#l8">08 · Fall: OpenAI Redis-Bug</a><a href="#l9">09 · Fall: Slack AI-Richtlinie</a><a href="#l10">10 · Fall: Copilot Oversharing</a><a href="#l11">11 · Kontinuierliche statt einmaliger Prüfung</a><a href="#l12">12 · Datenfluss-Dokumentation</a><a href="#lab">13 · Live Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Vertrauensgrenzen werden auch bei etablierten Anbietern überschritten.</h2><p>Die folgenden öffentlich bekannt gewordenen Fälle tauchen in den Lektionen wieder auf.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>OpenAI</strong><span>Redis-Bug, Datenexposition</span><b>Öffentlicher Bericht, März 2023</b></article>
+    <article><strong>Slack</strong><span>AI-Trainingsdaten-Richtlinie</span><b>Öffentliche Kritik, 2024</b></article>
+    <article><strong>Microsoft 365 Copilot</strong><span>Oversharing-Risiko</span><b>Breit diskutiert, 2023/24</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Wie ein AI-Datenfluss abläuft</h2><p>Ein Prompt durchläuft mehrere Stationen, bevor eine Antwort zurückkommt - jede Station ist ein potenzieller Kontrollpunkt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Eingabe</div><div class="vfArrow">→</div><div class="vfNode">Anwendung</div><div class="vfArrow">→</div><div class="vfNode">AI-Anbieter</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Mehr Stationen als sichtbar</h3><p>Zwischen Eingabe und Antwort liegen oft weitere Stationen: Logging-Systeme, Caches, Monitoring, ggf. weitere Tool-Aufrufe. Jede davon ist ein Punkt, an dem Daten liegen bleiben oder weitergegeben werden könnten.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Vorschau auf den Live-Lab</strong><p>Der Live-Lab dieses Moduls prüft automatisiert, ob ein beschriebenes Szenario eine externe Vertrauensgrenze überschreitet.</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Kannst du für ein AI-Tool in deinem Alltag alle Stationen zwischen Eingabe und Antwort benennen?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">GRUNDBEGRIFF</div><h2>Was eine Vertrauensgrenze ist</h2><p>Eine Vertrauensgrenze ist der Punkt, an dem Daten von einem kontrollierten in einen weniger kontrollierten Bereich übergehen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Nicht jede Grenze ist gleich riskant</h3><p>Eine Grenze zu einem streng vertraglich geregelten, EU-gehosteten Anbieter ist etwas anderes als eine Grenze zu einem Dienst ohne jede Zusicherung. Die Existenz einer Grenze allein sagt noch nichts über das tatsächliche Risiko.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Jede Grenze verdient eine bewusste Entscheidung - nicht automatisch ein Verbot, aber auch nicht automatisches Vertrauen.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">ARCHITEKTUR</div><h2>On-premise vs. Cloud</h2><p>Bei on-premise gehosteten Lösungen verlassen Daten die eigene Infrastruktur nicht - bei Cloud-Lösungen prinzipbedingt schon.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Modell</th><th>Datenverbleib</th></tr><tr><td>On-premise</td><td>Vollständig in eigener Infrastruktur</td></tr><tr><td>Cloud-API</td><td>Verarbeitung beim Anbieter</td></tr><tr><td>Hybrid</td><td>Teilweise eigene, teilweise externe Verarbeitung</td></tr></table>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Kein Modell ist per se "das sichere"</h3><p>On-premise verschiebt Verantwortung vollständig zu einem selbst - inklusive Wartung, Patches und Skalierung. Cloud verschiebt Verantwortung teilweise zum Anbieter - inklusive der Notwendigkeit, dessen Zusicherungen zu prüfen.</p></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Für welches eigene AI-Tool wäre on-premise realistisch, für welches nicht - und warum?</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">HÄUFIGER IRRTUM</div><h2>Transportverschlüsselung reicht nicht</h2><p>HTTPS schützt die Übertragung - nicht, was der Anbieter mit den Daten danach macht.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Zwei unabhängige Fragen</h3><p>"Ist die Übertragung sicher?" und "Was passiert mit den Daten nach dem Empfang?" sind zwei komplett unabhängige Fragen. Eine gut verschlüsselte Verbindung zu einem Anbieter ohne klare Datenverarbeitungsvereinbarung löst das zweite Problem nicht.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>"Wir nutzen HTTPS" ist eine Antwort auf die falsche Frage, wenn es um Datenverarbeitung beim Anbieter geht.</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">METHODE</div><h2>Datenfluss nachzeichnen</h2><p>Der wichtigste erste Schritt jeder Bewertung: den tatsächlichen Weg der Daten von der Eingabe bis zur Antwort aufzuschreiben.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Nutzer-Eingabe → Anwendung → ggf. Zwischenspeicher/Logging → AI-Anbieter → ggf. Subprozessor → Antwort zurück</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ohne Diagramm kein vollständiges Bild</h3><p>Ein einfaches Kästchen-und-Pfeile-Diagramm macht sichtbar, wie viele Stationen tatsächlich beteiligt sind - oft mehr, als aus der reinen Nutzersicht ersichtlich ist.</p></div>
+<div class="lessonCallout"><strong>Vorbereitung auf den Lab</strong><p>Der Live-Lab prüft automatisiert, ob eine externe Grenze im beschriebenen Datenfluss überschritten wird.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">KONTROLLE</div><h2>EU-Hosting als konkrete Zusicherung</h2><p>"EU-gehostet" ist eine konkrete, prüfbare Aussage über den Verarbeitungsort - kein Marketing-Schlagwort.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Prüfbar heißt: nachfragbar</h3><p>Eine seriöse Zusicherung zum Verarbeitungsort lässt sich vertraglich fixieren und im Zweifel nachweisen - anders als vage Formulierungen wie "wir legen Wert auf Sicherheit".</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Bei jeder Cloud-Integration aktiv nach dem konkreten Verarbeitungsort fragen, statt ihn anzunehmen.</p></div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">LIEFERKETTE</div><h2>Subprozessor-Ketten</h2><p>Ein AI-Anbieter kann selbst wieder weitere Subunternehmer einsetzen, die zusätzlich Zugriff auf Daten erhalten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="caseFlow"><b>Eigenes Unternehmen</b><span>→</span><b>AI-Anbieter</b><span>→</span><b>Subprozessor 1</b><span>→</span><b>Subprozessor 2</b></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Die Kette endet selten beim ersten Anbieter</h3><p>Eine vollständige Risikoprüfung schließt die komplette Subprozessor-Kette ein - nicht nur den Vertragspartner, mit dem man direkt spricht.</p></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Kennst du bei deinem wichtigsten AI-Tool die vollständige Subprozessor-Liste?</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">REALER FALL</div><h2>Der OpenAI Redis-Bug (März 2023)</h2><p>Ein Fehler in einer Zwischenkomponente kann eine Vertrauensgrenze durchbrechen, ohne dass irgendjemand es beabsichtigt hat.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein Bug in der Caching-Bibliothek</h3><p>OpenAI veröffentlichte im März 2023 einen öffentlichen Bericht zu einem Fehler in einer verwendeten Redis-Bibliothek, durch den kurzzeitig Chat-Titel und teilweise Zahlungsdaten anderer aktiver Nutzer sichtbar werden konnten.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · OPENAI</span><h3>Eine Zwischenkomponente durchbrach die Vertrauensgrenze zwischen Nutzern</h3><p>Der Fall zeigt: Sicherheitsprüfungen müssen die gesamte technische Kette einschließen, nicht nur den sichtbaren Endpunkt.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · März 2023, öffentlicher Bericht</span></div>
+<div class="miniStat"><strong>1</strong><span>Zwischenkomponente als Ursache</span></div></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">REALER FALL</div><h2>Die Slack-AI-Richtlinie (2024)</h2><p>Datenschutzformulierungen zur AI-Trainingsnutzung können sich als Vertrauensgrenze entpuppen, die niemand aktiv bemerkt hatte.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Eine Formulierung mit großer Wirkung</h3><p>2024 wurde öffentlich kritisiert, dass Slacks Datenschutzbestimmungen eine Formulierung enthielten, nach der Kundennachrichten standardmäßig zum Trainieren von AI/ML-Modellen genutzt werden könnten, sofern nicht widersprochen wird.</p></div>
+<div class="lessonCallout"><strong>Übertragung</strong><p>Richtlinien-Formulierungen sind selbst eine Art Vertrauensgrenze - sie bestimmen, wofür Daten tatsächlich genutzt werden dürfen.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">REALER FALL</div><h2>Microsoft 365 Copilot: Oversharing</h2><p>Neue AI-Funktionen machen oft sichtbar, was in bestehenden Berechtigungsstrukturen bereits angelegt war.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Das Oversharing-Risiko</h3><p>Im Zusammenhang mit Microsoft 365 Copilot wurde breit diskutiert, dass Copilot Nutzenden Inhalte anzeigen kann, für die bereits vorher zu weit gefasste interne Berechtigungen bestanden - die aber vor Copilot kaum praktisch genutzt oder bemerkt wurden.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Copilot erschafft die Berechtigung nicht neu - es macht eine bestehende, oft übersehene Schieflage plötzlich praktisch relevant.</p></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">KONTINUITÄT</div><h2>Kontinuierliche statt einmaliger Prüfung</h2><p>Ein einmaliges Anbieter-Audit reicht nicht, weil sich Praktiken, Richtlinien und Subprozessoren über Zeit ändern können.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Alle drei Fälle zeigen dasselbe Muster</h3><p>OpenAI, Slack und Microsoft sind etablierte, professionell geführte Anbieter - und trotzdem traten bei allen dreien öffentlich bekannt gewordene Vertrauensgrenz-Themen auf. Das zeigt: kontinuierliche Prüfung bleibt notwendig, unabhängig von der Reputation des Anbieters.</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Anbieter-Prüfung als wiederkehrenden Termin einplanen, nicht als einmalige Freigabe.</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRAXIS</div><h2>Datenfluss-Dokumentation</h2><p>Eine vollständige Dokumentation macht jede überschrittene Grenze sichtbar und prüfbar.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Element</th><th>Frage</th></tr><tr><td>Ausgangspunkt</td><td>Wo entsteht die Eingabe?</td></tr><tr><td>Zwischenstationen</td><td>Welche Systeme sind beteiligt (Logging, Cache, Monitoring)?</td></tr><tr><td>Zielsystem</td><td>Wer verarbeitet die Daten final?</td></tr><tr><td>Subprozessoren</td><td>Wer hat zusätzlich Zugriff?</td></tr></table>
+<div class="lessonCallout"><strong>Vorbereitung auf den Lab</strong><p>Der folgende Live-Lab wendet genau diese Denkweise automatisiert auf ein beschriebenes Szenario an.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER TRUST-BOUNDARY-ANALYZER</div><h2>3 Lernfälle – dieselbe Grenz-Regel wie in den Lektionen 1-7</h2><p class="muted">Der Analyzer prüft automatisiert, ob ein beschriebenes Szenario eine externe Vertrauensgrenze überschreitet und ob sensible Daten ohne Schutzmaßnahme betroffen sind.</p>
+<div class="flowToolbar"><button type="button" data-flow-preset="unkritisch" aria-pressed="false">A · Unkritisch</button><button type="button" data-flow-preset="pruefen" aria-pressed="false">B · Prüfen</button><button type="button" data-flow-preset="hochrisiko" aria-pressed="false">C · Hochrisiko</button></div>
+<div class="flowLab"><div class="flowEditor"><textarea data-flow-input spellcheck="false" placeholder="Szenario beschreiben oder oben laden…"></textarea><button class="flowRun" type="button" data-flow-run>Datenfluss analysieren</button></div>
+<div class="flowResult"><div class="kisFlow1"><div data-kis1-node>Szenario</div><div data-kis1-node>Grenz-Check</div><div data-kis1-node>Verdikt</div></div><pre class="flowOutput" data-flow-output>Bereit. Wähle ein Szenario oder beschreibe einen eigenen Fall.</pre></div></div>
+<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und erkläre, warum keine externe Grenze erkannt wurde.</li><li>Starte B und benenne, welche Grenze überschritten wird und warum es trotzdem nicht "hochrisiko" ist.</li><li>Starte C und erkläre, welche zwei Bedingungen zusammen die Blockade auslösen.</li><li>Formuliere B so um, dass eine Schutzmaßnahme genannt wird, und teste erneut.</li></ol></details></section>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 01</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen und erzeugt zusätzliche variable Szenarien. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 01 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> einen AI-Datenfluss Station für Station beschreiben</label><label><input type="checkbox"> eine Vertrauensgrenze definieren</label><label><input type="checkbox"> on-premise von Cloud unterscheiden</label><label><input type="checkbox"> erklären, warum HTTPS allein nicht reicht</label><label><input type="checkbox"> einen Datenfluss selbst nachzeichnen</label><label><input type="checkbox"> EU-Hosting als konkrete Zusicherung einordnen</label><label><input type="checkbox"> eine Subprozessor-Kette erklären</label><label><input type="checkbox"> den OpenAI-Redis-Fall einordnen</label><label><input type="checkbox"> den Slack-Fall einordnen</label><label><input type="checkbox"> den Copilot-Oversharing-Fall einordnen</label><label><input type="checkbox"> begründen, warum Prüfung kontinuierlich sein muss</label><label><input type="checkbox"> alle drei Live-Lab-Fälle erklären</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 02 · Identitäten &amp; Berechtigungen</strong><span>Modul 02 vertieft Least-Privilege-Prinzipien für AI-Agenten und Zugriffskontrolle.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein IT &amp; Security</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-module-study.js?v=2.0" defer></script>
+<script src="../../../assets/kis-module-01.js?v=1.0" defer></script>
+<script src="../../../assets/kis-module-01-assessment.js?v=1.0" defer></script>
+</body></html>
