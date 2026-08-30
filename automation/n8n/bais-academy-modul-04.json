@@ -1,0 +1,302 @@
+{
+  "name": "BAIS Academy · Modul 04 · Authentication Credentials OAuth2 Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-04",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -780,
+        0
+      ],
+      "id": "ff64c731-11aa-4db4-b25f-74bd6c70bf68",
+      "name": "Webhook",
+      "webhookId": "f42142e7-8a5c-4f8e-9815-6c56e8bb4ed4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst allowed=[\"api-key\",\"bearer\",\"forbidden\",\"expired\"];\nif(!allowed.includes(scenario)){\n  return [{json:{valid:false,scenario,error:\"unknown_scenario\"}}];\n}\nconst map={\n  \"api-key\":{\n    authType:\"API Key\",\n    apiKey:\"bais-demo-key-read\",\n    authorization:\"\",\n    expectedStatus:200,\n    expectedMeaning:\"Credential gültig und Scope customer:read vorhanden.\"\n  },\n  \"bearer\":{\n    authType:\"Bearer Token\",\n    apiKey:\"\",\n    authorization:\"Bearer bais-demo-token-read\",\n    expectedStatus:200,\n    expectedMeaning:\"Token gültig und Scope customer:read vorhanden.\"\n  },\n  \"forbidden\":{\n    authType:\"Bearer Token\",\n    apiKey:\"\",\n    authorization:\"Bearer bais-demo-token-no-scope\",\n    expectedStatus:403,\n    expectedMeaning:\"Identität bekannt, aber Scope customer:read fehlt.\"\n  },\n  \"expired\":{\n    authType:\"Bearer Token\",\n    apiKey:\"\",\n    authorization:\"Bearer bais-demo-token-expired\",\n    expectedStatus:401,\n    expectedMeaning:\"Token ist abgelaufen; Re-Authentication/Refresh wäre erforderlich.\"\n  }\n};\nreturn [{json:{valid:true,scenario,...map[scenario]}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        0
+      ],
+      "id": "9b2a0b0b-7262-4578-b099-43974d4bfd69",
+      "name": "Prepare Auth Scenario"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fa60b615-7613-4615-a633-e6e273a94cdf",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -300,
+        0
+      ],
+      "id": "52786f5b-0d56-4c5d-9843-2fbaec054201",
+      "name": "Scenario Valid?"
+    },
+    {
+      "parameters": {
+        "url": "https://bais-solutions.de/api/academy/auth-lab-resource",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "customer:read"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Prepare Auth Scenario').item.json.apiKey }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $('Prepare Auth Scenario').item.json.authorization }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "X-BAIS-Lab",
+              "value": "module-04"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        -100
+      ],
+      "id": "9081bd1c-fc7f-4199-bb89-d4182ceccbe7",
+      "name": "Call Protected Resource"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response=$input.first().json;\nconst prepared=$('Prepare Auth Scenario').item.json;\nconst status=Number(response.statusCode??response.status??response.body?.status??0);\nconst body=response.body??response;\nconst passed=status===Number(prepared.expectedStatus);\nreturn [{json:{\n  ok:passed,\n  module:\"04\",\n  case:prepared.scenario,\n  authType:prepared.authType,\n  expectedStatus:prepared.expectedStatus,\n  observedStatus:status,\n  expectedMeaning:prepared.expectedMeaning,\n  authorizationModel:{\n    credentialPresented:prepared.scenario===\"api-key\"?\"X-API-Key\":\"Authorization: Bearer ***\",\n    requiredScope:\"customer:read\",\n    note:\"Demo credentials only — never use these values as real secrets.\"\n  },\n  protectedResource:body,\n  lesson:status===200\n    ?\"Authentifizierung + Autorisierung erfolgreich.\"\n    :status===401\n      ?\"401: Credential fehlt/ungültig/abgelaufen. Identität ist nicht erfolgreich authentisiert.\"\n      :status===403\n        ?\"403: Identität ist bekannt, aber Berechtigung/Scope fehlt.\"\n        :\"Unerwarteter Status — Request/Response prüfen.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        -100
+      ],
+      "id": "b5e78650-7daf-4a65-8956-c878199c514d",
+      "name": "Explain Auth Result"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "a2",
+              "name": "module",
+              "value": "04",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "case",
+              "value": "invalid",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "observedStatus",
+              "value": 422,
+              "type": "number"
+            },
+            {
+              "id": "a5",
+              "name": "error",
+              "value": "Unbekanntes Auth-Lab-Szenario.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -40,
+        140
+      ],
+      "id": "36d5cbb6-d096-4e73-ae1e-e7f2a7e776ea",
+      "name": "Invalid Scenario"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        480,
+        -100
+      ],
+      "id": "5b8fa5ae-b9b6-4052-b954-b4835831dd3f",
+      "name": "Respond Lab"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        220,
+        140
+      ],
+      "id": "50f9700f-8bbb-482d-bd5c-d4ecb8981b93",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Auth Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Auth Scenario": {
+      "main": [
+        [
+          {
+            "node": "Scenario Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scenario Valid?": {
+      "main": [
+        [
+          {
+            "node": "Call Protected Resource",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Protected Resource": {
+      "main": [
+        [
+          {
+            "node": "Explain Auth Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain Auth Result": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Scenario": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-04",
+    "body": {
+      "scenario": "api-key"
+    },
+    "expect": {
+      "filter": ".observedStatus",
+      "value": "200"
+    }
+  }
+}
