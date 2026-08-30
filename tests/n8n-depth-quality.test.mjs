@@ -2,7 +2,7 @@ import test from"node:test";
 import assert from"node:assert/strict";
 import{readFile}from"node:fs/promises";
 
-const visualClassPattern=/class="[^"]*(?:visual|grid|flow|diagram|map|compare|timeline|model|tree|pyramid|architecture)[^"]*"/i;
+const visualClassPattern=/class="[^"]*(?:visual|grid|flow|diagram|map|compare|timeline|model|tree|pyramid|architecture|pipeline)[^"]*"/i;
 
 test("every n8n module keeps 12 deep lessons with real sourced cases and visual explanations",async()=>{
   for(let i=1;i<=12;i++){
