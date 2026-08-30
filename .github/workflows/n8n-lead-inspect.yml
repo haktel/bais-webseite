@@ -1,0 +1,41 @@
+name: Inspect Lead Qualification Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/n8n-lead-inspect.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    env:
+      N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+    steps:
+      - name: Print sanitized workflow topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="${N8N_BASE_URL%/}"
+          LIST="$(curl -fsS             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=250")"
+
+          FOUND=""
+          while read -r ID; do
+            WF="$(curl -fsS               -H "X-N8N-API-KEY: ${N8N_API_KEY}"               -H "Accept: application/json"               "${BASE}/api/v1/workflows/${ID}")"
+            if echo "${WF}" | jq -e '.nodes[]? | select((.type|ascii_downcase|contains("webhook")) and .parameters.path=="bais-lead-qualification")' >/dev/null; then
+              FOUND="${WF}"
+              break
+            fi
+          done < <(echo "${LIST}" | jq -r '.data[]?.id')
+
+          test -n "${FOUND}"
+          echo "${FOUND}" | jq '{
+            id,name,active,
+            nodes:[.nodes[]|{name,type,typeVersion,position,parameterKeys:(.parameters|keys),webhookPath:(.parameters.path//null)}],
+            connections
+          }'
