@@ -40,3 +40,33 @@ test("final exam grade boundaries match BAIS mastery thresholds",()=>{
  assert.equal(gradeFor(50),4);
  assert.equal(gradeFor(49),5);
 });
+
+
+test("final exam includes one dynamic production scenario per module",()=>{
+ const exam=buildExam();
+ const dynamic=exam.questions.filter(question=>question.id.startsWith("D"));
+ assert.equal(dynamic.length,12);
+ for(let module=1;module<=12;module++){
+  assert.equal(dynamic.filter(question=>question.module===module).length,1);
+ }
+});
+
+test("immediate retry changes every dynamic production scenario",()=>{
+ const first=buildExam();
+ const previous=first.questions.map(question=>question.id);
+ const second=buildExam(previous);
+ const firstDynamic=new Set(first.questions.filter(q=>q.id.startsWith("D")).map(q=>q.id));
+ const repeated=second.questions.filter(q=>q.id.startsWith("D")&&firstDynamic.has(q.id));
+ assert.equal(repeated.length,0);
+});
+
+test("dynamic scenario questions still expose exactly four options and server-side answer keys",()=>{
+ const exam=buildExam();
+ for(const question of exam.questions.filter(q=>q.id.startsWith("D"))){
+  assert.equal(question.options.length,4);
+  assert.equal(new Set(question.options).size,4);
+  const answer=exam.answerKey[question.id];
+  assert.ok(Number.isInteger(answer));
+  assert.ok(answer>=0&&answer<4);
+ }
+});
