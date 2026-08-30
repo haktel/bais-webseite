@@ -2,8 +2,17 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}fro
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 
 const MODULE_COUNT=12;
-const LESSONS_PER_MODULE={"modul-01":12,"modul-02":12};
-const LAB_CASES={"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"]};
+// Keyed by courseSlug -> moduleSlug, not just moduleSlug, so two different
+// courses can each have their own "modul-01" without one course's lesson
+// count or lab case ids leaking into the other's validation.
+const LESSONS_PER_MODULE={
+  "n8n-bootcamp":{"modul-01":12,"modul-02":12},
+  "ki-fuehrerschein":{"modul-01":12}
+};
+const LAB_CASES={
+  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"]},
+  "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"]}
+};
 
 const parseArray=value=>{
   try{
@@ -37,9 +46,9 @@ async function recalcCourse(db,userId,courseId,now){
   return{percent,status};
 }
 
-function moduleScore(moduleSlug,lessons,labs,best){
-  const lessonTotal=LESSONS_PER_MODULE[moduleSlug]||0;
-  const labTotal=(LAB_CASES[moduleSlug]||[]).length;
+function moduleScore(courseSlug,moduleSlug,lessons,labs,best){
+  const lessonTotal=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
+  const labTotal=(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length;
   const lessonPart=lessonTotal?Math.round(Math.min(unique(lessons).length,lessonTotal)/lessonTotal*60):0;
   const labPart=labTotal?Math.round(Math.min(unique(labs).length,labTotal)/labTotal*20):0;
   // The result screen shows the full academic Notenskala (1-5, 50%+ is a
@@ -103,14 +112,14 @@ export const onRequestPost=async({request,env})=>{
 
     if(event==="lesson_complete"){
       const lessonId=cleanText(body.lessonId,8);
-      const max=LESSONS_PER_MODULE[moduleSlug]||0;
+      const max=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
       if(!/^\d{2}$/.test(lessonId)||Number(lessonId)<1||Number(lessonId)>max)throw new ApiError(422,"lesson_invalid","Ungültige Lerneinheit.");
       lessons=unique([...lessons,lessonId]);
     }
 
     if(event==="lab_case"){
       const caseId=cleanText(body.caseId,40);
-      if(!(LAB_CASES[moduleSlug]||[]).includes(caseId))throw new ApiError(422,"lab_case_invalid","Ungültiger Lab-Fall.");
+      if(!(LAB_CASES[courseSlug]?.[moduleSlug]||[]).includes(caseId))throw new ApiError(422,"lab_case_invalid","Ungültiger Lab-Fall.");
       labs=unique([...labs,caseId]);
     }
 
@@ -120,7 +129,7 @@ export const onRequestPost=async({request,env})=>{
       best=Math.max(best,score);
     }
 
-    const modulePercent=moduleScore(moduleSlug,lessons,labs,best),now=new Date().toISOString();
+    const modulePercent=moduleScore(courseSlug,moduleSlug,lessons,labs,best),now=new Date().toISOString();
     await db.prepare(
       "INSERT INTO academy_module_progress(user_id,course_id,module_slug,completed_lessons_json,lab_cases_json,assessment_best,module_percent,updated_at) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(user_id,course_id,module_slug) DO UPDATE SET completed_lessons_json=excluded.completed_lessons_json,lab_cases_json=excluded.lab_cases_json,assessment_best=excluded.assessment_best,module_percent=excluded.module_percent,updated_at=excluded.updated_at"
     ).bind(user.user_id,course.id,moduleSlug,JSON.stringify(lessons),JSON.stringify(labs),best,modulePercent,now).run();
