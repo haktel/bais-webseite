@@ -52,6 +52,49 @@ async function recalcCourse(db,userId,courseId,courseSlug,now){
   return{percent,status};
 }
 
+function sequenceState(courseSlug,moduleSlug,lessons,labs,isAdmin=false){
+  const lessonTotal=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
+  const labOrder=LAB_CASES[courseSlug]?.[moduleSlug]||[];
+  if(courseSlug!=="n8n-bootcamp"||isAdmin){
+    return{enforced:false,nextLesson:null,lessonsComplete:unique(lessons).length>=lessonTotal,labsUnlocked:true,nextLabCase:null,labsComplete:unique(labs).length>=labOrder.length,assessmentUnlocked:true};
+  }
+  const completedLessons=new Set(unique(lessons));
+  const completedLabs=new Set(unique(labs));
+  const orderedLessons=Array.from({length:lessonTotal},(_,i)=>String(i+1).padStart(2,"0"));
+  const nextLesson=orderedLessons.find(id=>!completedLessons.has(id))||null;
+  const lessonsComplete=!nextLesson;
+  const nextLabCase=lessonsComplete?(labOrder.find(id=>!completedLabs.has(id))||null):null;
+  const labsComplete=lessonsComplete&&!nextLabCase;
+  return{
+    enforced:true,
+    nextLesson,
+    lessonsComplete,
+    labsUnlocked:lessonsComplete,
+    nextLabCase,
+    labsComplete,
+    assessmentUnlocked:lessonsComplete&&labsComplete
+  };
+}
+
+function assertN8nSequence({courseSlug,moduleSlug,event,lessonId,caseId,lessons,labs,isAdmin}){
+  if(courseSlug!=="n8n-bootcamp"||isAdmin)return;
+  const seq=sequenceState(courseSlug,moduleSlug,lessons,labs,false);
+  if(event==="lesson_complete"){
+    if(lessons.includes(lessonId))return;
+    if(seq.nextLesson!==lessonId)throw new ApiError(409,"learning_sequence_locked",`Bitte zuerst Lerneinheit ${seq.nextLesson||"01"} abschließen.`);
+    return;
+  }
+  if(event==="lab_case"){
+    if(labs.includes(caseId))return;
+    if(!seq.labsUnlocked)throw new ApiError(409,"learning_sequence_locked","Bitte zuerst alle 12 Lerneinheiten in Reihenfolge abschließen.");
+    if(seq.nextLabCase!==caseId)throw new ApiError(409,"learning_sequence_locked",`Bitte zuerst den Pflicht-Lab „${seq.nextLabCase||"nächster Fall"}“ durchführen.`);
+    return;
+  }
+  if(event==="assessment_result"&&!seq.assessmentUnlocked){
+    throw new ApiError(409,"learning_sequence_locked","Das Assessment wird erst nach allen Lerneinheiten und Pflicht-Labs freigeschaltet.");
+  }
+}
+
 function moduleScore(courseSlug,moduleSlug,lessons,labs,best){
   const lessonTotal=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
   const labTotal=(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length;
@@ -79,16 +122,18 @@ export const onRequestGet=async({request,env})=>{
     const row=await db.prepare(
       "SELECT completed_lessons_json,lab_cases_json,assessment_best,module_percent,updated_at FROM academy_module_progress WHERE user_id=? AND course_id=? AND module_slug=? LIMIT 1"
     ).bind(user.user_id,course.id,moduleSlug).first();
+    const completedLessons=parseArray(row?.completed_lessons_json),labCases=parseArray(row?.lab_cases_json);
     return json({ok:true,module:{
       moduleSlug,
-      completedLessons:parseArray(row?.completed_lessons_json),
-      labCases:parseArray(row?.lab_cases_json),
+      completedLessons,
+      labCases,
       assessmentBest:Number(row?.assessment_best||0),
       lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,
       labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,
       assessmentTarget:81,
       modulePercent:Number(row?.module_percent||0),
-      updatedAt:row?.updated_at||null
+      updatedAt:row?.updated_at||null,
+      sequence:sequenceState(courseSlug,moduleSlug,completedLessons,labCases,user.role==="admin")
     },requestId:traceId});
   }catch(error){return handleError(error,traceId);}
 };
@@ -123,18 +168,21 @@ export const onRequestPost=async({request,env})=>{
       const lessonId=cleanText(body.lessonId,8);
       const max=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
       if(!/^\d{2}$/.test(lessonId)||Number(lessonId)<1||Number(lessonId)>max)throw new ApiError(422,"lesson_invalid","Ungültige Lerneinheit.");
+      assertN8nSequence({courseSlug,moduleSlug,event,lessonId,lessons,labs,isAdmin:user.role==="admin"});
       lessons=unique([...lessons,lessonId]);
     }
 
     if(event==="lab_case"){
       const caseId=cleanText(body.caseId,40);
       if(!(LAB_CASES[courseSlug]?.[moduleSlug]||[]).includes(caseId))throw new ApiError(422,"lab_case_invalid","Ungültiger Lab-Fall.");
+      assertN8nSequence({courseSlug,moduleSlug,event,caseId,lessons,labs,isAdmin:user.role==="admin"});
       labs=unique([...labs,caseId]);
     }
 
     if(event==="assessment_result"){
       const score=Number(body.score);
       if(!Number.isInteger(score)||score<0||score>100)throw new ApiError(422,"assessment_invalid","Ungültiges Assessment-Ergebnis.");
+      assertN8nSequence({courseSlug,moduleSlug,event,lessons,labs,isAdmin:user.role==="admin"});
       best=Math.max(best,score);
     }
 
@@ -148,7 +196,7 @@ export const onRequestPost=async({request,env})=>{
       "INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)"
     ).bind(crypto.randomUUID(),user.user_id,"academy.module.progress","course",course.id,JSON.stringify({moduleSlug,event,modulePercent,coursePercent:courseProgress.percent}),now).run();
 
-    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,assessmentTarget:81,modulePercent},course:courseProgress,requestId:traceId});
+    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,assessmentTarget:81,modulePercent,sequence:sequenceState(courseSlug,moduleSlug,lessons,labs,user.role==="admin")},course:courseProgress,requestId:traceId});
   }catch(error){return handleError(error,traceId);}
 };
 
