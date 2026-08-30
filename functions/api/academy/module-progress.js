@@ -1,16 +1,15 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 
-const MODULE_COUNT=12;
 // Keyed by courseSlug -> moduleSlug, not just moduleSlug, so two different
 // courses can each have their own "modul-01" without one course's lesson
 // count or lab case ids leaking into the other's validation.
 const LESSONS_PER_MODULE={
-  "n8n-bootcamp":{"modul-01":12,"modul-02":12},
+  "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12},
   "ki-fuehrerschein":{"modul-01":12}
 };
 const LAB_CASES={
-  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"]},
+  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"]},
   "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"]}
 };
 
@@ -29,11 +28,18 @@ async function courseForUser(db,userId,slug){
   ).bind(userId,slug).first();
 }
 
-async function recalcCourse(db,userId,courseId,now){
+function moduleCountForCourse(courseSlug){
+  return Object.keys(LESSONS_PER_MODULE[courseSlug]||{}).length||1;
+}
+
+async function recalcCourse(db,userId,courseId,courseSlug,now){
   const aggregate=await db.prepare(
     "SELECT COALESCE(SUM(module_percent),0) AS total FROM academy_module_progress WHERE user_id=? AND course_id=?"
   ).bind(userId,courseId).first();
-  const percent=Math.max(0,Math.min(100,Math.round(Number(aggregate?.total||0)/MODULE_COUNT)));
+  // Course-wide percent is the average of each of THIS course's own
+  // modules, not a fixed guess at how many modules a course has - a course
+  // with 3 real modules must be able to reach 100%, not cap out at 25%.
+  const percent=Math.max(0,Math.min(100,Math.round(Number(aggregate?.total||0)/moduleCountForCourse(courseSlug))));
   const status=percent===100?"completed":percent>0?"in_progress":"not_started";
   await db.batch([
     db.prepare(
@@ -134,7 +140,7 @@ export const onRequestPost=async({request,env})=>{
       "INSERT INTO academy_module_progress(user_id,course_id,module_slug,completed_lessons_json,lab_cases_json,assessment_best,module_percent,updated_at) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(user_id,course_id,module_slug) DO UPDATE SET completed_lessons_json=excluded.completed_lessons_json,lab_cases_json=excluded.lab_cases_json,assessment_best=excluded.assessment_best,module_percent=excluded.module_percent,updated_at=excluded.updated_at"
     ).bind(user.user_id,course.id,moduleSlug,JSON.stringify(lessons),JSON.stringify(labs),best,modulePercent,now).run();
 
-    const courseProgress=await recalcCourse(db,user.user_id,course.id,now);
+    const courseProgress=await recalcCourse(db,user.user_id,course.id,course.slug,now);
     await db.prepare(
       "INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)"
     ).bind(crypto.randomUUID(),user.user_id,"academy.module.progress","course",course.id,JSON.stringify({moduleSlug,event,modulePercent,coursePercent:courseProgress.percent}),now).run();
