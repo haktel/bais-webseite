@@ -16,17 +16,18 @@
   const renderProgress=()=>{
     const done=new Set(state.completedLessons||[]);
     lessons.forEach(lesson=>{
-      const id=lesson.dataset.lesson,button=lesson.querySelector("[data-done]"),details=lesson.querySelector("details");
-      const complete=done.has(id);
-      if(button){
-        button.classList.toggle("done",complete);
-        button.disabled=complete||(!details?.open&&button.dataset.unlocked!=="true");
-        button.textContent=complete?"✓ Abgeschlossen":button.disabled?"Vertiefung öffnen":"Lerneinheit abschließen";
+      const id=lesson.dataset.lesson,button=lesson.querySelector("[data-done]");
+      if(button&&done.has(id)){
+        button.classList.add("done");
+        button.disabled=true;
+        button.textContent="✓ Abgeschlossen";
       }
     });
     const pct=Number(state.modulePercent)||0;
     if(bar)bar.style.width=pct+"%";
-    if(text)text.textContent=`${state.completedLessons.length}/12 Lektionen · ${state.labCases.length}/3 Labs · Assessment ${state.assessmentBest}% · Modul ${pct}%`;
+    const grade=state.assessmentBest>0&&window.percentToNote?window.percentToNote(state.assessmentBest):null;
+    const assessmentText=grade?`Note ${grade.note} (${state.assessmentBest}%)`:"noch nicht abgelegt";
+    if(text)text.textContent=`${state.completedLessons.length}/12 Lektionen · ${state.labCases.length}/3 Labs · Assessment ${assessmentText} · Modul ${pct}%`;
   };
 
   const postEvidence=async(payload)=>{
@@ -46,21 +47,66 @@
     }
   };
 
+  // A learner can no longer unlock "Lerneinheit abschließen" just by
+  // opening the "Vertiefung" - the button stays disabled with a live
+  // countdown until enough time has actually been spent with it open.
+  // Required time scales with how much there is to read (min 20s, max
+  // 110s at ~200 words/minute), tracked cumulatively across close/reopen
+  // so closing early never punishes you, just doesn't count more time.
+  const READ_WPM=200,MIN_READ_SECONDS=20,MAX_READ_SECONDS=110;
+  const estimateReadSeconds=text=>{
+    const words=text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.min(MAX_READ_SECONDS,Math.max(MIN_READ_SECONDS,Math.round(words/READ_WPM*60)));
+  };
+
   lessons.forEach(lesson=>{
     const details=lesson.querySelector("details"),button=lesson.querySelector("[data-done]");
-    details?.addEventListener("toggle",()=>{
-      if(details.open&&button&&!button.classList.contains("done")){
+    if(!details||!button)return;
+    const summary=details.querySelector("summary");
+    const bodyText=[...details.childNodes].filter(node=>node!==summary).map(node=>node.textContent||"").join(" ");
+    const required=estimateReadSeconds(bodyText);
+    let accumulated=0,openedAt=null,timer=null;
+
+    const updateButton=()=>{
+      if(button.classList.contains("done"))return;
+      const elapsedOpen=openedAt?(Date.now()-openedAt)/1000:0;
+      const totalRead=accumulated+elapsedOpen;
+      if(totalRead>=required){
         button.dataset.unlocked="true";
         button.disabled=false;
+        button.classList.remove("reading");
         button.textContent="Lerneinheit abschließen";
+        if(timer){clearInterval(timer);timer=null;}
+      }else{
+        button.disabled=true;
+        button.classList.toggle("reading",details.open);
+        button.style.setProperty("--read-pct",Math.min(100,Math.round(totalRead/required*100))+"%");
+        button.textContent=details.open?`Noch ${Math.ceil(required-totalRead)}s lesen …`:"Vertiefung öffnen";
+      }
+    };
+
+    details.addEventListener("toggle",()=>{
+      if(details.open){
+        openedAt=Date.now();
+        if(button.dataset.unlocked!=="true"){
+          updateButton();
+          timer=setInterval(updateButton,1000);
+        }
+      }else{
+        if(openedAt){accumulated+=(Date.now()-openedAt)/1000;openedAt=null;}
+        if(timer){clearInterval(timer);timer=null;}
+        updateButton();
       }
     });
-    button?.addEventListener("click",async()=>{
+
+    button.addEventListener("click",async()=>{
       if(button.disabled)return;
       button.disabled=true;
-      try{await postEvidence({event:"lesson_complete",lessonId:lesson.dataset.lesson});}
-      catch(error){button.disabled=false;button.textContent="Erneut versuchen";}
+      try{await postEvidence({event:"lesson_complete",lessonId:lesson.dataset.lesson});if(timer){clearInterval(timer);timer=null;}}
+      catch(error){button.disabled=false;updateButton();}
     });
+
+    updateButton();
   });
 
   const form=document.querySelector("[data-lab-form]");

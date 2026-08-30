@@ -59,6 +59,19 @@
     if(svg){el.innerHTML=svg;el.classList.add("dgEnhanced","miniArchitectureFlow");}
   });
 
+  // Converts an assessment percentage into a German university-style grade
+  // (Notenskala 1-5, ausreichend/50% is the minimum passing grade) instead
+  // of a flat pass/fail label - used by both modules' assessment result
+  // screens and the shared progress summary text.
+  window.percentToNote=function(percent){
+    const p=Number(percent)||0;
+    if(p>=92)return{note:1,label:"sehr gut",passed:true};
+    if(p>=81)return{note:2,label:"gut",passed:true};
+    if(p>=67)return{note:3,label:"befriedigend",passed:true};
+    if(p>=50)return{note:4,label:"ausreichend",passed:true};
+    return{note:5,label:"nicht ausreichend",passed:false};
+  };
+
   // Shared helper for the interactive Live Lab node rows (modul-01's
   // .labNodes, modul-02's .module2Flow): draws a real connecting line
   // between each pair of nodes in the row and returns handles so the

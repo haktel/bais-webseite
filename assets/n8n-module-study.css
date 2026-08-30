@@ -39,3 +39,19 @@
 .labConnLine.active{stroke:#ff806c;stroke-dasharray:9 7;animation:dgFlow .7s linear infinite}
 .labConnLine.done{stroke:#5ee1d4}
 @media(prefers-reduced-motion:reduce){.dgLine,.labConnLine.active{animation:none}}
+
+/* Reading-time gate: the "Vertiefung" content must actually stay open for
+   its estimated reading time before the button unlocks. .reading shows a
+   left-to-right fill tracking that progress instead of a plain grey disabled
+   state, so it reads as "still counting", not "broken". */
+.doneButton.reading{background:linear-gradient(90deg,#dfeef1 var(--read-pct,0%),#fff var(--read-pct,0%));border-color:#8fb0ba;color:#2c4750;transition:background .3s linear}
+
+/* Exam result grade badge (deutsches Notensystem 1-5, 50% = ausreichend/bestanden) */
+.gradeRow{display:flex;gap:16px;align-items:center;margin-bottom:6px}
+.gradeBadge{display:inline-grid;place-items:center;min-width:58px;height:58px;border-radius:14px;color:#fff;font-size:1.65rem;font-weight:950;flex-shrink:0}
+.gradeBadge.grade-1{background:#0c715e}
+.gradeBadge.grade-2{background:#15916f}
+.gradeBadge.grade-3{background:#b9861f}
+.gradeBadge.grade-4{background:#c96a2c}
+.gradeBadge.grade-5{background:#b13a2e}
+.gradeLabel{display:block;margin-top:4px;font-size:.8rem;font-weight:800;color:#9fc2cb;text-transform:capitalize}

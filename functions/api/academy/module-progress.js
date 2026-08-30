@@ -42,7 +42,10 @@ function moduleScore(moduleSlug,lessons,labs,best){
   const labTotal=(LAB_CASES[moduleSlug]||[]).length;
   const lessonPart=lessonTotal?Math.round(Math.min(unique(lessons).length,lessonTotal)/lessonTotal*60):0;
   const labPart=labTotal?Math.round(Math.min(unique(labs).length,labTotal)/labTotal*20):0;
-  const assessmentPart=Number(best)>=80?20:0;
+  // 50% matches the German university passing grade "ausreichend" (Note 4)
+  // shown to students on the assessment result screen - credit is awarded
+  // once the module exam is passed, same as a real course.
+  const assessmentPart=Number(best)>=50?20:0;
   return Math.min(100,lessonPart+labPart+assessmentPart);
 }
 
