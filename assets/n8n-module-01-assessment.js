@@ -183,6 +183,7 @@
         result.hidden=false;
         result.innerHTML=`<strong>${correctCount}/${questions.length} richtig · ${percent}%</strong>
           <p>${percent>=80?"Bestanden. Starte trotzdem einen neuen Versuch – die Fragen und Reihenfolge ändern sich.":"Noch nicht bestanden. Der nächste Versuch priorisiert zusätzlich deine schwächeren Themen und verwendet möglichst andere Fragen."}</p>`;
+        window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-01",score:percent,passed:percent>=80}}));
         result.scrollIntoView({behavior:"smooth",block:"center"});
       }
     });
