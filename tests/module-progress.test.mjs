@@ -2,6 +2,7 @@ import test from"node:test";import assert from"node:assert/strict";
 import{onRequestPost}from"../functions/api/academy/module-progress.js";
 
 const future=new Date(Date.now()+3600_000).toISOString();
+const lessonStarted=new Date(Date.now()-60_000).toISOString();
 const allLessons=Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0"));
 const progressRow=(lessons=[],labs=[],best=0)=>({
  completed_lessons_json:JSON.stringify(lessons),
@@ -20,6 +21,7 @@ function makeDb(getProgressRow,aggregate={total:0},priorModules={},role="student
       if(sql.includes("FROM enrollments e JOIN course_runs"))return{id:"course-1",slug:"n8n-bootcamp"};
       if(sql.startsWith("SELECT module_percent FROM academy_module_progress"))return{module_percent:priorModules[args[2]]??100};
       if(sql.startsWith("SELECT completed_lessons_json,lab_cases_json,assessment_best FROM academy_module_progress"))return getProgressRow();
+      if(sql.startsWith("SELECT started_at FROM academy_lesson_sessions"))return{started_at:lessonStarted};
       if(sql.startsWith("SELECT COALESCE(SUM(module_percent),0)"))return aggregate;
       return null;
      }
