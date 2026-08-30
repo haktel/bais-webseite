@@ -1,5 +1,5 @@
 import{ApiError}from"./api.js";
-const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24*7,PBKDF2_ITERATIONS=120000;
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24*7,PBKDF2_ITERATIONS=100000;
 
 const bytesToBase64Url=bytes=>{
  let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
