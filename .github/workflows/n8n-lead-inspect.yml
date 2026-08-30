@@ -47,6 +47,15 @@ jobs:
           cat /tmp/u.json 2>/dev/null || true
           echo
 
+          echo "=== RECENT EXECUTIONS ==="
+          WF_ID="$(echo "${FOUND}" | jq -r '.id')"
+          EXECS="$(curl -fsS -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H "Accept: application/json" "${BASE}/api/v1/executions?workflowId=${WF_ID}&limit=6")"
+          echo "${EXECS}" | jq '[.data[]|{id,status,startedAt,stoppedAt}]'
+          for EID in $(echo "${EXECS}" | jq -r '.data[]?.id' | head -n 4); do
+            echo "--- execution ${EID} ---"
+            curl -fsS -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H "Accept: application/json" "${BASE}/api/v1/executions/${EID}?includeData=true"               | jq '{id,status,finished,mode,error:(.data.resultData.error//null),lastNodeExecuted:(.data.resultData.lastNodeExecuted//null)}'
+          done
+
           echo "=== SIGNED BAIS ==="
           SHTTP="$(curl -sS --max-time 25 -o /tmp/s.json -w "%{http_code}" -X POST             -H "Origin: https://bais-solutions.de" -H "Content-Type: application/json"             "https://bais-solutions.de/api/n8n-demo"             --data '{"scenario":"automation","urgency":"planned"}' || true)"
           echo "HTTP=${SHTTP}"
