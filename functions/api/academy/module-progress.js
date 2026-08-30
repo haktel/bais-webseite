@@ -79,7 +79,7 @@ function sequenceState(courseSlug,moduleSlug,lessons,labs){
 
 function assertN8nSequence({courseSlug,moduleSlug,event,lessonId,caseId,lessons,labs}){
   if(courseSlug!=="n8n-bootcamp")return;
-  const seq=sequenceState(courseSlug,moduleSlug,lessons,labs,false);
+  const seq=sequenceState(courseSlug,moduleSlug,lessons,labs);
   if(event==="lesson_complete"){
     if(lessons.includes(lessonId))return;
     if(seq.nextLesson!==lessonId)throw new ApiError(409,"learning_sequence_locked",`Bitte zuerst Lerneinheit ${seq.nextLesson||"01"} abschließen.`);
