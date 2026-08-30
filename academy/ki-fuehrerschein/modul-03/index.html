@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 03 – Prompt-Aufbau &amp; Iteration | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Die fünf Bausteine eines präzisen Prompts, iteratives Nachschärfen, negative Einschränkungen und wiederverwendbare Vorlagen – mit echtem Prompt-Bausteine-Analyzer als Live-Lab.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-fuehrerschein/modul-03/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/kif-module-03.css?v=1.0">
+</head><body data-module="modul-03" data-course="ki-fuehrerschein">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein</a><a href="../modul-02/">Modul 02</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 03 · PRIVATER LERNBEREICH</span><h1>Prompt-Aufbau &amp; Iteration</h1><p class="lead">Du lernst die fünf Bausteine eines präzisen Prompts, wie du eine Antwort gezielt statt zufällig nachschärfst, warum negative Einschränkungen genauso wichtig sind wie die eigentliche Aufgabe – und wie du daraus wiederverwendbare Vorlagen baust.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-03 Lernarchitektur"><div class="courseMap"><div><b>BAUSTEINE</b><span>Rolle, Aufgabe, Kontext, Format, Grenze</span></div><div><b>ITERATION</b><span>Gezielt nachschärfen</span></div><div><b>NEGATIV</b><span>Was die Antwort NICHT soll</span></div><div><b>VORLAGE</b><span>Wiederverwendbar machen</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 03 · Lernpfad</strong>
+<a href="#l1">01 · Die fünf Bausteine</a><a href="#l2">02 · Rolle</a><a href="#l3">03 · Aufgabe</a><a href="#l4">04 · Kontext</a><a href="#l5">05 · Format</a><a href="#l6">06 · Einschränkungen</a><a href="#l7">07 · Few-Shot-Beispiele</a><a href="#l8">08 · Iteration Runde 1</a><a href="#l9">09 · Iteration Runde 2</a><a href="#l10">10 · Negative Constraints</a><a href="#l11">11 · Wiederverwendbare Vorlagen</a><a href="#l12">12 · Prompt-Reifegrad</a><a href="#lab">13 · Live Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Gute und schlechte Prompt-Konstruktion haben reale Konsequenzen.</h2><p>Die folgenden öffentlich bekannt gewordenen Fälle tauchen in den Lektionen wieder auf – unabhängig von den Fällen aus Modul 01 und 02.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Klarna</strong><span>KI-Assistent im großen Maßstab</span><b>Öffentlich vorgestellt, 2024</b></article>
+    <article><strong>Autohaus-Chatbot</strong><span>1-Dollar-Auto-Zusage</span><b>Viral, Dez. 2023</b></article>
+    <article><strong>Bing „Sydney”</strong><span>Kontext-Drift in langer Konversation</span><b>NYT-Bericht, Feb. 2023</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Die fünf Bausteine eines präzisen Prompts</h2><p>Rolle, Aufgabe, Kontext, Format und Einschränkung bilden zusammen das Gerüst, das den Interpretationsspielraum eines Prompts am stärksten reduziert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Rolle</div><div class="vfArrow">+</div><div class="vfNode">Aufgabe</div><div class="vfArrow">+</div><div class="vfNode">Kontext+Format+Grenze</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Struktur statt Zufall</h3><p>Ein Prompt mit nur einem Baustein (z. B. nur der Aufgabe) lässt dem Modell viel Interpretationsspielraum. Je mehr der fünf Bausteine explizit benannt sind, desto eindeutiger wird das gewünschte Ergebnis - unabhängig vom konkreten Thema.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Vorschau auf den Live-Lab</strong><p>Der Live-Lab dieses Moduls zählt genau diese fünf Bausteine automatisiert in einem Prompt und gibt dir einen Score von 0-5.</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Welche der fünf Bausteine verwendest du in deinen eigenen Prompts bereits automatisch, welche eher selten?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">BAUSTEIN 1</div><h2>Rolle: Perspektive und Tonfall steuern</h2><p>Eine Rollenvorgabe wie "Antworte als..." beeinflusst erkennbar Sprache, Fachtiefe und Blickwinkel der Antwort.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Rolle ist kein Kostüm, sondern ein Filter</h3><p>"Antworte als erfahrene Steuerberaterin" führt zu einer anderen Wortwahl und Tiefe als "Antworte als Kollege im ersten Ausbildungsjahr" - bei identischer Aufgabe. Die Rolle steuert den Rahmen, nicht den Inhalt an sich.</p></div>
+<div class="lessonCallout"><strong>Praxisbeispiel</strong><p>"Erkläre X" liefert eine generische Antwort. "Erkläre X als erfahrene IT-Sicherheitsberaterin für ein nicht-technisches Management" liefert eine gezielt zugeschnittene Antwort.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BAUSTEIN 2</div><h2>Aufgabe: Den Task-Verb eindeutig machen</h2><p>Ein klares Verb (fasse zusammen, vergleiche, übersetze, formuliere) macht sofort erkennbar, welche Handlung erwartet wird.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ohne klares Verb bleibt die Erwartung vage</h3><p>"Mach was mit dem Text" enthält kein eindeutiges Task-Verb - zusammenfassen, umformulieren, kritisieren und übersetzen sind alle plausible Interpretationen. Ein konkretes Verb schließt diesen Interpretationsspielraum.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Ein eindeutiges Verb ist der kleinste gemeinsame Nenner jedes brauchbaren Prompts.</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">BAUSTEIN 3</div><h2>Kontext: Zielgruppe und Zweck benennen</h2><p>Kontext klärt, für wen und wofür eine Antwort gedacht ist - ohne das muss das Modell raten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Zielgruppe verändert die richtige Antwort</h3><p>Dieselbe Aufgabe ("erkläre Cloud-Speicher") braucht für ein technisches Fachpublikum eine andere Antwort als für Kund:innen ohne IT-Hintergrund. Kontext ist der Baustein, der diesen Unterschied explizit macht.</p></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Wie oft benennst du in eigenen Prompts explizit, FÜR WEN die Antwort gedacht ist?</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">BAUSTEIN 4</div><h2>Format: Struktur vor der Antwort festlegen</h2><p>Eine Formatvorgabe (Tabelle, Stichpunkte, E-Mail, maximale Länge) macht Ergebnisse strukturiert und vergleichbar.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Ohne Format → unvorhersehbare Struktur
+Mit Format ("als Tabelle, max. 5 Zeilen") → vorhersehbare, vergleichbare Struktur</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Format steuert Struktur, nicht Richtigkeit</h3><p>Eine Formatvorgabe macht eine Antwort besser nutzbar - sie macht sie nicht automatisch inhaltlich korrekt. Beide Bausteine (Format und spätere Prüfung) bleiben nötig.</p></div>
+<div class="lessonCallout"><strong>Praxisbeispiel</strong><p>"Fasse zusammen" vs. "Fasse in 5 Stichpunkten für eine Kundenmail zusammen" - dieselbe Aufgabe, deutlich unterschiedlich nutzbares Ergebnis.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">BAUSTEIN 5</div><h2>Einschränkungen: Länge, Ton, Ausschlüsse</h2><p>Einschränkungen grenzen den Ergebnisraum aktiv ein - durch Länge, Tonfall oder explizit ausgeschlossene Inhalte.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Einschränkung ist der Baustein, der am häufigsten fehlt</h3><p>Rolle, Aufgabe, Kontext und Format werden häufiger mitgedacht als explizite Einschränkungen wie "ohne Fachjargon" oder "maximal 5 Sätze". Genau dieser fehlende Baustein führt oft zu unpassend langen oder zu technischen Antworten.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Eine Einschränkung ist kein Misstrauen gegenüber dem Modell - sie ist eine bewusste Entscheidung, was NICHT gebraucht wird.</p></div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">FEW-SHOT</div><h2>Mit Beispielen die Erwartung zeigen</h2><p>Ein konkretes Beispiel der gewünschten Antwort ist oft eindeutiger als jede noch so genaue Beschreibung.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="codeCompare"><div><span>NUR BESCHREIBUNG</span><pre>"Schreibe kurze,
+knappe Produkttitel."</pre></div><div><span>MIT BEISPIEL (FEW-SHOT)</span><pre>"Schreibe Produkttitel
+wie dieses Beispiel:
+'Laptop-Tasche, wasserdicht, 15 Zoll'"</pre></div></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Für welche eigene, wiederkehrende Aufgabe hättest du bereits ein gutes Beispiel zur Hand, das du als Few-Shot-Vorlage nutzen könntest?</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">ITERATION 1</div><h2>Erste Antwort als Ausgangspunkt</h2><p>Eine erste Antwort, die nicht passt, ist kein Fehlschlag - sie ist der Ausgangspunkt für die nächste, präzisere Runde.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Der Fall Klarna: Iteration im großen Maßstab</h3><p>Klarna stellte 2024 öffentlich einen KI-gestützten Kundenservice-Assistenten vor, der einen erheblichen Teil der eingehenden Chats übernahm. Ein solcher produktiver Einsatz entsteht nicht aus einem einzigen perfekten Prompt, sondern aus wiederholt getesteten und verbesserten Workflows.</p></div>
+<div class="lessonCallout"><strong>Übertragung</strong><p>Auch im Kleinen gilt: Die erste Antwort ist ein Entwurf für die nächste Präzisierung, kein Endergebnis.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">ITERATION 2</div><h2>Gezielt nachschärfen statt neu anfangen</h2><p>Konkretes Feedback zur Abweichung ist wirksamer als ein komplett neuer, andersartiger Prompt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Der Fall „Sydney”: Was passiert ohne Re-Fokussierung</h3><p>Im Februar 2023 berichtete ein Journalist der New York Times öffentlich von einer sehr langen Unterhaltung mit Bings Chatbot (intern „Sydney” genannt), in der die Antworten zunehmend unvorhersehbar wurden. Der Fall zeigt: Ohne bewusste Re-Fokussierung kann sich eine lange Konversation von der ursprünglichen Aufgabe entfernen.</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Bei einer langen, wichtigen Konversation: Zwischendurch den bisherigen Stand kurz zusammenfassen und die eigentliche Aufgabe erneut benennen.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">NEGATIVE CONSTRAINTS</div><h2>Was die Antwort NICHT enthalten soll</h2><p>Eine positive Aufgabenbeschreibung allein schließt nicht automatisch aus, was NICHT passieren soll.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Der Fall des 1-Dollar-Autos</h3><p>Im Dezember 2023 wurde öffentlich bekannt, dass ein Kunde den Chatbot eines Autohauses dazu brachte, einem eindeutig unseriösen Angebot ("Auto für 1 US-Dollar, keine Rücknahme") scheinbar zuzustimmen. Der zugrunde liegende Prompt/Systemhinweis enthielt offenbar keine explizite Einschränkung gegen bindend klingende Zusagen.</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Bei jedem kundenseitig sichtbaren KI-Tool: Explizit ausschließen, was auf keinen Fall passieren darf - nicht nur beschreiben, was passieren soll.</p></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">VORLAGEN</div><h2>Wiederverwendbare Prompt-Vorlagen</h2><p>Wiederkehrende Aufgaben mit ähnlicher Struktur lohnen sich als feste Vorlage statt als ständige Neuerfindung.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Aufgabentyp</th><th>Vorlage lohnt sich?</th></tr><tr><td>Einmalige, sehr spezifische Anfrage</td><td>Eher nicht</td></tr><tr><td>Wöchentliche Team-Statusmail</td><td>Ja - Rolle, Format und Länge bleiben gleich</td></tr><tr><td>Tägliche Ticket-Zusammenfassung</td><td>Ja - Struktur ist immer identisch</td></tr></table>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Eine Vorlage friert die Bausteine ein, nicht den Inhalt</h3><p>Rolle, Format und Einschränkung bleiben in einer Vorlage fest - nur Aufgabe und konkreter Inhalt ändern sich pro Nutzung. Das spart bei jeder Wiederholung Zeit und sorgt für konsistente Ergebnisse.</p></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Welche eigene, wiederkehrende Aufgabe würde am meisten von einer festen Vorlage profitieren?</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">REIFEGRAD</div><h2>Wann ein Prompt "fertig" ist</h2><p>Ein Prompt ist nicht fertig, weil er lang ist - sondern weil er zuverlässig die gewünschte Struktur liefert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Reifegrad</th><th>Merkmal</th></tr><tr><td>Unreif</td><td>Nur Aufgabe, kein Kontext/Format/Grenze</td></tr><tr><td>Teilweise reif</td><td>2-3 Bausteine vorhanden, Ergebnis noch variabel</td></tr><tr><td>Reif</td><td>4-5 Bausteine vorhanden, Ergebnis zuverlässig vorhersehbar</td></tr></table>
+<div class="lessonCallout"><strong>Vorbereitung auf den Lab</strong><p>Der folgende Live-Lab misst genau diesen Reifegrad automatisiert. Schätze bei jedem Beispiel vorher, wie viele Bausteine vorhanden sind.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER PROMPT-BAUSTEINE-ANALYZER</div><h2>3 Lernfälle – dieselbe Struktur-Regel wie in den Lektionen 1-6</h2><p class="muted">Der Analyzer zählt automatisiert, wie viele der fünf Bausteine (Rolle, Aufgabe, Kontext, Format, Einschränkung) in einem Prompt erkennbar sind.</p>
+<div class="structToolbar"><button type="button" data-struct-preset="vollstaendig" aria-pressed="false">A · Vollständig (5/5)</button><button type="button" data-struct-preset="teilweise" aria-pressed="false">B · Teilweise (2/5)</button><button type="button" data-struct-preset="unzureichend" aria-pressed="false">C · Unzureichend (1/5)</button></div>
+<div class="structLab"><div class="structEditor"><textarea data-struct-input spellcheck="false" placeholder="Prompt eingeben oder ein Szenario oben laden…"></textarea><button class="structRun" type="button" data-struct-run>Struktur analysieren</button></div>
+<div class="structResult"><div class="kifFlow3"><div data-kif3-node>Rolle</div><div data-kif3-node>Aufgabe</div><div data-kif3-node>Kontext</div><div data-kif3-node>Format</div><div data-kif3-node>Grenze</div></div><pre class="structOutput" data-struct-output>Bereit. Wähle ein Szenario oder schreibe einen eigenen Prompt.</pre></div></div>
+<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und zähle selbst nach, welche fünf Bausteine du im Text findest.</li><li>Starte B und benenne, welche drei Bausteine fehlen.</li><li>Starte C und schreibe daraus einen eigenen, verbesserten Prompt mit mindestens 4 von 5 Bausteinen.</li><li>Teste deinen eigenen Prompt und prüfe, ob der Analyzer deine Erwartung bestätigt.</li></ol></details></section>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 03</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen und erzeugt zusätzliche variable Szenarien. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 03 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> die fünf Bausteine ohne Folie aufzählen</label><label><input type="checkbox"> eine Rollenvorgabe sinnvoll einsetzen</label><label><input type="checkbox"> ein eindeutiges Task-Verb erkennen</label><label><input type="checkbox"> Kontext von Aufgabe unterscheiden</label><label><input type="checkbox"> eine passende Formatvorgabe formulieren</label><label><input type="checkbox"> eine sinnvolle Einschränkung ergänzen</label><label><input type="checkbox"> ein Few-Shot-Beispiel konstruieren</label><label><input type="checkbox"> eine Antwort gezielt nachschärfen statt neu zu beginnen</label><label><input type="checkbox"> eine negative Einschränkung formulieren</label><label><input type="checkbox"> den Autohaus- und den Sydney-Fall einordnen</label><label><input type="checkbox"> eine wiederverwendbare Vorlage entwerfen</label><label><input type="checkbox"> alle drei Live-Lab-Fälle erklären</label>
+</div></section>
+
+<div class="nextModule"><strong>Falls du Modul 02 noch nicht abgeschlossen hast</strong><span>Halluzinationen, Bias und Grenzen sind die Grundlage, um KI-Ausgaben aus diesem Modul richtig einzuordnen.</span><p><a href="../modul-02/">Modul 02 öffnen →</a></p></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein</span><span><a href="../modul-02/">← Modul 02</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
+<script src="../../../assets/kif-module-03.js?v=1.0" defer></script>
+<script src="../../../assets/kif-module-03-assessment.js?v=1.0" defer></script>
+</body></html>
