@@ -3,8 +3,102 @@
   const lessons=[...document.querySelectorAll("[data-lesson]")];
   const bar=document.querySelector("[data-progress-bar]");
   const text=document.querySelector("[data-progress-text]");
-  let state={completedLessons:[],labCases:[],assessmentBest:0,lessonTotal:lessons.length||12,labTotal:0,assessmentTarget:81,modulePercent:0};
+  const IS_N8N=COURSE==="n8n-bootcamp";
+  let state={
+    completedLessons:[],labCases:[],assessmentBest:0,lessonTotal:lessons.length||12,labTotal:0,assessmentTarget:81,modulePercent:0,
+    sequence:IS_N8N?{enforced:true,nextLesson:"01",lessonsComplete:false,labsUnlocked:false,nextLabCase:null,labsComplete:false,assessmentUnlocked:false}:{enforced:false}
+  };
   let busy=false;
+
+  const getPresetButtons=()=>[...document.querySelectorAll(".liveLab button")].filter(button=>Object.keys(button.dataset).some(key=>key.toLowerCase().endsWith("preset")));
+  const presetCase=button=>{
+    const key=Object.keys(button.dataset).find(k=>k.toLowerCase().endsWith("preset"));
+    return key?String(button.dataset[key]||""):"";
+  };
+  const ensureLockBanner=(container,key,textValue)=>{
+    if(!container)return null;
+    let banner=container.querySelector(`[data-sequence-lock="${key}"]`);
+    if(!banner){
+      banner=document.createElement("div");
+      banner.className="sequenceLockBanner";
+      banner.dataset.sequenceLock=key;
+      container.prepend(banner);
+    }
+    banner.textContent=textValue;
+    return banner;
+  };
+
+  const applySequenceLocks=()=>{
+    if(!IS_N8N)return;
+    const seq=state.sequence||{};
+    const done=new Set(state.completedLessons||[]);
+    const nextLesson=seq.nextLesson||null;
+
+    lessons.forEach(lesson=>{
+      const id=lesson.dataset.lesson;
+      const completed=done.has(id);
+      const unlocked=completed||!nextLesson||id===nextLesson;
+      lesson.dataset.sequenceLocked=String(!unlocked);
+      lesson.classList.toggle("sequenceLocked",!unlocked);
+      const details=lesson.querySelector("details");
+      const button=lesson.querySelector("[data-done]");
+      const nav=document.querySelector(`.studyNav a[href="#${lesson.id}"]`);
+      if(!unlocked){
+        if(details?.open)details.open=false;
+        if(button){button.disabled=true;button.textContent=`🔒 Erst Lerneinheit ${nextLesson} abschließen`;}
+        nav?.classList.add("sequenceLocked");
+        nav?.setAttribute("aria-disabled","true");
+      }else{
+        nav?.classList.remove("sequenceLocked");
+        nav?.removeAttribute("aria-disabled");
+      }
+    });
+
+    const liveLab=document.querySelector(".liveLab");
+    const presets=getPresetButtons();
+    if(liveLab){
+      const labsUnlocked=Boolean(seq.labsUnlocked);
+      const nextCase=seq.nextLabCase||null;
+      liveLab.classList.toggle("sequenceLocked",!labsUnlocked);
+      const banner=ensureLockBanner(
+        liveLab,
+        "lab",
+        labsUnlocked
+          ? nextCase?`Pflicht-Reihenfolge aktiv · als Nächstes: ${nextCase}`:"✓ Alle Pflicht-Labs abgeschlossen."
+          :"🔒 Live Lab wird erst nach allen 12 Lerneinheiten freigeschaltet."
+      );
+      banner?.classList.toggle("ready",labsUnlocked);
+
+      presets.forEach(button=>{
+        const id=presetCase(button);
+        const completed=(state.labCases||[]).includes(id);
+        const allowed=labsUnlocked&&Boolean(nextCase)&&id===nextCase;
+        button.disabled=!allowed;
+        button.classList.toggle("sequenceDone",completed);
+        button.classList.toggle("sequenceCurrent",allowed);
+        button.title=completed?"Bereits abgeschlossen":allowed?"Nächster Pflichtfall":"Noch gesperrt";
+      });
+
+      const active=presets.find(button=>button.getAttribute("aria-pressed")==="true");
+      const activeCase=active?presetCase(active):"";
+      [...liveLab.querySelectorAll("button")].filter(button=>!presets.includes(button)).forEach(button=>{
+        button.disabled=!labsUnlocked||!nextCase||activeCase!==nextCase;
+      });
+    }
+
+    const assessment=document.querySelector("[data-assessment]");
+    if(assessment){
+      const unlocked=Boolean(seq.assessmentUnlocked);
+      assessment.classList.toggle("sequenceLocked",!unlocked);
+      assessment.setAttribute("aria-disabled",String(!unlocked));
+      const banner=ensureLockBanner(
+        assessment,
+        "assessment",
+        unlocked?"✓ Assessment freigeschaltet.":"🔒 Assessment wird nach allen Lerneinheiten und Pflicht-Labs freigeschaltet."
+      );
+      banner?.classList.toggle("ready",unlocked);
+    }
+  };
 
   const api=async(url,options={})=>{
     const response=await fetch(url,{credentials:"same-origin",headers:{"Content-Type":"application/json","Accept":"application/json",...(options.headers||{})},...options});
@@ -17,14 +111,19 @@
     const done=new Set(state.completedLessons||[]);
     lessons.forEach(lesson=>{
       const id=lesson.dataset.lesson,button=lesson.querySelector("[data-done]");
+      const nav=document.querySelector(`.studyNav a[href="#${lesson.id}"]`);
       if(button&&done.has(id)){
         button.classList.add("done");
         button.disabled=true;
         button.textContent="✓ Abgeschlossen";
         lesson.classList.add("done");
-        document.querySelector(`.studyNav a[href="#${lesson.id}"]`)?.classList.add("done");
+        nav?.classList.add("done");
+      }else{
+        lesson.classList.remove("done");
+        nav?.classList.remove("done");
       }
     });
+    applySequenceLocks();
     const pct=Number(state.modulePercent)||0;
     if(bar)bar.style.width=pct+"%";
     const grade=state.assessmentBest>0&&window.percentToNote?window.percentToNote(state.assessmentBest):null;
@@ -32,7 +131,6 @@
     const lessonTotal=Number(state.lessonTotal)||lessons.length||12,labTotal=Number(state.labTotal)||state.labCases.length||0;
     if(text)text.textContent=`${state.completedLessons.length}/${lessonTotal} Lektionen · ${state.labCases.length}/${labTotal} Labs · Assessment ${assessmentText} · Modul ${pct}%`;
   };
-
   const postEvidence=async(payload)=>{
     const data=await api("/api/academy/module-progress",{method:"POST",body:JSON.stringify({courseSlug:COURSE,moduleSlug:MODULE,...payload})});
     state=data.module;
@@ -100,6 +198,14 @@
 
     const updateButton=()=>{
       if(button.classList.contains("done")){banner.hidden=true;return;}
+      if(IS_N8N&&lesson.dataset.sequenceLocked==="true"){
+        if(timer){clearInterval(timer);timer=null;}
+        button.disabled=true;
+        button.textContent=`🔒 Erst Lerneinheit ${state.sequence?.nextLesson||"01"} abschließen`;
+        banner.classList.remove("ready");
+        label.textContent="Diese Lerneinheit ist noch gesperrt.";
+        return;
+      }
       const elapsedOpen=openedAt?(Date.now()-openedAt)/1000:0;
       const totalRead=accumulated+elapsedOpen;
       updateBanner(totalRead);
@@ -123,6 +229,10 @@
     const entry={details,pause};
 
     details.addEventListener("toggle",()=>{
+      if(details.open&&IS_N8N&&lesson.dataset.sequenceLocked==="true"){
+        details.open=false;
+        return;
+      }
       if(details.open){
         // Accordion: opening this lesson's "Vertiefung" forces every other
         // currently open one shut and pauses its clock, so the required
@@ -178,6 +288,17 @@
       :"Szenario geladen. Formuliere zuerst deine Erwartung und starte dann den Workflow.";
     nodes.forEach(n=>n.classList.remove("active","ok","error"));
   }));
+
+  if(IS_N8N){
+    getPresetButtons().forEach(button=>button.addEventListener("click",()=>setTimeout(applySequenceLocks,0)));
+    document.querySelectorAll(".studyNav a").forEach(link=>link.addEventListener("click",event=>{
+      if(link.classList.contains("sequenceLocked")){
+        event.preventDefault();
+        const current=state.sequence?.nextLesson||"01";
+        document.getElementById("l"+Number(current))?.scrollIntoView({behavior:"smooth",block:"start"});
+      }
+    }));
+  }
 
   const connector=window.mountLabConnector?window.mountLabConnector(document.querySelector(".labNodes")):{lines:[],reset(){}};
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -240,5 +361,6 @@
     }
   });
 
+  if(IS_N8N)renderProgress();
   loadState();
 })();
