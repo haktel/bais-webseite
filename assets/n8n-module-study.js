@@ -1,5 +1,5 @@
 (()=> {
-  const COURSE="n8n-bootcamp",MODULE="modul-01";
+  const COURSE="n8n-bootcamp",MODULE=document.body.dataset.module||"modul-01";
   const lessons=[...document.querySelectorAll("[data-lesson]")];
   const bar=document.querySelector("[data-progress-bar]");
   const text=document.querySelector("[data-progress-text]");
@@ -132,6 +132,16 @@
     const score=Number(event.detail?.score);
     if(Number.isInteger(score)){
       try{await postEvidence({event:"assessment_result",score});}catch{}
+    }
+  });
+
+  // Generic hook for module-specific lab UIs (e.g. modul-02's JSON lab)
+  // that can't share modul-01's form-based markup but still need to
+  // report a correctly-completed lab case as evidence.
+  window.addEventListener("bais:lab-case",async event=>{
+    const caseId=event.detail?.caseId;
+    if(typeof caseId==="string"&&caseId){
+      try{await postEvidence({event:"lab_case",caseId});}catch{}
     }
   });
 
