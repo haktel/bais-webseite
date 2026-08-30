@@ -10,7 +10,10 @@
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-720, 0],
+      "position": [
+        -720,
+        0
+      ],
       "id": "5be59c52-cdea-4de8-88e6-6ead7870a703",
       "name": "Webhook",
       "webhookId": "8acb39ff-64ae-4ec5-998a-9d903e820c2a"
@@ -42,7 +45,10 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-500, 0],
+      "position": [
+        -500,
+        0
+      ],
       "id": "7e3f2213-c8f0-4240-8181-c3da923f3a5a",
       "name": "Validate Input"
     },
@@ -92,7 +98,10 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-260, -100],
+      "position": [
+        -260,
+        -100
+      ],
       "id": "0226aeef-9299-4e34-84f8-315ca6cae128",
       "name": "Transform"
     },
@@ -123,7 +132,10 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-20, -100],
+      "position": [
+        -20,
+        -100
+      ],
       "id": "82f59b56-0875-4266-993c-8fd391b48941",
       "name": "IF Budget >= 5000"
     },
@@ -131,20 +143,58 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id":"14338a2d-788f-4ce9-a6c0-7e9c8f47de5b","name":"ok","value":true,"type":"boolean"},
-            {"id":"484fa65a-ac8d-4535-926e-026900f774ab","name":"valid","value":true,"type":"boolean"},
-            {"id":"6cd8c530-30bc-4b34-a24a-8073ae40e146","name":"route","value":"qualified","type":"string"},
-            {"id":"73357678-3644-43aa-8c98-379dce48a950","name":"message","value":"Lead accepted","type":"string"},
-            {"id":"b6248923-4b45-4f31-a3c3-438f005042ab","name":"customer","value":"={{ $json.customer }}","type":"string"},
-            {"id":"2393525d-8c14-423a-8dfb-641012c89bd2","name":"budget","value":"={{ $json.budget }}","type":"number"},
-            {"id":"c0f6e239-8e0d-4b2a-9a66-bdb15df633c1","name":"module","value":"01","type":"string"}
+            {
+              "id": "14338a2d-788f-4ce9-a6c0-7e9c8f47de5b",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "484fa65a-ac8d-4535-926e-026900f774ab",
+              "name": "valid",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "6cd8c530-30bc-4b34-a24a-8073ae40e146",
+              "name": "route",
+              "value": "qualified",
+              "type": "string"
+            },
+            {
+              "id": "73357678-3644-43aa-8c98-379dce48a950",
+              "name": "message",
+              "value": "Lead accepted",
+              "type": "string"
+            },
+            {
+              "id": "b6248923-4b45-4f31-a3c3-438f005042ab",
+              "name": "customer",
+              "value": "={{ $json.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "2393525d-8c14-423a-8dfb-641012c89bd2",
+              "name": "budget",
+              "value": "={{ $json.budget }}",
+              "type": "number"
+            },
+            {
+              "id": "c0f6e239-8e0d-4b2a-9a66-bdb15df633c1",
+              "name": "module",
+              "value": "01",
+              "type": "string"
+            }
           ]
         },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [220, -200],
+      "position": [
+        220,
+        -200
+      ],
       "id": "e45bd83e-e571-47b8-a3fb-ab8a854cba0a",
       "name": "Qualified Response"
     },
@@ -152,20 +202,58 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id":"deaf0f68-24e1-47ed-8f5e-7e381c3f0f1d","name":"ok","value":true,"type":"boolean"},
-            {"id":"0f65260d-dba0-44ad-a103-6891bd91e960","name":"valid","value":true,"type":"boolean"},
-            {"id":"fe6ba5b1-d39d-4a86-bf5a-0dbf9278bd71","name":"route","value":"standard","type":"string"},
-            {"id":"1dc49122-ccf2-4bb7-8fb3-88d2ba86b4a6","name":"message","value":"Lead accepted","type":"string"},
-            {"id":"54430491-6677-4fca-bb12-ddc5295308f8","name":"customer","value":"={{ $json.customer }}","type":"string"},
-            {"id":"06ffbcd0-39b9-44fa-be0b-b872ec4ab9cf","name":"budget","value":"={{ $json.budget }}","type":"number"},
-            {"id":"5113c979-e7e2-4c37-af9a-64347b77cc6e","name":"module","value":"01","type":"string"}
+            {
+              "id": "deaf0f68-24e1-47ed-8f5e-7e381c3f0f1d",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "0f65260d-dba0-44ad-a103-6891bd91e960",
+              "name": "valid",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "fe6ba5b1-d39d-4a86-bf5a-0dbf9278bd71",
+              "name": "route",
+              "value": "standard",
+              "type": "string"
+            },
+            {
+              "id": "1dc49122-ccf2-4bb7-8fb3-88d2ba86b4a6",
+              "name": "message",
+              "value": "Lead accepted",
+              "type": "string"
+            },
+            {
+              "id": "54430491-6677-4fca-bb12-ddc5295308f8",
+              "name": "customer",
+              "value": "={{ $json.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "06ffbcd0-39b9-44fa-be0b-b872ec4ab9cf",
+              "name": "budget",
+              "value": "={{ $json.budget }}",
+              "type": "number"
+            },
+            {
+              "id": "5113c979-e7e2-4c37-af9a-64347b77cc6e",
+              "name": "module",
+              "value": "01",
+              "type": "string"
+            }
           ]
         },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [220, 0],
+      "position": [
+        220,
+        0
+      ],
       "id": "e9d22129-47d3-4446-8c91-cbc72be7ff62",
       "name": "Standard Response"
     },
@@ -173,54 +261,189 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id":"b6635676-4e0f-4cd9-9c89-2a728f3de3e6","name":"ok","value":false,"type":"boolean"},
-            {"id":"ed476b77-fd9d-46e3-9df6-e12733434465","name":"valid","value":false,"type":"boolean"},
-            {"id":"d981d03f-4dda-4f46-a520-ce264107da4a","name":"route","value":"rejected","type":"string"},
-            {"id":"f6925247-052b-4f18-a3fa-9bb318e4249f","name":"error","value":"Name, gültige E-Mail und numerisches Budget sind erforderlich.","type":"string"},
-            {"id":"5b596602-fe8f-48d1-a8a4-a38589d41ce1","name":"module","value":"01","type":"string"}
+            {
+              "id": "b6635676-4e0f-4cd9-9c89-2a728f3de3e6",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "ed476b77-fd9d-46e3-9df6-e12733434465",
+              "name": "valid",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "d981d03f-4dda-4f46-a520-ce264107da4a",
+              "name": "route",
+              "value": "rejected",
+              "type": "string"
+            },
+            {
+              "id": "f6925247-052b-4f18-a3fa-9bb318e4249f",
+              "name": "error",
+              "value": "Name, gültige E-Mail und numerisches Budget sind erforderlich.",
+              "type": "string"
+            },
+            {
+              "id": "5b596602-fe8f-48d1-a8a4-a38589d41ce1",
+              "name": "module",
+              "value": "01",
+              "type": "string"
+            }
           ]
         },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-260, 160],
+      "position": [
+        -260,
+        160
+      ],
       "id": "71858e70-b7be-4e1f-9d3e-c79047064883",
       "name": "Invalid Response"
     },
     {
       "parameters": {
         "respondWith": "firstIncomingItem",
-        "options": {"responseCode": 200}
+        "options": {
+          "responseCode": 200
+        }
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [480, -100],
+      "position": [
+        480,
+        -100
+      ],
       "id": "ed4d73d9-51c8-4557-9c41-33f61475a7fa",
       "name": "Respond OK"
     },
     {
       "parameters": {
         "respondWith": "firstIncomingItem",
-        "options": {"responseCode": 422}
+        "options": {
+          "responseCode": 422
+        }
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [0, 160],
+      "position": [
+        0,
+        160
+      ],
       "id": "f07adb0f-a203-49cc-9352-f098820ec0d8",
       "name": "Respond Invalid"
     }
   ],
   "connections": {
-    "Webhook": {"main": [[{"node":"Validate Input","type":"main","index":0}]]},
-    "Validate Input": {"main": [[{"node":"Transform","type":"main","index":0}], [{"node":"Invalid Response","type":"main","index":0}]]},
-    "Transform": {"main": [[{"node":"IF Budget >= 5000","type":"main","index":0}]]},
-    "IF Budget >= 5000": {"main": [[{"node":"Qualified Response","type":"main","index":0}], [{"node":"Standard Response","type":"main","index":0}]]},
-    "Qualified Response": {"main": [[{"node":"Respond OK","type":"main","index":0}]]},
-    "Standard Response": {"main": [[{"node":"Respond OK","type":"main","index":0}]]},
-    "Invalid Response": {"main": [[{"node":"Respond Invalid","type":"main","index":0}]]}
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Transform",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform": {
+      "main": [
+        [
+          {
+            "node": "IF Budget >= 5000",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Budget >= 5000": {
+      "main": [
+        [
+          {
+            "node": "Qualified Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Standard Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified Response": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Standard Response": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "settings": {
     "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-01",
+    "body": {
+      "name": "Max Mustermann",
+      "email": "max@example.com",
+      "company": "Muster GmbH",
+      "budget": 7500
+    },
+    "expect": {
+      "filter": ".route",
+      "value": "qualified"
+    }
   }
 }
