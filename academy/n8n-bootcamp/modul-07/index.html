@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 07 – Databases, State & Persistence | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich zu n8n Data Tables, CRUD, Upsert, Domain Keys, Dedupe, Idempotency, Workflow State, Cursors, SQL, Transactions, Backups, Retention und Schema-Migrationen.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-07/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-07.css?v=1.0">
+</head><body data-module="modul-07">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-06/">Modul 06</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 07 · PRIVATER LERNBEREICH</span><h1>Databases, State &amp; Persistence</h1><p class="lead">Ein professioneller Workflow muss sich Dinge merken können. In diesem Modul lernst du persistente Daten nicht als „irgendwo speichern“, sondern als kontrolliertes Datenmodell: Data Tables, CRUD, Domain Keys, Upsert, Dedupe, Workflow-State, SQL, Transactions, Retention, Backup und Schema-Evolution.</p></div>
+<div class="heroDiagram"><div class="courseMap"><div><b>SPEICHERN</b><span>Data Tables · SQL</span></div><div><b>IDENTIFIZIEREN</b><span>Keys · Schema</span></div><div><b>WIEDERERKENNEN</b><span>Upsert · Dedupe</span></div><div><b>BETREIBEN</b><span>Backup · Retention · Migration</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 07 · Lernpfad</strong>
+<a href="#l1">01 · Persistence Mental Model</a><a href="#l2">02 · n8n Data Tables</a><a href="#l3">03 · CRUD</a><a href="#l4">04 · Schema & Keys</a><a href="#l5">05 · Upsert</a><a href="#l6">06 · Dedupe & Idempotency</a><a href="#l7">07 · Workflow State & Cursor</a><a href="#l8">08 · SQL Basics</a><a href="#l9">09 · Transactions</a><a href="#l10">10 · Data Table vs SQL DB</a><a href="#l11">11 · Retention, Backup & Migration</a><a href="#l12">12 · Production Data Architecture</a><a href="#lab">13 · Live Persistence Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+ <div><span class="ey">REALE PERSISTENZ</span><h2>„Workflow beendet“ darf nicht bedeuten „Gedächtnis gelöscht“.</h2><p>CRM-Synchronisation, Webhook-Dedupe, Import-Cursor, Approval-State, Job-Tracking und Wiederanlauf brauchen Zustand zwischen Executions. Genau hier beginnt Data Engineering im Kleinen.</p></div>
+ <div class="realWorldGrid">
+  <article><strong>Customer State</strong><span>Upsert</span><b>gleiche Entität wiedererkennen</b></article>
+  <article><strong>Webhook Events</strong><span>Dedupe</span><b>doppelte Aktionen verhindern</b></article>
+  <article><strong>Incremental Sync</strong><span>Cursor / lastSync</span><b>nur Neues verarbeiten</b></article>
+ </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Transienter Datenfluss vs persistenter Zustand</h2><p>$json lebt im aktuellen Workflow-Durchlauf. Persistence lebt über diesen Durchlauf hinaus und beeinflusst spätere Executions.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="stateChoice"><div><b>Transient</b><span>aktuelles Item · aktueller Node · aktuelle Execution</span></div><div><b>Persistent</b><span>Data Table · SQL · externer Store</span></div><div><b>Derived State</b><span>Cursor · Status · processed flag · dedupe key</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>State beantwortet die Frage: „Was wusste das System gestern?“</h3><p>Wenn ein Webhook heute dasselbe <code>eventId</code> erneut sendet, kann dein Workflow nur dann erkennen, dass dieses Ereignis bereits verarbeitet wurde, wenn diese Information außerhalb der ursprünglichen Execution gespeichert wurde.</p></div>
+<div class="caseFlow"><b>Execution #1</b><span>→</span><b>eventId speichern</b><span>→ ZEIT →</span><b>Execution #2</b><span>→</span><b>eventId wiederfinden</b></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Ohne State</strong><p>Jede Execution wirkt wie der erste Kontakt mit den Daten.</p></div><div class="lessonCallout"><strong>Mit State</strong><p>Der Workflow kann vergleichen, fortsetzen, deduplizieren und inkrementell arbeiten.</p></div></div>
+<div class="incident"><b>Reales Problem:</b> Payment-Provider retried denselben Webhook. Ohne persistenten Dedupe-Key könnte dein Workflow dieselbe Rechnung, E-Mail oder Buchung ein zweites Mal erzeugen.</div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">N8N DATA TABLES</div><h2>Persistente Tabellen direkt in n8n</h2><p>Data Tables speichern strukturierte Rows innerhalb der n8n-Instanz und können von mehreren Executions und Workflows gelesen und verändert werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="schemaDiagram"><div><h4>Customers</h4><code>id · system</code><code>customerId · domain key</code><code>name · string</code><code>status · string</code><code>score · number</code></div><div><h4>Events</h4><code>id · system</code><code>eventId · domain key</code><code>eventType · string</code><code>processed · boolean</code><code>customerId · relation</code></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Data Table ist echter State – aber keine Universal-Datenbank</h3><p>Data Tables sind sehr gut für Lookup-Tabellen, Dedupe-Keys, kleine bis mittlere State-Mengen, Konfiguration und Kontrolltabellen. Für hochkomplexe relationale Modelle, schwere Analytics oder echte Multi-Table-Transaktionen ist PostgreSQL/MySQL oft die bessere Architektur.</p></div>
+<div class="dbModel"><div><b>Row</b><span>ein persistenter Datensatz</span></div><div><b>Column</b><span>Name + Datentyp</span></div><div><b>Filter</b><span>Rows gezielt finden</span></div><div><b>System Fields</b><span>id · createdAt · updatedAt</span></div></div>
+<div class="lessonCallout"><strong>Wichtig</strong><p>Die technische Data-Table-Row-ID und deine fachliche ID wie <code>customerId</code> sind nicht dasselbe.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">CRUD</div><h2>Create, Read, Update, Delete – vier Grundoperationen</h2><p>Fast jede persistente Business-Anwendung lässt sich zunächst auf CRUD zurückführen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="crudGrid"><div><b>CREATE</b><code>INSERT</code></div><div><b>READ</b><code>SELECT / GET</code></div><div><b>UPDATE</b><code>UPDATE</code></div><div><b>DELETE</b><code>DELETE</code></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Operation</th><th>Absicht</th><th>Production-Frage</th></tr><tr><td>Create</td><td>neue Row</td><td>Darf Duplicate entstehen?</td></tr><tr><td>Read</td><td>finden/lesen</td><td>Welcher Filter/Index?</td></tr><tr><td>Update</td><td>bestehende Row ändern</td><td>Welcher Key schützt vor Massenupdate?</td></tr><tr><td>Delete</td><td>entfernen</td><td>Retention/Referenzen/Audit?</td></tr></table>
+<div class="lessonCallout"><strong>Danger Zone</strong><p>Update/Delete ohne ausreichend spezifischen Filter ist in Datenbanken eines der gefährlichsten Muster. Erst Domain-Key bestimmen, dann mutieren.</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">SCHEMA & KEYS</div><h2>Fachliche Identität von technischer Row-ID trennen</h2><p>Ein stabiles Datenmodell beginnt damit, dass jede Entität einen zuverlässigen Domain-Key besitzt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="keyCompare"><div><b>System Row ID</b><span>von Data Table/DB verwaltet</span><code>42</code></div><span>≠</span><div><b>Domain Key</b><span>fachliche Identität</span><code>customerId=C-1042</code></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Warum nicht Name oder E-Mail als universeller Key?</h3><p>Namen sind nicht eindeutig. E-Mail-Adressen können sich ändern. Gute Domain-IDs werden vom Quellsystem stabil vergeben oder intern als eindeutige Business-ID erzeugt.</p></div>
+<div class="schemaDiagram"><div><h4>Guter Key</h4><code>customerId = C-1042</code><code>orderId = ORD-88</code><code>eventId = evt_abc123</code></div><div><h4>Schwacher Key</h4><code>name = Mina Yilmaz</code><code>timestamp only</code><code>array position = 3</code></div></div>
+<div class="lessonCallout"><strong>Schema Contract</strong><p>Definiere Name, Datentyp, Nullability, Bedeutung, Quelle und Key-Funktion jedes kritischen Felds.</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">UPSERT</div><h2>Update wenn vorhanden – sonst Insert</h2><p>Upsert ist eines der wichtigsten Patterns für Synchronisation und wiederholbare Integrationen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="upsertVisual"><div><b>customerId=C-1042</b><p>Incoming State</p></div><span>→ UPSERT →</span><div class="paths"><div><b>Match gefunden</b><br>UPDATE</div><div><b>Kein Match</b><br>INSERT</div></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Upsert verhindert blindes „immer neue Row“</h3><p>Wenn CRM C-1042 zuerst als <code>lead</code> und später als <code>qualified</code> liefert, willst du in vielen Fällen dieselbe fachliche Entität fortschreiben – nicht zwei Kunden erzeugen.</p></div>
+<div class="caseFlow"><b>Execution #1</b><span>→</span><b>C-1042 · lead</b><span>→ später →</span><b>Execution #2</b><span>→</span><b>C-1042 · qualified</b></div>
+<div class="lessonCallout"><strong>Race Condition</strong><p>Ein manuelles Get → IF → Insert kann bei parallelen Executions Duplikate erzeugen. Echte DB-Unique-Constraints/Upsert-Semantik sind für harte Konsistenz stärker.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">DEDUPE & IDEMPOTENCY</div><h2>Dasselbe Event darf nicht dieselbe Aktion zweimal auslösen</h2><p>Webhook-Provider können retrien. Netzwerke können Timeouts produzieren. Dedupe-State macht Wiederholung beherrschbar.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="dedupeFlow"><div>eventId</div><span>→</span><div>Exists?</div><span>→ NO →</span><div class="insert">INSERT + PROCESS</div><span>· YES →</span><div class="skip">SKIP DUPLICATE</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Exactly-once nicht einfach annehmen</h3><p>Viele Event-Systeme liefern eher „at least once“. Das bedeutet: Ein Event kann mehrfach ankommen. Deine Consumer-Logik muss daher einen stabilen Idempotency-Key kennen.</p></div>
+<table class="depthTable"><tr><th>Event</th><th>eventId gespeichert?</th><th>Aktion</th></tr><tr><td>erstmals</td><td>nein</td><td>process + store</td></tr><tr><td>Provider Retry</td><td>ja</td><td>skip / acknowledge</td></tr><tr><td>neues Event</td><td>nein</td><td>process + store</td></tr></table>
+<div class="incident"><b>Payment-Fall:</b> Der HTTP-Response ging verloren, obwohl der Workflow die Zahlung bereits verarbeitet hat. Der Provider sendet erneut. Dedupe schützt vor einer zweiten fachlichen Aktion.</div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">WORKFLOW STATE</div><h2>Cursor, lastSync und Checkpoints</h2><p>State kann auch Fortschritt sein: „Bis wohin habe ich sicher verarbeitet?“</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="caseFlow"><b>lastId=100</b><span>→</span><b>GET id&gt;100</b><span>→</span><b>101…180 verarbeiten</b><span>→</span><b>lastId=180 speichern</b></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Checkpoint erst nach erfolgreichem Abschnitt</h3><p>Wenn du <code>lastId=180</code> speicherst, bevor 101–180 wirklich erfolgreich verarbeitet wurden, können Daten nach einem Crash übersprungen werden. State-Update gehört an einen bewusst definierten Commit-Punkt.</p></div>
+<div class="stateChoice"><div><b>Timestamp Cursor</b><span>updatedAfter=...</span></div><div><b>ID Cursor</b><span>lastProcessedId=...</span></div><div><b>Page Token</b><span>nextCursor=...</span></div></div>
+<div class="lessonCallout"><strong>Incremental Sync</strong><p>Nur geänderte Daten laden reduziert API-Last, Laufzeit und Kosten gegenüber permanentem Full Sync.</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">SQL BASICS</div><h2>SELECT, INSERT, UPDATE, DELETE lesen können</h2><p>Auch wenn du Data Tables verwendest: SQL-Denken hilft dir, externe Datenbanken professionell zu integrieren.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="sqlCard"><pre>SELECT customer_id, status, score
+FROM customers
+WHERE customer_id = 'C-1042';
+
+UPDATE customers
+SET status = 'qualified', score = 85
+WHERE customer_id = 'C-1042';</pre></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>SQL</th><th>CRUD</th><th>Risiko</th></tr><tr><td>SELECT</td><td>Read</td><td>zu große Resultsets</td></tr><tr><td>INSERT</td><td>Create</td><td>Duplicate</td></tr><tr><td>UPDATE</td><td>Update</td><td>fehlendes WHERE</td></tr><tr><td>DELETE</td><td>Delete</td><td>irreversibler Datenverlust</td></tr></table>
+<div class="lessonCallout"><strong>Parameterized Queries</strong><p>Benutzereingaben nie per String-Konkatenation in SQL bauen. Parameterbindung schützt gegen SQL Injection und Typfehler.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">TRANSACTIONS</div><h2>Alles oder nichts</h2><p>Wenn mehrere Datenbankänderungen gemeinsam konsistent sein müssen, brauchst du Transaction-Denken.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="txVisual"><div>BEGIN</div><div>Order INSERT</div><div>Stock UPDATE</div><div class="commit">COMMIT</div><div class="rollback">bei Fehler: ROLLBACK</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Partial State vermeiden</h3><p>Stell dir vor: Order wurde gespeichert, Stock-Update scheitert. Ohne Transaction kann die Datenbank in einem fachlich unmöglichen Zwischenzustand bleiben.</p></div>
+<div class="caseFlow"><b>BEGIN</b><span>→</span><b>Operation A</b><span>→</span><b>Operation B</b><span>→ Erfolg →</span><b>COMMIT</b><span>· Fehler →</span><b>ROLLBACK</b></div>
+<div class="lessonCallout"><strong>Grenze</strong><p>Eine SQL-Transaction kann nicht automatisch eine externe E-Mail oder SaaS-API zurückrollen. Dafür brauchst du Saga/Compensation-Patterns.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">ARCHITEKTURWAHL</div><h2>Data Table oder PostgreSQL/MySQL?</h2><p>Das richtige Persistenzsystem hängt von Datenvolumen, Beziehungen, Query-Komplexität, Transaktionen und Governance ab.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="dbModel"><div><b>Data Table</b><span>Workflow-State · Lookup · Dedupe</span></div><div><b>SQL DB</b><span>Relationen · Constraints · Transactions</span></div><div><b>Object Storage</b><span>Dateien · große Payloads</span></div><div><b>Cache</b><span>kurzlebig · schnell · TTL</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Kriterium</th><th>Data Table</th><th>SQL DB</th></tr><tr><td>Einfacher Key/Value-State</td><td>sehr passend</td><td>möglich</td></tr><tr><td>Komplexe Joins</td><td>begrenzt</td><td>stark</td></tr><tr><td>Multi-table Transactions</td><td>nicht Hauptzweck</td><td>stark</td></tr><tr><td>Große Analytics</td><td>nicht Hauptzweck</td><td>eher DB/DWH</td></tr><tr><td>Workflow-nahe Dedupe-Liste</td><td>passend</td><td>ebenfalls möglich</td></tr></table>
+<div class="realCase"><div><span class="caseTag">REALER FALL · FORMULA BOT</span><h3>Mehrere Datenquellen brauchen klare Persistenzgrenzen</h3><p>Formula Bot verbindet Dateien, Analytics-Plattformen, BigQuery und weitere Quellen über n8n. Solche Architekturen zeigen: n8n orchestriert – aber das passende System of Record bleibt abhängig vom Datentyp und Use Case.</p><a href="https://n8n.io/case-studies/formula-bot/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>ORCHESTRATE</strong><span>nicht jede DB ersetzen</span></div></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">DATA LIFECYCLE</div><h2>Retention, Backup, Restore und Schema Migration</h2><p>Persistente Daten brauchen einen Lebenszyklus – nicht nur einen Insert-Node.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="productionPyramid"><div>DATA OWNER</div><div>SCHEMA · KEYS · CLASSIFICATION</div><div>ACCESS · RETENTION · DELETION</div><div>BACKUP · RESTORE TEST</div><div>MIGRATION · MONITORING</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Backup ohne Restore-Test ist nur Hoffnung</h3><p>Definiere, welche Daten gesichert werden, wie oft, wie lange und wie ein Restore tatsächlich funktioniert. Prüfe außerdem, ob personenbezogene Daten nach Ablauf der fachlichen/rechtlichen Aufbewahrungsfrist gelöscht oder anonymisiert werden müssen.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Schema Migration</strong><p><code>score</code> von String zu Number? Downstream Expressions, Reports und Filters müssen angepasst und getestet werden.</p></div><div class="lessonCallout"><strong>Retention</strong><p>Dedupe-Events eventuell 30/90 Tage; Kundendaten je nach Zweck anders. Nicht „für immer“ als Default.</p></div></div>
+<div class="incident"><b>Migration-Fall:</b> Feld <code>customerId</code> wird umbenannt. Zehn Workflows referenzieren den alten Namen. Ohne Versionierung und Migrationsplan brechen Integrationen verteilt.</div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRODUCTION DATA ARCHITECTURE</div><h2>System of Record, State Store und Audit auseinanderhalten</h2><p>Ein Workflow sollte wissen, welche Daten Quelle der Wahrheit sind, welche nur technischer State und welche für Audit/Recovery gespeichert werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="stateChoice"><div><b>System of Record</b><span>z. B. CRM / ERP / PostgreSQL</span></div><div><b>Workflow State</b><span>cursor · dedupe · checkpoint</span></div><div><b>Audit / Recovery</b><span>execution · event · decision</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>n8n orchestriert – Ownership bleibt fachlich definiert</h3><p>Wenn CRM die Quelle der Wahrheit für Kundenstatus ist, darf eine lokale Data Table nicht unbemerkt zum zweiten konkurrierenden CRM werden. Speichere nur State, Cache oder kontrollierte Kopien mit klarer Synchronisationsregel.</p></div>
+<div class="caseFlow lifecycle"><b>Source of Truth</b><span>→</span><b>n8n Orchestration</b><span>→</span><b>Target Systems</b><span>↕</span><b>State / Dedupe</b><span>→</span><b>Audit</b></div>
+<div class="lessonCallout"><strong>Production Checklist</strong><p>Domain-Key · Schema · Unique/Dedupe-Strategie · Update-Semantik · Retention · Access · Backup/Restore · Migration · Owner · Monitoring.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER N8N DATA TABLE PERSISTENCE LAB</div><h2>Zwei Executions – derselbe State</h2><p class="muted">Dieser Lab verwendet echte n8n Data Tables. Führe A → B aus: dieselbe fachliche Customer-ID wird in einer späteren Execution wiedererkannt und per Upsert aktualisiert. Führe C → D aus: dasselbe Event wird beim zweiten Mal als Duplicate erkannt.</p>
+<div class="dbPresetBar"><button type="button" data-db-preset="create">A · Customer First State</button><button type="button" data-db-preset="update">B · Same Customer Upsert</button><button type="button" data-db-preset="event-first">C · Event First Delivery</button><button type="button" data-db-preset="event-repeat">D · Duplicate Event Replay</button></div>
+<div class="dbLab"><div class="dbControls"><div class="lessonCallout"><strong>Reihenfolge wichtig</strong><p>A → B beweist Upsert über zwei getrennte Executions. C → D beweist persistente Deduplizierung.</p></div><button class="dbRun" type="button" data-db-run>Live Persistence Workflow starten</button></div><div><div class="module7Flow"><div data-m07-node>Webhook</div><div data-m07-node>Ensure Tables</div><div data-m07-node>Switch</div><div data-m07-node>Exists?</div><div data-m07-node>Upsert / Insert</div><div data-m07-node>Read State</div><div data-m07-node>Respond</div></div><pre class="dbOutput" data-db-output>Bereit.</pre></div></div>
+<div class="dbAnalysis" data-db-analysis hidden></div>
+<details><summary>Lab-Auftrag &amp; Break/Fix öffnen</summary>
+<div class="labMission"><h3>A · First State</h3><ol><li>Starte A.</li><li>Notiere technische Row-ID, customerId, createdAt und updatedAt.</li><li>Erkläre, warum die Row nach Ende der Execution nicht verschwindet.</li></ol></div>
+<div class="labMission"><h3>B · Upsert Across Executions</h3><ol><li>Starte B direkt nach A.</li><li>Vergleiche Row-ID: dieselbe fachliche Row soll fortgeschrieben werden.</li><li>Prüfe status <code>qualified</code> und score <code>85</code>.</li><li>Erkläre INSERT vs UPDATE vs UPSERT.</li></ol></div>
+<div class="labMission"><h3>C · Event First Delivery</h3><ol><li>Starte C.</li><li>Event-ID darf noch nicht existieren.</li><li>Row wird gespeichert und <code>duplicate=false</code>.</li></ol></div>
+<div class="labMission break"><h3>D · Duplicate Replay</h3><ol><li>Starte D nach C.</li><li>Dieselbe Event-ID existiert bereits.</li><li>Der Workflow muss <code>duplicate=true</code> und <code>inserted=false</code> liefern.</li><li>Erkläre, welche doppelte Business-Aktion dadurch verhindert werden könnte.</li></ol></div>
+<div class="labMission fix"><h3>E · DESIGN IT</h3><ol><li>Entwirf eine <code>lastSync</code>-Tabelle für drei Datenquellen.</li><li>Welche Domain-Keys und Datentypen brauchst du?</li><li>Wann wird Cursor aktualisiert?</li><li>Wann würdest du statt Data Table PostgreSQL wählen?</li></ol></div>
+</details></section>
+
+<section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 07</div><h2>Persistenzverständnis statt SQL-Begriffe auswendig lernen</h2><p>Upsert-, Dedupe-, Cursor-, Key- und Architekturfragen variieren pro Versuch. Schwächere Themen werden beim nächsten Versuch stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 07 ist erst fertig, wenn du das ohne Vorlage kannst</h2><div class="teachList">
+<label><input type="checkbox"> transient vs persistent state erklären</label><label><input type="checkbox"> Data Tables sinnvoll einsetzen</label><label><input type="checkbox"> CRUD unterscheiden</label><label><input type="checkbox"> Domain-Key wählen</label><label><input type="checkbox"> Upsert erklären</label><label><input type="checkbox"> Dedupe / Idempotency bauen</label><label><input type="checkbox"> Cursor / lastSync modellieren</label><label><input type="checkbox"> SELECT/INSERT/UPDATE/DELETE lesen</label><label><input type="checkbox"> Transaction / Commit / Rollback erklären</label><label><input type="checkbox"> Data Table vs SQL DB entscheiden</label><label><input type="checkbox"> Retention/Backup/Migration planen</label><label><input type="checkbox"> System of Record von Workflow-State trennen</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 08 · Files, Binary Data & Document Automation</strong><span>Binary Data, Upload/Download, CSV/Excel/PDF, File Metadata, Storage, Parsing, Dokumentenpipelines und sichere Dateiverarbeitung.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-06/">← Modul 06</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-07.js?v=1.0" defer></script><script src="../../../assets/n8n-module-07-assessment.js?v=1.0" defer></script>
+</body></html>

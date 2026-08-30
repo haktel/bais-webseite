@@ -1,0 +1,692 @@
+{
+  "name": "BAIS Academy · Modul 07 · Data Tables State Persistence Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-07",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1180,
+        0
+      ],
+      "id": "m07-webhook",
+      "name": "Webhook",
+      "webhookId": "m07-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body=$input.first().json.body??{};\nconst scenario=String(body.scenario??\"\").trim();\nconst labKey=String(body.labKey??\"\").trim().replace(/[^a-zA-Z0-9_-]/g,\"\").slice(0,48);\nif(!labKey||![\"create\",\"update\",\"event-first\",\"event-repeat\"].includes(scenario)){\n return [{json:{valid:false,scenario,labKey,error:\"invalid scenario or labKey\"}}];\n}\nconst customerId=\"C-\"+labKey;\nconst isCustomer=[\"create\",\"update\"].includes(scenario);\nconst isUpdate=scenario===\"update\";\nreturn [{json:{\n valid:true,\n scenario,\n kind:isCustomer?\"customer\":\"event\",\n labKey,\n customerId,\n customer:{\n   customerId,\n   name:isUpdate?\"Mina Yilmaz · Updated\":\"Mina Yilmaz\",\n   status:isUpdate?\"qualified\":\"lead\",\n   score:isUpdate?85:10,\n   source:\"bais-academy\"\n },\n event:{\n   eventId:\"EV-\"+labKey,\n   eventType:\"payment_received\",\n   customerId,\n   processed:true,\n   source:\"bais-academy\"\n }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        0
+      ],
+      "id": "m07-prepare",
+      "name": "Prepare Persistence Scenario"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "BAIS Academy Modul 07 Customers",
+        "columns": {
+          "column": [
+            {
+              "name": "customerId",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "string"
+            },
+            {
+              "name": "score",
+              "type": "number"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -740,
+        0
+      ],
+      "id": "m07-create-customers",
+      "name": "Ensure Customers Table"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "BAIS Academy Modul 07 Events",
+        "columns": {
+          "column": [
+            {
+              "name": "eventId",
+              "type": "string"
+            },
+            {
+              "name": "eventType",
+              "type": "string"
+            },
+            {
+              "name": "customerId",
+              "type": "string"
+            },
+            {
+              "name": "processed",
+              "type": "boolean"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -520,
+        0
+      ],
+      "id": "m07-create-events",
+      "name": "Ensure Events Table"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m07-kind-customer",
+                    "leftValue": "={{ $('Prepare Persistence Scenario').item.json.kind }}",
+                    "rightValue": "customer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Customer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m07-kind-event",
+                    "leftValue": "={{ $('Prepare Persistence Scenario').item.json.kind }}",
+                    "rightValue": "event",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Event"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -300,
+        0
+      ],
+      "id": "m07-kind-switch",
+      "name": "Customer or Event?"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 07 Customers"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "customerId",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Persistence Scenario').item.json.customer.customerId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customerId": "={{ $('Prepare Persistence Scenario').item.json.customer.customerId }}",
+            "name": "={{ $('Prepare Persistence Scenario').item.json.customer.name }}",
+            "status": "={{ $('Prepare Persistence Scenario').item.json.customer.status }}",
+            "score": "={{ $('Prepare Persistence Scenario').item.json.customer.score }}",
+            "source": "={{ $('Prepare Persistence Scenario').item.json.customer.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customerId",
+              "displayName": "customerId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -40,
+        -140
+      ],
+      "id": "m07-upsert-customer",
+      "name": "Upsert Customer"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 07 Customers"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "customerId",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Persistence Scenario').item.json.customer.customerId }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        180,
+        -140
+      ],
+      "id": "m07-get-customer",
+      "name": "Read Persisted Customer"
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$input.first().json;\nconst prepared=$('Prepare Persistence Scenario').item.json;\nreturn [{json:{\n ok:true,module:\"07\",case:prepared.scenario,\n persistence:\"n8n_data_table\",\n operation:\"upsert\",\n table:\"BAIS Academy Modul 07 Customers\",\n matchKey:\"customerId\",\n row:{\n   id:row.id??null,\n   customerId:row.customerId,\n   name:row.name,\n   status:row.status,\n   score:row.score,\n   source:row.source,\n   createdAt:row.createdAt??null,\n   updatedAt:row.updatedAt??null\n },\n lesson:prepared.scenario===\"update\"\n  ?\"Same customerId matched: existing logical customer was updated instead of blindly inserting a duplicate.\"\n  :\"Customer state is persisted in n8n and can be read again in another execution.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -140
+      ],
+      "id": "m07-explain-customer",
+      "name": "Explain Customer State"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 07 Events"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "eventId",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Persistence Scenario').item.json.event.eventId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        40
+      ],
+      "id": "m07-event-exists",
+      "name": "Event Already Exists?"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 07 Events"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "eventId",
+              "condition": "eq",
+              "keyValue": "={{ $('Prepare Persistence Scenario').item.json.event.eventId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        180
+      ],
+      "id": "m07-event-new",
+      "name": "Event Is New?"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 07 Events"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "eventId": "={{ $('Prepare Persistence Scenario').item.json.event.eventId }}",
+            "eventType": "={{ $('Prepare Persistence Scenario').item.json.event.eventType }}",
+            "customerId": "={{ $('Prepare Persistence Scenario').item.json.event.customerId }}",
+            "processed": "={{ $('Prepare Persistence Scenario').item.json.event.processed }}",
+            "source": "={{ $('Prepare Persistence Scenario').item.json.event.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "eventId",
+              "displayName": "eventId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "eventType",
+              "displayName": "eventType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "customerId",
+              "displayName": "customerId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        180
+      ],
+      "id": "m07-insert-event",
+      "name": "Insert New Event"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared=$('Prepare Persistence Scenario').item.json;\nconst inserted=$input.first().json;\nreturn [{json:{\n ok:true,module:\"07\",case:prepared.scenario,\n persistence:\"n8n_data_table\",\n operation:\"dedupe_insert\",\n table:\"BAIS Academy Modul 07 Events\",\n eventId:prepared.event.eventId,\n duplicate:false,\n inserted:true,\n rowId:inserted.id??null,\n lesson:\"No existing eventId matched, so the event was inserted exactly once.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        180
+      ],
+      "id": "m07-new-event-result",
+      "name": "Explain New Event"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared=$('Prepare Persistence Scenario').item.json;\nreturn [{json:{\n ok:true,module:\"07\",case:prepared.scenario,\n persistence:\"n8n_data_table\",\n operation:\"dedupe_skip\",\n table:\"BAIS Academy Modul 07 Events\",\n eventId:prepared.event.eventId,\n duplicate:true,\n inserted:false,\n lesson:\"The same eventId already exists, so the duplicate was blocked before a second insert.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        40
+      ],
+      "id": "m07-duplicate-event-result",
+      "name": "Explain Duplicate Event"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        700,
+        20
+      ],
+      "id": "m07-respond",
+      "name": "Respond Lab"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Persistence Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Persistence Scenario": {
+      "main": [
+        [
+          {
+            "node": "Ensure Customers Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure Customers Table": {
+      "main": [
+        [
+          {
+            "node": "Ensure Events Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure Events Table": {
+      "main": [
+        [
+          {
+            "node": "Customer or Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer or Event?": {
+      "main": [
+        [
+          {
+            "node": "Upsert Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event Already Exists?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Event Is New?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Upsert Customer": {
+      "main": [
+        [
+          {
+            "node": "Read Persisted Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Persisted Customer": {
+      "main": [
+        [
+          {
+            "node": "Explain Customer State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain Customer State": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Already Exists?": {
+      "main": [
+        [
+          {
+            "node": "Explain Duplicate Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Is New?": {
+      "main": [
+        [
+          {
+            "node": "Insert New Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert New Event": {
+      "main": [
+        [
+          {
+            "node": "Explain New Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain New Event": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain Duplicate Event": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-07",
+    "body": {
+      "scenario": "create",
+      "labKey": "smoke07"
+    },
+    "expect": {
+      "filter": ".operation",
+      "value": "upsert"
+    }
+  }
+}
