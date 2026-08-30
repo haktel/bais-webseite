@@ -118,6 +118,26 @@ test("ki-fuehrerschein modul-03 lab_case 'unzureichend' is accepted",async()=>{
  assert.deepEqual(body.module.labCases,["unzureichend"]);
 });
 
+test("ki-fuehrerschein modul-04 lesson_complete is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-04","lesson_complete",{lessonId:"01"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-04",event:"lesson_complete",lessonId:"01"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.completedLessons,["01"]);
+});
+
+test("ki-fuehrerschein modul-04 lab_case 'besondere_kategorie' is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-04","lab_case",{caseId:"besondere_kategorie"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-04",event:"lab_case",caseId:"besondere_kategorie"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["besondere_kategorie"]);
+});
+
 test("course-wide percent averages over THIS course's own module count, not a fixed 12 (regression)",async()=>{
  // n8n-bootcamp has 3 real modules (modul-01/02/03). If all three are fully
  // scored (module_percent 100 each, summing to 300), the course must reach
