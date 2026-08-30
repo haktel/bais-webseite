@@ -158,13 +158,29 @@ test("ki-fuehrerschein modul-05 lab_case 'unbelegt' is accepted",async()=>{
  assert.deepEqual(body.module.labCases,["unbelegt"]);
 });
 
-test("course-wide percent averages over THIS course's own module count, not a fixed 12 (regression)",async()=>{
- // n8n-bootcamp has 3 real modules (modul-01/02/03). If all three are fully
- // scored (module_percent 100 each, summing to 300), the course must reach
- // 100% - not be capped at 25% by a leftover hardcoded /12 divisor.
- const db=makeDb(()=>null,{total:300}),env={DB:db};
- const res=await onRequestPost({request:makeRequest("modul-03","lesson_complete",{lessonId:"01"}),env});
+test("course-wide percent averages over all 12 real n8n modules",async()=>{
+ const db=makeDb(()=>null,{total:1200}),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-12","lesson_complete",{lessonId:"01"}),env});
  const body=await res.json();
  assert.equal(res.status,200);
  assert.equal(body.course.percent,100);
+});
+
+test("n8n modul-11 security lab case is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-11","lab_case",{caseId:"ssrf"}),env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["ssrf"]);
+ assert.equal(body.module.labTotal,5);
+});
+
+test("n8n modul-12 capstone lab case is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-12","lab_case",{caseId:"weakroi"}),env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["weakroi"]);
+ assert.equal(body.module.lessonTotal,12);
+ assert.equal(body.module.labTotal,5);
 });

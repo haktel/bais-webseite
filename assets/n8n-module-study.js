@@ -3,7 +3,7 @@
   const lessons=[...document.querySelectorAll("[data-lesson]")];
   const bar=document.querySelector("[data-progress-bar]");
   const text=document.querySelector("[data-progress-text]");
-  let state={completedLessons:[],labCases:[],assessmentBest:0,modulePercent:0};
+  let state={completedLessons:[],labCases:[],assessmentBest:0,lessonTotal:lessons.length||12,labTotal:0,assessmentTarget:81,modulePercent:0};
   let busy=false;
 
   const api=async(url,options={})=>{
@@ -29,7 +29,8 @@
     if(bar)bar.style.width=pct+"%";
     const grade=state.assessmentBest>0&&window.percentToNote?window.percentToNote(state.assessmentBest):null;
     const assessmentText=grade?`Note ${grade.note} (${state.assessmentBest}%)`:"noch nicht abgelegt";
-    if(text)text.textContent=`${state.completedLessons.length}/12 Lektionen · ${state.labCases.length}/3 Labs · Assessment ${assessmentText} · Modul ${pct}%`;
+    const lessonTotal=Number(state.lessonTotal)||lessons.length||12,labTotal=Number(state.labTotal)||state.labCases.length||0;
+    if(text)text.textContent=`${state.completedLessons.length}/${lessonTotal} Lektionen · ${state.labCases.length}/${labTotal} Labs · Assessment ${assessmentText} · Modul ${pct}%`;
   };
 
   const postEvidence=async(payload)=>{

@@ -5,11 +5,11 @@ import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js"
 // courses can each have their own "modul-01" without one course's lesson
 // count or lab case ids leaking into the other's validation.
 const LESSONS_PER_MODULE={
-  "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12},
+  "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12,"modul-06":12,"modul-07":12,"modul-08":12,"modul-09":12,"modul-10":12,"modul-11":12,"modul-12":12},
   "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12}
 };
 const LAB_CASES={
-  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"]},
+  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"],"modul-04":["api-key","bearer","forbidden","expired"],"modul-05":["mixed","high","fallback","invalid"],"modul-06":["success","client","rate","server"],"modul-07":["create","update","event-first","event-repeat"],"modul-08":["csv","unicode","json","unsafe","invalid"],"modul-09":["grounded","unknown","injection","cost"],"modul-10":["standard","messy","extra","invalid"],"modul-11":["trusted","tampered","pii","ssrf","destructive"],"modul-12":["happy","high","invalid","security","weakroi"]},
   "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"],"modul-05":["belegt","vage","unbelegt"]}
 };
 
@@ -84,6 +84,9 @@ export const onRequestGet=async({request,env})=>{
       completedLessons:parseArray(row?.completed_lessons_json),
       labCases:parseArray(row?.lab_cases_json),
       assessmentBest:Number(row?.assessment_best||0),
+      lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,
+      labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,
+      assessmentTarget:81,
       modulePercent:Number(row?.module_percent||0),
       updatedAt:row?.updated_at||null
     },requestId:traceId});
@@ -145,7 +148,7 @@ export const onRequestPost=async({request,env})=>{
       "INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)"
     ).bind(crypto.randomUUID(),user.user_id,"academy.module.progress","course",course.id,JSON.stringify({moduleSlug,event,modulePercent,coursePercent:courseProgress.percent}),now).run();
 
-    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,modulePercent},course:courseProgress,requestId:traceId});
+    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,assessmentTarget:81,modulePercent},course:courseProgress,requestId:traceId});
   }catch(error){return handleError(error,traceId);}
 };
 
