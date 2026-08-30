@@ -1,0 +1,39 @@
+name: n8n API Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/n8n-api-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify n8n API access
+        env:
+          N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${N8N_BASE_URL:-}" ] || [ -z "${N8N_API_KEY:-}" ]; then
+            echo "Missing N8N_BASE_URL or N8N_API_KEY repository secret."
+            exit 1
+          fi
+
+          BASE="${N8N_BASE_URL%/}"
+          STATUS=$(curl -sS             -o /tmp/n8n-response.json             -w "%{http_code}"             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=1")
+
+          if [ "${STATUS}" -lt 200 ] || [ "${STATUS}" -ge 300 ]; then
+            echo "n8n API check failed with HTTP ${STATUS}."
+            cat /tmp/n8n-response.json
+            exit 1
+          fi
+
+          echo "n8n API access verified successfully."
