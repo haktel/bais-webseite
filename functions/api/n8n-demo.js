@@ -84,7 +84,7 @@ function responseHeaders(){
   };
 }
 
-export async function onRequestPost({request}){
+export async function onRequestPost({request,env}){
   const requestId=request.headers.get("cf-ray")||crypto.randomUUID();
   const origin=request.headers.get("Origin");
   if(!allowedOrigin(origin)){
@@ -128,7 +128,7 @@ export async function onRequestPost({request}){
   const timeout=setTimeout(()=>controller.abort(),12000);
 
   try{
-    const upstream=await callLeadQualificationWebhook(payload,{signal:controller.signal});
+    const upstream=await callLeadQualificationWebhook(payload,{signal:controller.signal,db:env?.DB});
     const result=await upstream.json().catch(()=>null);
     const durationMs=Date.now()-started;
 
@@ -168,6 +168,7 @@ export async function onRequestPost({request}){
       ok:true,
       requestId,
       source:"live-n8n",
+      requestAuth:"hmac-sha256",
       workflow:"bais-lead-qualification",
       scenario:scenarioKey,
       scenarioLabel:DEMO_SCENARIOS[scenarioKey].label,
@@ -181,6 +182,7 @@ export async function onRequestPost({request}){
       evidence:[
         {step:"edge-validation",status:"verified"},
         {step:"synthetic-payload",status:"verified"},
+        {step:"request-signature",status:"verified"},
         {step:"n8n-webhook",status:"verified"},
         {step:"routing-output",status:"verified"}
       ]
