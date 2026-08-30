@@ -15,6 +15,7 @@ const fields={
  upstream:document.getElementById("resultUpstream"),
  inputHash:document.getElementById("resultInputHash"),
  resultHash:document.getElementById("resultHash"),
+ auth:document.getElementById("resultAuth"),
  next:document.getElementById("resultNext"),
  audit:document.getElementById("resultAudit"),
  workflow:document.getElementById("resultWorkflow")
@@ -57,6 +58,7 @@ function render(data){
  fields.upstream.textContent=Number.isFinite(data.upstreamStatus)?String(data.upstreamStatus):"—";
  fields.inputHash.textContent=safe(data.inputFingerprint);
  fields.resultHash.textContent=safe(data.resultFingerprint);
+ fields.auth.textContent=safe(data.requestAuth);
  fields.next.textContent=safe(data.nextAction,"Keine Next Action zurückgegeben.");
  fields.audit.textContent=safe(data.auditStatus);
  fields.workflow.textContent=safe(data.workflow,"bais-lead-qualification");
