@@ -53,10 +53,10 @@ async function recalcCourse(db,userId,courseId,courseSlug,now){
   return{percent,status};
 }
 
-function sequenceState(courseSlug,moduleSlug,lessons,labs,isAdmin=false){
+function sequenceState(courseSlug,moduleSlug,lessons,labs){
   const lessonTotal=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
   const labOrder=LAB_CASES[courseSlug]?.[moduleSlug]||[];
-  if(courseSlug!=="n8n-bootcamp"||isAdmin){
+  if(courseSlug!=="n8n-bootcamp"){
     return{enforced:false,nextLesson:null,lessonsComplete:unique(lessons).length>=lessonTotal,labsUnlocked:true,nextLabCase:null,labsComplete:unique(labs).length>=labOrder.length,assessmentUnlocked:true};
   }
   const completedLessons=new Set(unique(lessons));
@@ -77,8 +77,8 @@ function sequenceState(courseSlug,moduleSlug,lessons,labs,isAdmin=false){
   };
 }
 
-function assertN8nSequence({courseSlug,moduleSlug,event,lessonId,caseId,lessons,labs,isAdmin}){
-  if(courseSlug!=="n8n-bootcamp"||isAdmin)return;
+function assertN8nSequence({courseSlug,moduleSlug,event,lessonId,caseId,lessons,labs}){
+  if(courseSlug!=="n8n-bootcamp")return;
   const seq=sequenceState(courseSlug,moduleSlug,lessons,labs,false);
   if(event==="lesson_complete"){
     if(lessons.includes(lessonId))return;
@@ -120,7 +120,7 @@ export const onRequestGet=async({request,env})=>{
     if(!courseSlug||!/^modul-(0[1-9]|1[0-2])$/.test(moduleSlug))throw new ApiError(422,"validation_failed","Programm und Modul sind erforderlich.");
     const course=await courseForUser(db,user.user_id,courseSlug);
     if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
-    if(courseSlug==="n8n-bootcamp"&&user.role!=="admin"){
+    if(courseSlug==="n8n-bootcamp"){
       const requiredModule=await firstIncompletePriorN8nModule(db,user.user_id,course.id,moduleSlug);
       if(requiredModule)throw new ApiError(409,"module_sequence_locked",`Bitte zuerst ${requiredModule} vollständig abschließen.`);
     }
@@ -138,7 +138,7 @@ export const onRequestGet=async({request,env})=>{
       assessmentTarget:81,
       modulePercent:Number(row?.module_percent||0),
       updatedAt:row?.updated_at||null,
-      sequence:sequenceState(courseSlug,moduleSlug,completedLessons,labCases,user.role==="admin")
+      sequence:sequenceState(courseSlug,moduleSlug,completedLessons,labCases)
     },requestId:traceId});
   }catch(error){return handleError(error,traceId);}
 };
@@ -160,7 +160,7 @@ export const onRequestPost=async({request,env})=>{
 
     const course=await courseForUser(db,user.user_id,courseSlug);
     if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
-    if(courseSlug==="n8n-bootcamp"&&user.role!=="admin"){
+    if(courseSlug==="n8n-bootcamp"){
       const requiredModule=await firstIncompletePriorN8nModule(db,user.user_id,course.id,moduleSlug);
       if(requiredModule)throw new ApiError(409,"module_sequence_locked",`Bitte zuerst ${requiredModule} vollständig abschließen.`);
     }
@@ -177,21 +177,21 @@ export const onRequestPost=async({request,env})=>{
       const lessonId=cleanText(body.lessonId,8);
       const max=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
       if(!/^\d{2}$/.test(lessonId)||Number(lessonId)<1||Number(lessonId)>max)throw new ApiError(422,"lesson_invalid","Ungültige Lerneinheit.");
-      assertN8nSequence({courseSlug,moduleSlug,event,lessonId,lessons,labs,isAdmin:user.role==="admin"});
+      assertN8nSequence({courseSlug,moduleSlug,event,lessonId,lessons,labs});
       lessons=unique([...lessons,lessonId]);
     }
 
     if(event==="lab_case"){
       const caseId=cleanText(body.caseId,40);
       if(!(LAB_CASES[courseSlug]?.[moduleSlug]||[]).includes(caseId))throw new ApiError(422,"lab_case_invalid","Ungültiger Lab-Fall.");
-      assertN8nSequence({courseSlug,moduleSlug,event,caseId,lessons,labs,isAdmin:user.role==="admin"});
+      assertN8nSequence({courseSlug,moduleSlug,event,caseId,lessons,labs});
       labs=unique([...labs,caseId]);
     }
 
     if(event==="assessment_result"){
       const score=Number(body.score);
       if(!Number.isInteger(score)||score<0||score>100)throw new ApiError(422,"assessment_invalid","Ungültiges Assessment-Ergebnis.");
-      assertN8nSequence({courseSlug,moduleSlug,event,lessons,labs,isAdmin:user.role==="admin"});
+      assertN8nSequence({courseSlug,moduleSlug,event,lessons,labs});
       best=Math.max(best,score);
     }
 
@@ -205,7 +205,7 @@ export const onRequestPost=async({request,env})=>{
       "INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)"
     ).bind(crypto.randomUUID(),user.user_id,"academy.module.progress","course",course.id,JSON.stringify({moduleSlug,event,modulePercent,coursePercent:courseProgress.percent}),now).run();
 
-    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,assessmentTarget:81,modulePercent,sequence:sequenceState(courseSlug,moduleSlug,lessons,labs,user.role==="admin")},course:courseProgress,requestId:traceId});
+    return json({ok:true,module:{moduleSlug,completedLessons:lessons,labCases:labs,assessmentBest:best,lessonTotal:LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0,labTotal:(LAB_CASES[courseSlug]?.[moduleSlug]||[]).length,assessmentTarget:81,modulePercent,sequence:sequenceState(courseSlug,moduleSlug,lessons,labs)},course:courseProgress,requestId:traceId});
   }catch(error){return handleError(error,traceId);}
 };
 
