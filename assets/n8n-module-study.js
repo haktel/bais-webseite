@@ -341,7 +341,12 @@
     }catch(error){
       nodes[0]?.classList.add("error");
       out.textContent="FEHLER: "+error.message+"\n\nDebugging: Input → Trigger → Execution → Node → Output.";
-    }finally{busy=false;run.disabled=false;run.textContent="Live Workflow starten";}
+    }finally{
+      busy=false;
+      run.disabled=false;
+      run.textContent="Live Workflow starten";
+      if(IS_N8N)setTimeout(applySequenceLocks,0);
+    }
   });
 
   window.addEventListener("bais:assessment-result",async event=>{
