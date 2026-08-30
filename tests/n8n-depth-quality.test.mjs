@@ -49,8 +49,21 @@ test("n8n learning sequence remains mandatory in UI and server evidence",async()
   assert.match(study,/nextLesson/);
   assert.match(study,/nextLabCase/);
   assert.match(study,/assessmentUnlocked/);
+  assert.match(study,/applyMasteryEvidence/);
+  assert.match(study,/input\.disabled=true/);
+  assert.match(study,/applyNextModuleGate/);
   assert.match(landing,/sequenceLocked/);
   assert.match(progress,/assertN8nSequence/);
   assert.match(progress,/firstIncompletePriorN8nModule/);
   assert.match(routeGuard,/firstIncompletePriorN8nModule/);
+});
+
+
+test("all n8n modules load the automatic mastery gate asset",async()=>{
+  for(let i=1;i<=12;i++){
+    const n=String(i).padStart(2,"0");
+    const html=await readFile("academy/n8n-bootcamp/modul-"+n+"/index.html","utf8");
+    assert.match(html,/n8n-module-study\.js\?v=1\.8/,"modul-"+n+" must load n8n study v1.8");
+    assert.match(html,/class="teachList"/,"modul-"+n+" must retain the evidence checklist");
+  }
 });
