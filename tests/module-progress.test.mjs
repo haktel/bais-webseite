@@ -211,6 +211,34 @@ test("ki-fuehrerschein modul-06 lab_case 'vollfreigabe' is accepted",async()=>{
  assert.deepEqual(body.module.labCases,["vollfreigabe"]);
 });
 
+test("ki-it-security modul-01 lesson_complete is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-01","lesson_complete",{lessonId:"01"});
+ req.json=async()=>({courseSlug:"ki-it-security",moduleSlug:"modul-01",event:"lesson_complete",lessonId:"01"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.completedLessons,["01"]);
+});
+
+test("ki-it-security modul-01 lab_case 'hochrisiko' is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-01","lab_case",{caseId:"hochrisiko"});
+ req.json=async()=>({courseSlug:"ki-it-security",moduleSlug:"modul-01",event:"lab_case",caseId:"hochrisiko"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["hochrisiko"]);
+});
+
+test("ki-it-security modul-01 rejects a lab case id that belongs to a different course",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-01","lab_case",{caseId:"belegt"});
+ req.json=async()=>({courseSlug:"ki-it-security",moduleSlug:"modul-01",event:"lab_case",caseId:"belegt"});
+ const res=await onRequestPost({request:req,env});
+ assert.equal(res.status,422);
+});
+
 test("course-wide percent averages over all 12 real n8n modules",async()=>{
  const db=makeDb(()=>null,{total:1200}),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-12","lesson_complete",{lessonId:"01"}),env});
