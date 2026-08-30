@@ -7,6 +7,7 @@ export const onRequest=async context=>{
   try{
     await ensureAuthSchema(db);
     const user=await requireSession(db,request);
+    if(user.role==="admin")return context.next();
     const enrollment=await db.prepare(
       "SELECT e.status FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug='n8n-bootcamp' AND e.status IN('active','completed') LIMIT 1"
     ).bind(user.user_id).first();
