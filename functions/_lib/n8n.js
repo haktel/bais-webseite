@@ -1,10 +1,11 @@
 export const N8N_LEAD_WEBHOOK="https://6wejmb5u.rpcld.co/webhook/bais-lead-qualification";
 
-export async function callLeadQualificationWebhook(payload){
+export async function callLeadQualificationWebhook(payload,{signal}={}){
   return fetch(N8N_LEAD_WEBHOOK,{
     method:"POST",
     headers:{"Content-Type":"application/json","User-Agent":"BAIS-Website/1.0"},
-    body:JSON.stringify(payload)
+    body:JSON.stringify(payload),
+    signal
   });
 }
 
