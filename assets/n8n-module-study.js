@@ -28,6 +28,74 @@
     return banner;
   };
 
+  const ensureEvidenceStyle=()=>{
+    if(document.getElementById("n8n-evidence-style"))return;
+    const style=document.createElement("style");
+    style.id="n8n-evidence-style";
+    style.textContent='.teachList label.evidenceDone{border-color:#9bcdbd;background:#f4fbf8}.teachList label.evidencePending{opacity:.72}.teachList input[type="checkbox"][disabled]{cursor:not-allowed}.masteryEvidenceState{display:block;margin-top:5px;font-size:.7rem;font-weight:800;color:#63747b}.evidenceDone .masteryEvidenceState{color:#0a6b55}.nextModule a.sequenceLocked{pointer-events:auto;opacity:.55;cursor:not-allowed;text-decoration:none}';
+    document.head.append(style);
+  };
+
+  const applyMasteryEvidence=()=>{
+    if(!IS_N8N)return;
+    const labels=[...document.querySelectorAll(".teachList label")];
+    if(!labels.length)return;
+    ensureEvidenceStyle();
+    const done=new Set((state.completedLessons||[]).map(String));
+    labels.forEach((label,index)=>{
+      const input=label.querySelector('input[type="checkbox"]');
+      if(!input)return;
+      const lessonId=String(index+1).padStart(2,"0");
+      const achieved=done.has(lessonId)||done.has(String(index+1));
+      input.checked=achieved;
+      input.disabled=true;
+      input.setAttribute("aria-disabled","true");
+      input.tabIndex=-1;
+      label.classList.toggle("evidenceDone",achieved);
+      label.classList.toggle("evidencePending",!achieved);
+      let status=label.querySelector(".masteryEvidenceState");
+      if(!status){
+        status=document.createElement("small");
+        status.className="masteryEvidenceState";
+        label.append(status);
+      }
+      status.textContent=achieved
+        ?"✓ Automatisch aus abgeschlossenem Lernnachweis"
+        :"🔒 Wird erst durch Lerneinheit "+lessonId+" bestätigt";
+    });
+  };
+
+  const applyNextModuleGate=()=>{
+    if(!IS_N8N)return;
+    const unlocked=Number(state.modulePercent||0)>=100;
+    document.querySelectorAll(".nextModule a").forEach(link=>{
+      if(!link.dataset.sequenceOriginalText)link.dataset.sequenceOriginalText=link.textContent||"Weiter";
+      if(link.dataset.sequenceGateBound!=="true"){
+        link.dataset.sequenceGateBound="true";
+        link.addEventListener("click",event=>{
+          if(link.dataset.sequenceLocked==="true"){
+            event.preventDefault();
+            document.querySelector("[data-progress-text]")?.scrollIntoView({behavior:"smooth",block:"center"});
+            alert("Dieses Modul muss zuerst vollständig abgeschlossen werden: 12 Lerneinheiten, alle Pflicht-Labs und das Assessment.");
+          }
+        });
+      }
+      link.dataset.sequenceLocked=String(!unlocked);
+      link.classList.toggle("sequenceLocked",!unlocked);
+      if(unlocked){
+        link.removeAttribute("aria-disabled");
+        link.removeAttribute("tabindex");
+        link.title="";
+        link.textContent=link.dataset.sequenceOriginalText;
+      }else{
+        link.setAttribute("aria-disabled","true");
+        link.setAttribute("tabindex","-1");
+        link.title="Erst nach 100% Modulfortschritt freigeschaltet";
+        link.textContent="🔒 Weiter erst nach vollständigem Modulabschluss";
+      }
+    });
+  };
+
   const applySequenceLocks=()=>{
     if(!IS_N8N)return;
     const seq=state.sequence||{};
@@ -124,6 +192,8 @@
       }
     });
     applySequenceLocks();
+    applyMasteryEvidence();
+    applyNextModuleGate();
     const pct=Number(state.modulePercent)||0;
     if(bar)bar.style.width=pct+"%";
     const grade=state.assessmentBest>0&&window.percentToNote?window.percentToNote(state.assessmentBest):null;
