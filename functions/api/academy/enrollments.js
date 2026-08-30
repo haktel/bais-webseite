@@ -4,7 +4,7 @@ const PROGRAMS={"ki-fuehrerschein":"KI-Führerschein Essentials","ki-leadership"
 
 async function qualifyEnrollment(db,enrollmentId,lead,traceId){
  try{
-  const upstream=await callLeadQualificationWebhook(buildLeadPayload(lead));
+  const upstream=await callLeadQualificationWebhook(buildLeadPayload(lead),{db});
   const mapped=mapLeadResult(await upstream.json().catch(()=>null));
   if(!mapped) throw new Error(`n8n responded with status ${upstream.status}`);
   await db.prepare("UPDATE enrollment_requests SET score=?,route=?,n8n_execution_id=? WHERE id=?")
