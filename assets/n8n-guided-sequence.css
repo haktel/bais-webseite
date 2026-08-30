@@ -1,0 +1,6 @@
+/* BAIS n8n strict guided mode: learners may review completed lessons and work only on the current required step. */
+.lesson.sequenceLocked{display:none!important}
+.assessment.sequenceLocked .assessmentList,.assessment.sequenceLocked .assessmentActions,.assessment.sequenceLocked .assessmentResult{display:none!important}
+.liveLab.sequenceLocked>*:not(.sequenceLockBanner):not(.ey):not(h2):not(.muted){display:none!important}
+.studyNav a.sequenceLocked{pointer-events:none}
+@media print{.lesson.sequenceLocked,.assessment.sequenceLocked .assessmentList,.assessment.sequenceLocked .assessmentActions,.liveLab.sequenceLocked>*{display:none!important}}
