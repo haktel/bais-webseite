@@ -1,0 +1,7 @@
+.escToolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.escToolbar button{padding:9px 11px;border-radius:9px;border:1px solid #456878;background:#102f3e;color:#d9e7eb;font-weight:800;cursor:pointer}.escToolbar button[aria-pressed="true"]{border-color:#ff806c;box-shadow:0 0 0 3px #ff806c22}
+.escLab{display:grid;grid-template-columns:1fr 1fr;gap:18px}.escEditor,.escResult{min-height:360px}.escEditor textarea{width:100%;min-height:180px;box-sizing:border-box;padding:14px;border:1px solid #456878;border-radius:12px;background:#06151f;color:#d7e7ec;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
+.escRun{margin-top:10px;padding:11px 14px;border:0;border-radius:10px;background:#ff745f;color:#071923;font-weight:950;cursor:pointer}.escRun:disabled{opacity:.55}
+.kifFlow6{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 13px}.kifFlow6 div{position:relative;z-index:1;padding:10px 6px;border:1px solid #426777;border-radius:9px;background:#102f3e;text-align:center;font-size:.72rem}.kifFlow6 div.active{border-color:#ff806c}.kifFlow6 div.ok{border-color:#5ee1d4}.kifFlow6 div.error{border-color:#ff806c}
+.escOutput{min-height:285px;white-space:pre-wrap;padding:14px;border-radius:12px;background:#06141d;color:#c8dde5;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:auto}
+@media(max-width:900px){.escLab{grid-template-columns:1fr}.kifFlow6{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.kifFlow6{grid-template-columns:1fr}}

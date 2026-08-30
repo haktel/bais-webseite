@@ -191,6 +191,26 @@ test("ki-fuehrerschein modul-05 lab_case 'unbelegt' is accepted",async()=>{
  assert.deepEqual(body.module.labCases,["unbelegt"]);
 });
 
+test("ki-fuehrerschein modul-06 lesson_complete is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-06","lesson_complete",{lessonId:"01"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-06",event:"lesson_complete",lessonId:"01"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.completedLessons,["01"]);
+});
+
+test("ki-fuehrerschein modul-06 lab_case 'vollfreigabe' is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-06","lab_case",{caseId:"vollfreigabe"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-06",event:"lab_case",caseId:"vollfreigabe"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["vollfreigabe"]);
+});
+
 test("course-wide percent averages over all 12 real n8n modules",async()=>{
  const db=makeDb(()=>null,{total:1200}),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-12","lesson_complete",{lessonId:"01"}),env});
