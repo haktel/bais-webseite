@@ -15,3 +15,6 @@
 .evidenceCard,.handoverCard{margin-top:12px;padding:12px;border:1px solid #365766;border-radius:10px;background:#0d2a38}.evidenceCard p,.handoverCard p{margin:.4rem 0}.evidenceCard code{font-size:.7rem}.handoverCard ul{margin:.5rem 0 0;padding-left:1.2rem}
 @media(max-width:900px){.discoveryGrid,.archLayers,.roiFormula,.handoverGrid,.capStatusGrid,.roiGrid{grid-template-columns:1fr 1fr}.projectLifecycle,.asisTobe,.capLab{grid-template-columns:1fr}.reqMatrix{grid-template-columns:1fr}.module12Flow{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.discoveryGrid,.archLayers,.roiFormula,.handoverGrid,.capStatusGrid,.roiGrid,.module12Flow{grid-template-columns:1fr}}
+
+.threatMap{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.threatMap>div{padding:13px;border:1px solid #d7e3e6;border-radius:10px;background:#fff;text-align:center;position:relative}.threatMap>div:after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:99px;background:#173f52}.threatMap b,.threatMap span{display:block}.threatMap span{margin-top:5px;color:#617983;font-size:.7rem}
+@media(max-width:900px){.threatMap{grid-template-columns:1fr 1fr}}@media(max-width:560px){.threatMap{grid-template-columns:1fr}}
