@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 01 – KI-Grundlagen &amp; sichere Nutzung | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Mental Model generativer AI, präzises Prompting, Datenschutz, Qualitätsprüfung, Verantwortung und ein echter Prompt-Checker Live-Lab.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-fuehrerschein/modul-01/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/kif-module-01.css?v=1.0">
+</head><body data-module="modul-01">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 01 · PRIVATER LERNBEREICH</span><h1>KI-Grundlagen &amp; sichere Nutzung</h1><p class="lead">Du lernst nicht nur, wie man ein Chatfenster bedient. Du verstehst, wie generative AI wirklich funktioniert, wie du präzise Prompts formulierst, wo die Grenzen liegen und was niemals in ein KI-Tool gehört – danach prüfst du alles an einem echten Prompt-Checker.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-01 Lernarchitektur"><div class="courseMap"><div><b>VERSTEHEN</b><span>Modell &amp; Grenzen</span></div><div><b>FORMULIEREN</b><span>Präzise Prompts</span></div><div><b>SCHÜTZEN</b><span>Daten &amp; Vertraulichkeit</span></div><div><b>PRÜFEN</b><span>Ready to Teach</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 01 · Lernpfad</strong>
+<a href="#l1">01 · Mental Model</a><a href="#l2">02 · Vom Prompt zur Antwort</a><a href="#l3">03 · Prompt-Bausteine</a><a href="#l4">04 · Tokens &amp; Wahrscheinlichkeit</a><a href="#l5">05 · Präzise formulieren</a><a href="#l6">06 · KI im Alltag</a><a href="#l7">07 · Entwurf, keine Wahrheit</a><a href="#l8">08 · Vertraulichkeit</a><a href="#l9">09 · Öffentlich vs Unternehmens-KI</a><a href="#l10">10 · Vertrauensgrenze</a><a href="#l11">11 · Falsche Antworten erkennen</a><a href="#l12">12 · Einsatzreife</a><a href="#lab">13 · Live Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Wir lernen an echten Vorfällen – nicht an Angstmache ohne Substanz.</h2><p>Die folgenden öffentlich bekannt gewordenen Fälle tauchen in den Lektionen wieder auf. Sie machen Chancen und Risiken generativer AI konkret, statt abstrakt zu bleiben.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Mata v. Avianca</strong><span>Halluzinierte Urteile</span><b>Sanktionen vom Gericht</b></article>
+    <article><strong>Samsung</strong><span>Datenleck über ChatGPT</span><b>Internes Nutzungsverbot</b></article>
+    <article><strong>Air Canada</strong><span>Falsche Chatbot-Zusage</span><b>Unternehmen haftet</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Was generative AI wirklich ist</h2><p>Ein KI-Modell weiß nichts. Es berechnet die statistisch wahrscheinlichste Fortsetzung eines Textes – das ist ein grundlegend anderes Prinzip als Nachschlagen oder Wissen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Eingabe</div><div class="vfArrow">→</div><div class="vfNode">Modell</div><div class="vfArrow">→</div><div class="vfNode">Wahrscheinlichste Antwort</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Kein Nachschlagewerk, sondern ein Vorhersagemodell</h3><p>Ein Suchmaschinen-Index verweist auf geprüfte Quellen. Ein generatives Modell erzeugt dagegen neuen Text, indem es Wort für Wort die wahrscheinlichste Fortsetzung berechnet – gelernt aus riesigen Textmengen. Das erklärt zwei Dinge zugleich: warum die Antworten oft erstaunlich gut klingen, und warum sie manchmal überzeugend falsch sind.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · MATA V. AVIANCA</span><h3>Sechs erfundene Gerichtsurteile in einem echten Schriftsatz</h3><p>Ein New Yorker Anwalt reichte 2023 einen von ChatGPT vorbereiteten Schriftsatz ein – inklusive sechs frei erfundener Gerichtsurteile mit plausibel klingenden Aktenzeichen. Keines davon existierte. Das US-Bundesgericht verhängte Sanktionen gegen die beteiligten Anwälte.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · US-Bundesgericht New York, Juni 2023</span></div>
+<div class="miniStat"><strong>6</strong><span>erfundene Urteile im Schriftsatz</span></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Warum das wichtig ist</strong><p>Der Wert von generativer AI entsteht nicht durch blindes Vertrauen, sondern dadurch, dass Menschen verstehen, wie das Werkzeug tatsächlich funktioniert.</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Woran hätte der Anwalt erkennen können, dass die Urteile erfunden waren, bevor er sie einreichte?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">LIFECYCLE</div><h2>Vom Prompt zur nutzbaren Antwort</h2><p>Eine gute KI-Nutzung endet nicht beim Absenden der Frage – sie beginnt dort erst richtig.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Kontext geben → Aufgabe formulieren → Entwurf prüfen → Verfeinern → Ergebnis freigeben</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein Prompt ist ein Prozess, kein Einzelklick</h3><p><b>Kontext geben</b> klärt Zielgruppe, Zweck und Rahmenbedingungen. <b>Aufgabe formulieren</b> beschreibt konkret, was entstehen soll. <b>Entwurf prüfen</b> vergleicht das Ergebnis mit der Erwartung. <b>Verfeinern</b> präzisiert bei Bedarf. <b>Freigeben</b> bedeutet: ein Mensch übernimmt die Verantwortung für das Ergebnis.</p></div>
+<div class="caseFlow lifecycle"><b>Kontext</b><span>→</span><b>Aufgabe</b><span>→</span><b>Entwurf</b><span>→</span><b>Verfeinern</b><span>→</span><b>Freigabe</b></div>
+<div class="lessonCallout"><strong>Typischer Fehler</strong><p>Die erste Antwort wird ungeprüft kopiert und verschickt. Ohne Prüfschritt ist das kein fertiges Ergebnis, sondern ein ungetesteter Entwurf.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BAUSTEINE</div><h2>Prompt, Kontext und Rolle</h2><p>Ein Prompt besteht aus mehreren Bausteinen. Wer sie kennt, formuliert gezielter statt zufällig.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Rolle + Aufgabe + Kontext + Format → Ergebnis</div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Baustein</th><th>Leitfrage</th><th>Praxisbeispiel</th><th>Fehlannahme</th></tr><tr><td>Rolle</td><td>Aus welcher Perspektive antworten?</td><td>„Antworte als erfahrene Supportkraft.”</td><td>„Rollen sind nur Spielerei ohne Wirkung.”</td></tr><tr><td>Aufgabe</td><td>Was soll konkret entstehen?</td><td>„Fasse zusammen”, „Übersetze”, „Vergleiche”</td><td>„Je vager, desto kreativer die Antwort.”</td></tr><tr><td>Kontext</td><td>Für wen, wofür?</td><td>„Für ein internes Team-Update”</td><td>„Das Modell errät den Zweck von selbst richtig.”</td></tr><tr><td>Format</td><td>In welcher Form?</td><td>„Als Tabelle, maximal 5 Zeilen”</td><td>„Format ist nur bei Bildern relevant.”</td></tr></table>
+<div class="lessonCallout"><strong>Praxis</strong><p>„Schreib was zu Marketing” liefert eine zufällige Antwort. „Erstelle 3 Social-Media-Post-Ideen für einen B2B-Softwareanbieter, Ton: professionell-locker” liefert ein nutzbares Ergebnis.</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">DATENMODELL</div><h2>Wie ein Modell „denkt”: Tokens und Wahrscheinlichkeit</h2><p>Text wird intern in kleine Einheiten – Tokens – zerlegt. Das Modell sagt Token für Token die wahrscheinlichste Fortsetzung voraus.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Wahrscheinlichkeit ist nicht dasselbe wie Wissen</h3><p>Ein Modell hat keinen internen „Fakten-Speicher”, den es abfragt. Es hat gelernt, welche Wortfolgen in ähnlichen Zusammenhängen wahrscheinlich sind. Bei bekannten, gut belegten Themen führt das meist zu richtigen Antworten. Bei Nischenwissen, aktuellen Ereignissen oder erfundenen Details wie Aktenzeichen kann exakt derselbe Mechanismus zu überzeugend falschen Antworten führen.</p></div>
+<div class="codeCompare"><div><span>Eingabe</span><pre>"Die Hauptstadt von Frankreich ist"</pre></div><div><span>Wahrscheinlichste Fortsetzung</span><pre>"Paris."</pre></div></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Ein Modell optimiert auf „klingt plausibel”, nicht auf „ist verifiziert wahr”. Diese Unterscheidung ist der Kern von Modul 01.</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">PRÄZISION</div><h2>Präzise formulieren: von vage zu konkret</h2><p>Dieselbe Absicht kann als vager oder als präziser Prompt formuliert werden – mit sehr unterschiedlichem Ergebnis.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="codeCompare"><div><span>Vage</span><pre>Schreib was zu unserem Produkt.</pre></div><div><span>Präzise</span><pre>Formuliere 3 Nutzenargumente für unser Produkt,
+Zielgruppe: IT-Leiter im Mittelstand,
+maximal 2 Sätze je Argument.</pre></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Präzision ersetzt Raten durch Steuern</h3><p>Ein vager Prompt zwingt das Modell, Zielgruppe, Umfang und Ton selbst zu erraten. Ein präziser Prompt übergibt diese Entscheidungen bewusst – das Ergebnis wird vorhersagbarer und schneller nutzbar.</p></div>
+<div class="lessonCallout"><strong>Realer Alltag</strong><p>Wer regelmäßig ähnliche Aufgaben hat (z. B. Kundenantworten, Zusammenfassungen), profitiert von einer festen Prompt-Vorlage statt jedes Mal neu zu formulieren.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">ALLTAG</div><h2>KI im Werkzeugkasten: wo sie überall auftaucht</h2><p>Generative AI ist längst nicht mehr nur ein separates Chatfenster – sie steckt in vielen Werkzeugen, die täglich genutzt werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonGrid"><div class="lessonCallout"><strong>E-Mail &amp; Office</strong><p>Formulierungsvorschläge, Zusammenfassungen langer Threads, automatische Foliengestaltung.</p></div><div class="lessonCallout"><strong>Kundenservice</strong><p>Chatbots und Antwortvorschläge für Support-Teams.</p></div><div class="lessonCallout"><strong>Entwicklung</strong><p>Code-Vervollständigung und Vorschläge in der Entwicklungsumgebung.</p></div><div class="lessonCallout"><strong>Suche &amp; Recherche</strong><p>KI-generierte Zusammenfassungen in Suchmaschinen und internen Wissensdatenbanken.</p></div></div>
+<div class="lessonCallout" style="margin-top:14px"><strong>Warum das wichtig ist</strong><p>Wenn KI überall eingebettet ist, reicht es nicht, „das Chatfenster” zu meiden. Der sichere Umgang muss überall gelten, wo KI-generierte Inhalte auftauchen – auch wenn es nicht offensichtlich ist.</p></div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">SORGFALTSPFLICHT</div><h2>Jede Antwort ist ein Entwurf, keine Wahrheit</h2><p>Eine KI-Antwort ist ein Ausgangspunkt zur Prüfung – kein fertiges, automatisch korrektes Ergebnis.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Verantwortung bleibt beim Menschen</h3><p>Unabhängig davon, wie selbstsicher eine Antwort klingt: Bevor sie weiterverwendet, veröffentlicht oder an Kund:innen gesendet wird, braucht es eine bewusste menschliche Prüfung und Freigabe.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · AIR CANADA</span><h3>Wenn der Chatbot eine falsche Zusage macht</h3><p>Der Support-Chatbot von Air Canada teilte einem Kunden eine falsche Auskunft zu einer Kulanzregelung für Trauerfälle mit. Air Canada argumentierte, der Chatbot sei „für seine eigenen Aussagen verantwortlich” – ein kanadisches Schlichtungsgericht widersprach 2024 und verpflichtete das Unternehmen zur Einhaltung der vom Bot gemachten Zusage.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · BC Civil Resolution Tribunal, Februar 2024</span></div>
+<div class="miniStat"><strong>1</strong><span>Unternehmen haftet für seinen eigenen Chatbot</span></div></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Welche interne Prüfung hätte diese falsche Zusage vor Veröffentlichung abfangen können?</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">VERTRAULICHKEIT</div><h2>Was niemals in ein KI-Tool gehört</h2><p>Nicht jedes KI-Tool ist für vertrauliche Daten geeignet – Eingaben können gespeichert oder weiterverarbeitet werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Eingaben sind nicht automatisch vertraulich</h3><p>Je nach Anbieter, Tarif und Einstellungen können Eingaben gespeichert, protokolliert oder zum weiteren Training verwendet werden. Kundendaten, Personaldaten, unveröffentlichter Quellcode oder Geschäftsgeheimnisse gehören deshalb nicht ungeprüft in ein öffentliches KI-Tool.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · SAMSUNG</span><h3>Vertraulicher Quellcode landet in ChatGPT</h3><p>2023 wurde bekannt, dass Samsung-Mitarbeitende vertraulichen Halbleiter-Quellcode und interne Meeting-Notizen in ChatGPT eingaben, um sich Arbeit zu erleichtern. Samsung untersagte daraufhin intern die Nutzung öffentlicher generativer KI-Tools auf Firmengeräten.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · breite Medienberichterstattung, April 2023</span></div>
+<div class="miniStat"><strong>3×</strong><span>gemeldete Vorfälle innerhalb weniger Wochen</span></div></div>
+<div class="lessonCallout"><strong>Nie tun</strong><p>Kundennummern, IBANs, Gesundheits- oder Personaldaten sowie unveröffentlichten Quellcode in ein ungeprüftes öffentliches KI-Tool eingeben.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">BETRIEBSMODELL</div><h2>Öffentliche KI-Tools vs. Unternehmens-KI</h2><p>Nicht jedes KI-Tool bietet dieselben Datenschutz-Zusicherungen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Bereich</th><th>Öffentliches Consumer-Tool</th><th>Unternehmens-/API-Lösung</th></tr><tr><td>Datennutzung</td><td>abhängig von Anbieter und Einstellungen, oft unklar</td><td>vertraglich geregelt, meist ohne Trainingsnutzung</td></tr><tr><td>Zugriffskontrolle</td><td>persönliches Konto, keine zentrale Steuerung</td><td>zentrale Verwaltung durch IT/Admin möglich</td></tr><tr><td>Protokollierung</td><td>selten einsehbar</td><td>Audit-Logs meist verfügbar</td></tr><tr><td>Freigabe</td><td>oft ohne Prüfung nutzbar</td><td>an Unternehmensrichtlinie gebunden</td></tr></table>
+<div class="lessonCallout"><strong>Entscheidungsfrage</strong><p>„Kostenlos” bedeutet nicht „für jede Art von Daten geeignet”. Die entscheidende Frage ist immer: Welche Zusicherung gibt es zur Datennutzung – nicht nur, was das Tool kann.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">VERTRAUENSGRENZE</div><h2>Was du prüfst, bevor du handelst</h2><p>Sowohl Eingaben in eine KI als auch Ausgaben aus einer KI verdienen eine bewusste Prüfung, bevor sie weiterverwendet werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Zwei Richtungen derselben Grenze</h3><p>Bei der Eingabe gilt: Nicht jede Information darf in ein KI-Tool. Bei der Ausgabe gilt: Nicht jede Antwort darf ungeprüft übernommen werden – insbesondere wenn sie automatisch weiterverarbeitet, gesendet oder ausgeführt wird (z. B. generierter Code oder ein automatisch verschickter Text).</p></div>
+<div class="securityZones"><div class="zone danger">EINGABE<br><small>vertrauliche Daten prüfen</small></div><span>→</span><div class="zone guard">KI-TOOL<br><small>Verarbeitung</small></div><span>→</span><div class="zone safe">AUSGABE<br><small>Fakten &amp; Ton prüfen</small></div><span>→</span><div class="zone safe">Freigabe &amp; Nutzung</div></div>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Frage bei jeder Eingabe: „Dürfte das hier stehen, wenn es öffentlich einsehbar wäre?” Frage bei jeder Ausgabe: „Habe ich das geprüft, bevor ich es weitergebe?”</p></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">QUALITÄTSPRÜFUNG</div><h2>Falsche Antworten erkennen</h2><p>Systematische Prüfung schlägt Bauchgefühl – besonders bei selbstsicher klingenden Antworten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Symptom</th><th>Wahrscheinliche Ursache</th><th>Erster Check</th></tr><tr><td>Konkrete Quelle/Zitat wirkt unauffindbar</td><td>Mögliche Halluzination</td><td>Quelle eigenständig suchen und verifizieren</td></tr><tr><td>Zahlen wirken plausibel, aber unbelegt</td><td>Berechnung ohne echte Datengrundlage</td><td>Gegen eine verlässliche Quelle prüfen</td></tr><tr><td>Antwort widerspricht bekanntem Fachwissen</td><td>Veraltetes oder falsches Muster gelernt</td><td>Mit Fachperson oder Primärquelle abgleichen</td></tr><tr><td>Gleiche Frage, andere Antwort als letztes Mal</td><td>Normale Modellvariabilität</td><td>Inhalt trotzdem eigenständig prüfen</td></tr></table>
+<div class="incident"><b>Praxisfall:</b> Eine KI-Antwort nennt eine konkrete Gesetzesnummer und ein Datum. 1) Wirkt die Angabe präzise, aber nicht erinnerlich? 2) Quelle aktiv suchen. 3) Nicht auffindbar oder widersprüchlich? Als ungeprüft kennzeichnen und nicht verwenden. 4) Bei Unsicherheit Fachperson einbeziehen.</div>
+<div class="lessonCallout"><strong>Trainer-Regel</strong><p>Du bist erst „Ready to Teach”, wenn du selbst erklären kannst, woran man eine Halluzination erkennt – nicht nur, dass es sie gibt.</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">EINSATZREIFE</div><h2>Wann ist eine KI-Antwort einsatzbereit?</h2><p>Nicht jede gute Antwort ist für jeden Zweck sofort geeignet.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Reifegrad</th><th>Zweck</th><th>Nötige Prüfung</th></tr><tr><td>Persönlicher Entwurf</td><td>eigene Notiz, erster Gedanke</td><td>keine Freigabe nötig, vor Weitergabe aber prüfen</td></tr><tr><td>Interne Nutzung</td><td>Team-Kommunikation</td><td>Review durch eine zweite Person</td></tr><tr><td>Kundenseitig / extern</td><td>Kommunikation nach außen</td><td>vollständige Prüfung, Freigabe, Ton- und Faktencheck</td></tr></table>
+<div class="lessonCallout"><strong>Abschlussfrage</strong><p>Wenn eine Kundin dich morgen fragt, warum eine KI-generierte Aussage falsch war: Kannst du erklären, welche Prüfung stattgefunden hat – und welche nicht?</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER PROMPT-CHECKER</div><h2>3 Lernfälle – derselbe Prüf-Workflow</h2><p class="muted">Du sollst nicht nur den Idealfall sehen. Lade verschiedene Prompts und beobachte, wie ein regelbasierter Checker Qualität und Vertraulichkeit bewertet.</p>
+<div class="promptToolbar"><button type="button" data-prompt-preset="gut" aria-pressed="false">A · Gut formuliert</button><button type="button" data-prompt-preset="verbesserungswuerdig" aria-pressed="false">B · Verbesserungswürdig</button><button type="button" data-prompt-preset="blockiert" aria-pressed="false">C · Vertrauliche Daten</button></div>
+<div class="promptLab"><div class="promptEditor"><textarea data-prompt-input spellcheck="false" placeholder="Prompt eingeben oder ein Szenario oben laden…"></textarea><button class="promptRun" type="button" data-prompt-run>Prompt prüfen</button></div>
+<div class="promptResult"><div class="kifFlow"><div data-kif-node>Eingabe</div><div data-kif-node>Datenschutz-Check</div><div data-kif-node>Qualitäts-Check</div><div data-kif-node>Verdikt</div></div><pre class="promptOutput" data-prompt-output>Bereit. Wähle ein Szenario oder schreibe einen eigenen Prompt.</pre></div></div>
+<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und erkläre, welche drei Bausteine erfüllt sind.</li><li>Starte B und erkläre, was konkret fehlt.</li><li>Starte C und erkläre, warum kontrollierte Ablehnung besser ist als stille Weiterverarbeitung.</li><li>Schreibe einen eigenen Prompt zu deiner Arbeit und sage vorher deine Erwartung voraus.</li><li>Erkläre danach den kompletten Prüfablauf ohne auf die Seite zu schauen.</li></ol></details></section>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 01</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen und erzeugt zusätzliche variable Szenarien. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 01 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> generative AI ohne Folie erklären</label><label><input type="checkbox"> einen präzisen Prompt formulieren</label><label><input type="checkbox"> Rolle, Aufgabe, Kontext und Format unterscheiden</label><label><input type="checkbox"> Tokens/Wahrscheinlichkeit einfach erklären</label><label><input type="checkbox"> öffentliche vs. Unternehmens-KI abgrenzen</label><label><input type="checkbox"> nie erlaubte Dateneingaben benennen</label><label><input type="checkbox"> eine Halluzination erkennen und prüfen</label><label><input type="checkbox"> die Vertrauensgrenze zeichnen</label><label><input type="checkbox"> alle drei Live-Lab-Fälle erklären</label><label><input type="checkbox"> Einsatzreife-Stufen unterscheiden</label><label><input type="checkbox"> Verantwortung bei KI-Nutzung erklären</label><label><input type="checkbox"> die drei Fallbeispiele einordnen</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 02</strong><span>Modul 02 vertieft Prompt-Techniken für konkrete Aufgaben im Arbeitsalltag. Folgt in Kürze.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-module-study.js?v=1.6" defer></script>
+<script src="../../../assets/kif-module-01.js?v=1.0" defer></script>
+<script src="../../../assets/kif-module-01-assessment.js?v=1.0" defer></script>
+</body></html>
