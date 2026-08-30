@@ -89,14 +89,19 @@
     nodes.forEach(n=>n.classList.remove("active","ok","error"));
   }));
 
+  const connector=window.mountLabConnector?window.mountLabConnector(document.querySelector(".labNodes")):{lines:[],reset(){}};
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   async function animate(success=true){
+    connector.reset();
     for(let i=0;i<nodes.length;i++){
       const node=nodes[i];
+      if(i>0)connector.lines[i-1]?.classList.add("active");
       node.classList.add("active");
       await wait(220);
       node.classList.remove("active");
-      node.classList.add(success||i<1?"ok":"error");
+      const ok=success||i<1;
+      node.classList.add(ok?"ok":"error");
+      if(i>0){connector.lines[i-1]?.classList.remove("active");if(ok)connector.lines[i-1]?.classList.add("done");}
     }
   }
 

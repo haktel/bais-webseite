@@ -22,8 +22,21 @@
   output.textContent="Szenario geladen. Vor dem Start: Sage voraus, wie viele Items entstehen und welche Felder sich ändern.";
   nodes.forEach(n=>n.classList.remove("active","ok","error"));
  }));
+ const connector=window.mountLabConnector?window.mountLabConnector(document.querySelector(".module2Flow")):{lines:[],reset(){}};
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
- async function animate(ok=true){for(let i=0;i<nodes.length;i++){const n=nodes[i];n.classList.add("active");await wait(220);n.classList.remove("active");n.classList.add(ok||i<2?"ok":"error");}}
+ async function animate(ok=true){
+  connector.reset();
+  for(let i=0;i<nodes.length;i++){
+   const n=nodes[i];
+   if(i>0)connector.lines[i-1]?.classList.add("active");
+   n.classList.add("active");
+   await wait(220);
+   n.classList.remove("active");
+   const stepOk=ok||i<2;
+   n.classList.add(stepOk?"ok":"error");
+   if(i>0){connector.lines[i-1]?.classList.remove("active");if(stepOk)connector.lines[i-1]?.classList.add("done");}
+  }
+ }
  run?.addEventListener("click",async()=>{
    nodes.forEach(n=>n.classList.remove("active","ok","error"));let payload;
    try{payload=JSON.parse(input.value);}catch{output.textContent="JSON Syntaxfehler: Der Browser konnte deine Eingabe nicht parsen.";return;}
