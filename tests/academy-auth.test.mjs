@@ -1,4 +1,4 @@
 import test from"node:test";import assert from"node:assert/strict";import{normalizeEmail,validPassword}from"../functions/_lib/auth.js";import{academyProgram,coursePath}from"../functions/_lib/academy.js";
 test("normalizeEmail trims and normalizes case",()=>assert.equal(normalizeEmail("  Student@BAIS.DE "),"student@bais.de"));
 test("password policy accepts 12 to 128 characters",()=>{assert.equal(validPassword("123456789012"),true);assert.equal(validPassword("short"),false);assert.equal(validPassword("x".repeat(129)),false);});
-test("academy program lookup rejects unknown slugs",()=>{assert.equal(academyProgram("ai-governance"),"AI Governance Essentials");assert.equal(academyProgram("unknown"),null);assert.equal(coursePath("unknown"),"/academy/");});
+test("academy program lookup rejects unknown slugs",()=>{assert.equal(academyProgram("ai-governance"),"AI Governance Essentials");assert.equal(academyProgram("unknown"),null);assert.equal(coursePath("unknown"),"/academy/");assert.equal(coursePath("n8n-bootcamp"),"/academy/n8n-bootcamp/modul-01/");});
