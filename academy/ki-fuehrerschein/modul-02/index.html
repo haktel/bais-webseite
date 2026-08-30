@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 02 – Halluzinationen, Bias &amp; Grenzen | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Warum KI-Modelle halluzinieren, wie Bias entsteht, welche Grenzen generative AI hat und mit welchen Strategien man Ausgaben verifiziert – mit echtem Halluzinations- &amp; Bias-Checker als Live-Lab.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-fuehrerschein/modul-02/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/kif-module-02.css?v=1.0">
+</head><body data-module="modul-02" data-course="ki-fuehrerschein">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein</a><a href="../modul-01/">Modul 01</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 02 · PRIVATER LERNBEREICH</span><h1>Halluzinationen, Bias &amp; Grenzen</h1><p class="lead">Du lernst, warum KI-Modelle überzeugend falsche Antworten geben, wie Bias unbemerkt in Ergebnisse gelangt, wo die technischen Grenzen generativer AI liegen – und mit welchen Verifikationsstrategien du das zuverlässig prüfst, bevor du eine Ausgabe verwendest.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-02 Lernarchitektur"><div class="courseMap"><div><b>HALLUZINATION</b><span>Woher falsche Sicherheit kommt</span></div><div><b>BIAS</b><span>Gelernte Schieflagen</span></div><div><b>GRENZEN</b><span>Stichtag, Rechnen, Risikothemen</span></div><div><b>VERIFIZIEREN</b><span>Warnsignale erkennen</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 02 · Lernpfad</strong>
+<a href="#l1">01 · Was eine Halluzination ist</a><a href="#l2">02 · Seltene Fakten, hohes Risiko</a><a href="#l3">03 · Overconfidence</a><a href="#l4">04 · Was Bias bedeutet</a><a href="#l5">05 · Bias in der Praxis</a><a href="#l6">06 · Manipulierbarkeit</a><a href="#l7">07 · Grenze: Wissensstichtag</a><a href="#l8">08 · Grenze: Exakte Berechnungen</a><a href="#l9">09 · Grenze: Sensible Themen</a><a href="#l10">10 · Zwei-Quellen-Prinzip</a><a href="#l11">11 · Das Warnsignal-Muster</a><a href="#l12">12 · Einsatzreife-Checkliste</a><a href="#lab">13 · Live Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Halluzination und Bias sind keine Theorie – sie haben Namen und Daten.</h2><p>Die folgenden öffentlich bekannt gewordenen Fälle tauchen in den Lektionen wieder auf. Sie zeigen, wie beide Fehlerarten in der Praxis aussehen – unabhängig von Modul 01's Fällen.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Google Bard</strong><span>Falsche Teleskop-Behauptung</span><b>Öffentliche Demo, Feb. 2023</b></article>
+    <article><strong>Amazon</strong><span>Bias im Recruiting-Tool</span><b>Tool eingestellt, 2018</b></article>
+    <article><strong>Microsoft Tay</strong><span>Manipulation in Stunden</span><b>Chatbot abgeschaltet, 2016</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Was eine Halluzination technisch ist</h2><p>Eine Halluzination ist keine Lüge und kein Systemfehler. Es ist eine statistisch plausible, aber sachlich falsche Fortsetzung – erzeugt von einem Modell, das keinen eingebauten Wahrheitsbegriff hat.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Lücke im Wissen</div><div class="vfArrow">→</div><div class="vfNode">Plausibelste Fortsetzung</div><div class="vfArrow">→</div><div class="vfNode">Überzeugend formuliert</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Kein Vorsatz, sondern Statistik</h3><p>Wenn ein Modell eine exakte Information nicht "kennt", stoppt es nicht automatisch. Es setzt den Text mit der wahrscheinlichsten nächsten Formulierung fort – auch wenn diese Formulierung inhaltlich falsch ist. Das Ergebnis liest sich genauso flüssig wie eine korrekte Antwort.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Wichtige Unterscheidung</strong><p>"Das Modell lügt" ist die falsche Vorstellung. Richtig ist: "Das Modell hat keine eingebaute Möglichkeit, zwischen Wissen und plausibler Vermutung zu unterscheiden."</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Warum ist die Formulierung "das Modell irrt sich" treffender als "das Modell lügt"?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">RISIKOMUSTER</div><h2>Seltene, spezifische Fakten – hohes Risiko</h2><p>Je seltener ein exaktes Detail in den Trainingsdaten vorkam, desto eher wird plausibel geraten statt korrekt wiedergegeben.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Häufiges Allgemeinwissen → geringes Risiko
+Seltene Zahl / Datum / Zitat → erhöhtes Risiko
+Ereignis nach Wissensstichtag → sehr hohes Risiko</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Der Bard-Vorfall vom Februar 2023</h3><p>Bei der öffentlichen Erstpräsentation von Googles Chatbot Bard behauptete das System fälschlich, das James-Webb-Weltraumteleskop habe das allererste Foto eines Planeten außerhalb unseres Sonnensystems gemacht. Tatsächlich gelang das bereits Jahre zuvor einem anderen Teleskop. Der Fehler wurde noch am selben Tag breit berichtet.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · GOOGLE BARD</span><h3>Eine falsche Behauptung in der wichtigsten Produkt-Demo des Unternehmens</h3><p>Die Aussage klang selbstsicher und plausibel formuliert – genau deshalb fiel sie zunächst niemandem im Publikum auf. Erst externe Fachleute widersprachen öffentlich.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · Februar 2023</span></div>
+<div class="miniStat"><strong>1</strong><span>falsche Kernaussage in der Live-Demo</span></div></div>
+<div class="lessonCallout"><strong>Warum das wichtig ist</strong><p>Wenn selbst eine sorgfältig vorbereitete Produkt-Demo eine überzeugend falsche Aussage enthalten kann, gilt das erst recht für spontane Alltagsanfragen.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">OVERCONFIDENCE</div><h2>Warum Tonfall keine Garantie ist</h2><p>Ein Modell formuliert unsichere und gesicherte Aussagen sprachlich oft identisch selbstsicher. Der Ton verrät nichts über die tatsächliche Verlässlichkeit.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Sicherheit ist keine Eigenschaft des Inhalts, sondern des Stils</h3><p>Ein Modell hat kein internes "Vertrauens-Messgerät", das es in seinen Tonfall übersetzt. Eine geratene Zahl klingt genauso bestimmt wie eine korrekt zitierte. Deshalb ist "es klingt überzeugend" niemals ein Beleg für Richtigkeit.</p></div>
+<div class="codeCompare"><div><span>KLINGT SICHER, IST FALSCH</span><pre>"Die Funktion wurde garantiert
+2019 eingeführt und ist zu 100%
+kompatibel mit jeder Version."</pre></div><div><span>KLINGT VORSICHTIG, IST EHRLICHER</span><pre>"Vermutlich wurde die Funktion
+um 2019 eingeführt – das solltest
+du in der Doku verifizieren."</pre></div></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Absolute Sicherheitssprache ("garantiert", "zu 100%") ist kein Qualitätsmerkmal – sie ist ein Anlass für zusätzliche Prüfung.</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">BIAS GRUNDLAGEN</div><h2>Was Bias bedeutet und woher er kommt</h2><p>Bias ist keine böswillige Absicht. Es ist die Wiedergabe systematischer Muster und Schieflagen, die bereits in den Trainingsdaten vorhanden waren.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="caseFlow"><b>Reale Welt</b><span>→</span><b>Texte &amp; Daten</b><span>→</span><b>Trainingsdaten</b><span>→</span><b>Gelerntes Muster</b><span>→</span><b>KI-Ausgabe</b></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Das Modell erfindet Bias nicht – es übernimmt ihn</h3><p>Wenn historische Daten eine gesellschaftliche Schieflage enthalten (z. B. bei Berufsbildern, Rollenverteilungen oder Repräsentation), kann ein darauf trainiertes Modell diese Schieflage unbemerkt reproduzieren – auch ganz ohne, dass es irgendjemand beabsichtigt hat.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Wichtig</strong><p>Ein größeres oder neueres Modell verhindert Bias nicht automatisch – es lernt Muster nur präziser, inklusive vorhandener Schieflagen.</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Warum ist "das war nicht beabsichtigt" keine ausreichende Antwort auf einen entdeckten Bias?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">BIAS IN DER PRAXIS</div><h2>Der Amazon-Recruiting-Fall</h2><p>Ein bekannt gewordenes Beispiel zeigt, wie unbemerkter Bias reale, folgenreiche Entscheidungen beeinflussen kann.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein Recruiting-Tool, trainiert auf zehn Jahren Bewerbungsdaten</h3><p>Amazon testete intern ein KI-gestütztes Tool zur Vorauswahl von Bewerbungen. Weil die zugrunde liegenden Daten überwiegend von männlichen Bewerbern stammten, lernte das System, Lebensläufe mit Begriffen wie "Frauen-Schachclub-Kapitänin" systematisch abzuwerten. Das Unternehmen stellte das Tool ein, nachdem dies bekannt wurde.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · AMAZON RECRUITING-TOOL</span><h3>Historische Daten, systematisch fortgeschriebene Schieflage</h3><p>Der Fall zeigt: Bias entsteht oft nicht durch einen einzelnen fehlerhaften Datenpunkt, sondern durch ein über Jahre gewachsenes, unausgewogenes Muster in den Trainingsdaten.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · Bericht 2018</span></div>
+<div class="miniStat"><strong>10</strong><span>Jahre Bewerbungsdaten als Trainingsgrundlage</span></div></div>
+<div class="lessonCallout"><strong>Übertragung</strong><p>Dieselbe Logik gilt für jedes automatisierte Vorfiltern von Menschen – nicht nur bei Bewerbungen, sondern z. B. auch bei Kreditvergabe oder Priorisierung von Support-Anfragen.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">MANIPULIERBARKEIT</div><h2>Der Tay-Chatbot: Verzerrung in Stunden</h2><p>Bias entsteht nicht nur beim Training – er kann auch durch gezielte Interaktion im laufenden Betrieb entstehen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein Chatbot, der von seinen Nutzenden lernte</h3><p>Microsofts Chatbot Tay ging 2016 live und war darauf ausgelegt, aus Konversationen mit echten Nutzenden zu lernen. Innerhalb weniger Stunden nutzten koordinierte Gruppen dies gezielt aus, um dem Bot diskriminierende Aussagen "beizubringen". Microsoft schaltete Tay noch am selben Tag ab.</p></div>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · MICROSOFT TAY</span><h3>Von null auf diskriminierend in unter 24 Stunden</h3><p>Der Fall zeigt: Ein System, das kontinuierlich aus neuen Eingaben lernt, braucht wirksame Schutzmechanismen gegen gezielte, koordinierte Manipulation.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · März 2016</span></div>
+<div class="miniStat"><strong>&lt;24h</strong><span>bis zur Abschaltung</span></div></div>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Was unterscheidet dieses Risiko von dem im Amazon-Fall – und was haben beide gemeinsam?</p></div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">GRENZE 1</div><h2>Der Wissensstichtag</h2><p>Ein Modell kennt nur, was bis zu einem bestimmten Zeitpunkt in seinen Trainingsdaten vorlag – aktuelle Ereignisse danach fehlen grundsätzlich.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Trainingsdaten bis Stichtag → Modell "friert" Wissen ein → Ereignisse danach: unbekannt oder erfunden</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Kein Live-Ticker, ohne Zusatzwerkzeug</h3><p>Ohne angebundene Websuche oder aktuelle Datenquelle kann ein Modell Fragen zu "was ist heute passiert" nicht zuverlässig beantworten. Statt "ich weiß es nicht" liefert es oft trotzdem eine plausibel klingende, aber möglicherweise veraltete oder erfundene Antwort.</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Bei jeder Frage zu aktuellen Ereignissen zuerst prüfen: Hat das Tool eine echte, aktuelle Datenquelle angebunden – oder antwortet es rein aus dem trainierten Wissen?</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">GRENZE 2</div><h2>Warum exakte Berechnungen riskant sind</h2><p>Ein Sprachmodell sagt die wahrscheinlichste nächste Zeichenfolge vorher – es rechnet nicht wie ein Taschenrechner mit garantierter Exaktheit.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Textvorhersage ist nicht dasselbe wie Arithmetik</h3><p>Bei kurzen, einfachen Rechnungen liegt ein Modell meist richtig, weil das Muster oft in Trainingsdaten vorkam. Bei längeren, mehrstufigen Berechnungen steigt die Fehlerwahrscheinlichkeit deutlich – ohne dass sich das am Tonfall der Antwort erkennen lässt.</p></div>
+<div class="lessonCallout"><strong>Praxisregel</strong><p>Für geschäftskritische Berechnungen ein echtes Rechenwerkzeug oder eine Formel verwenden – ein Sprachmodell allein ist dafür nicht die richtige Instanz.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">GRENZE 3</div><h2>Sensible Themenfelder</h2><p>In Recht, Medizin und Finanzen führen Fehler zu besonders hohen Folgen – dort ist zusätzliche Vorsicht keine Option, sondern Pflicht.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="securityZones"><div class="zone danger">RECHT<br><small>hohe Folgen bei Fehlern</small></div><span>→</span><div class="zone guard">MEDIZIN<br><small>hohe Folgen bei Fehlern</small></div><span>→</span><div class="zone danger">FINANZEN<br><small>hohe Folgen bei Fehlern</small></div><span>→</span><div class="zone safe">Fachperson prüft final</div></div>
+<div class="lessonCallout"><strong>Prinzip</strong><p>Je höher die möglichen Konsequenzen eines Fehlers für eine reale Person, desto strenger muss die menschliche Prüfung vor jeder Nutzung sein.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">VERIFIKATION</div><h2>Das Zwei-Quellen-Prinzip</h2><p>Dieselbe Frage noch einmal an dasselbe Modell zu stellen, deckt einen systematischen Fehler nicht auf. Eine unabhängige zweite Quelle schon.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">KI-Aussage</div><div class="vfArrow">→</div><div class="vfNode">Unabhängige Quelle</div><div class="vfArrow">→</div><div class="vfNode">Abgleich &amp; Freigabe</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Warum "nochmal fragen" nicht reicht</h3><p>Ein gelerntes Muster wiederholt sich bei erneuter Anfrage an dasselbe Modell oft identisch – der Fehler bleibt derselbe. Erst eine unabhängige, andere Quelle (Fachdokumentation, Primärquelle, Fachperson) zeigt zuverlässig, ob eine Aussage stimmt.</p></div>
+<div class="lessonCallout"><strong>Merksatz</strong><p>Eine zweite Meinung von derselben Instanz ist keine zweite Meinung.</p></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">WARNSIGNAL-MUSTER</div><h2>Sicherheitssprache + unbelegte Zahl</h2><p>Zwei einzelne Signale sind schon ein Hinweis. Zusammen sind sie das stärkste Warnzeichen für eine mögliche Halluzination – und genau das prüft der Live-Lab dieses Moduls.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Signal</th><th>Beispiel</th><th>Bedeutung allein</th></tr><tr><td>Absolute Sicherheitssprache</td><td>"garantiert", "zu 100% korrekt"</td><td>Anlass für Prüfung</td></tr><tr><td>Unbelegte präzise Zahl/Jahr</td><td>"47,8 Millionen", "im Jahr 2019"</td><td>Anlass für Prüfung</td></tr><tr><td>Beide zusammen</td><td>"Garantiert 47,8 Millionen im Jahr 2019"</td><td>Starkes Halluzinations-Warnsignal</td></tr></table>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Warum diese Kombination so aussagekräftig ist</h3><p>Ein Hedging-Wort ("könnte", "vermutlich") oder eine Quellenangabe ("laut...", "Studie von...") zeigt, dass eine Unsicherheit mitgedacht wurde. Fehlen beide UND wird zusätzlich absolute Sicherheit behauptet, ist das ein deutlich stärkeres Warnsignal als jedes der beiden Merkmale allein.</p></div>
+<div class="lessonCallout"><strong>Vorbereitung auf den Lab</strong><p>Der folgende Live-Lab wendet genau diese Regel automatisiert an. Bevor du ihn startest: Kannst du bei einem beliebigen KI-Text selbst einschätzen, welche der drei Kategorien zutrifft?</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">EINSATZREIFE</div><h2>Checkliste vor der Veröffentlichung</h2><p>Erst eine bewusste, abgeschlossene Prüfung macht aus einem KI-Entwurf ein einsatzreifes Ergebnis.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Prüfschritt</th><th>Frage</th></tr><tr><td>Fakten</td><td>Sind konkrete Zahlen, Namen und Daten gegen eine unabhängige Quelle geprüft?</td></tr><tr><td>Sprache</td><td>Enthält der Text absolute Sicherheitssprache, die eigentlich Prüfung verdient?</td></tr><tr><td>Bias</td><td>Reproduziert der Text unreflektierte Stereotype oder Schieflagen?</td></tr><tr><td>Risiko</td><td>Betrifft der Inhalt ein sensibles Themenfeld (Recht, Medizin, Finanzen)?</td></tr><tr><td>Freigabe</td><td>Hat eine zweite Person das Ergebnis vor Veröffentlichung geprüft?</td></tr></table>
+<div class="lessonCallout"><strong>Abschlussfrage</strong><p>Wenn du morgen erklären müsstest, warum eine veröffentlichte KI-Aussage falsch war: Welchen der fünf Prüfschritte hättest du übersprungen?</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER HALLUZINATIONS- &amp; BIAS-CHECKER</div><h2>3 Lernfälle – dieselbe Prüfregel wie in Lektion 11</h2><p class="muted">Du bewertest hier keinen Prompt, sondern eine fertige KI-AUSGABE. Lade verschiedene Beispieltexte und beobachte, wie ein regelbasierter Checker Sicherheitssprache und unbelegte Zahlen erkennt.</p>
+<div class="outputToolbar"><button type="button" data-output-preset="verlaesslich" aria-pressed="false">A · Verlässlich formuliert</button><button type="button" data-output-preset="pruefen" aria-pressed="false">B · Braucht Prüfung</button><button type="button" data-output-preset="kritisch" aria-pressed="false">C · Kritisches Warnsignal</button></div>
+<div class="outputLab"><div class="outputEditor"><textarea data-output-input spellcheck="false" placeholder="KI-generierten Text einfügen oder ein Szenario oben laden…"></textarea><button class="outputRun" type="button" data-output-run>Text prüfen</button></div>
+<div class="outputResult"><div class="kifFlow2"><div data-kif2-node>Text</div><div data-kif2-node>Sicherheitssprache?</div><div data-kif2-node>Verdikt</div></div><pre class="outputOutput" data-output-output>Bereit. Wähle ein Szenario oder füge einen eigenen KI-Text ein.</pre></div></div>
+<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und erkläre, welches Signal (Hedging oder Quelle) die Verlässlichkeit zeigt.</li><li>Starte B und erkläre, welches einzelne Signal fehlt.</li><li>Starte C und erkläre, warum die Kombination beider Signale zur Blockade führt.</li><li>Formuliere einen eigenen KI-Beispieltext und sage deine erwartete Einstufung vorher.</li><li>Erkläre danach die komplette Prüfregel aus Lektion 11 ohne auf die Seite zu schauen.</li></ol></details></section>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 02</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen und erzeugt zusätzliche variable Szenarien. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 02 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> eine Halluzination technisch erklären, ohne von "Lügen" zu sprechen</label><label><input type="checkbox"> den Bard-Fall als Beispiel für Overconfidence einordnen</label><label><input type="checkbox"> erklären, warum Tonfall keine Garantie ist</label><label><input type="checkbox"> Bias als Wiedergabe von Trainingsdaten erklären</label><label><input type="checkbox"> den Amazon-Fall als Bias-Beispiel einordnen</label><label><input type="checkbox"> den Tay-Fall als Manipulationsrisiko einordnen</label><label><input type="checkbox"> den Wissensstichtag als Grenze benennen</label><label><input type="checkbox"> das Risiko exakter Berechnungen erklären</label><label><input type="checkbox"> sensible Themenfelder benennen</label><label><input type="checkbox"> das Zwei-Quellen-Prinzip anwenden</label><label><input type="checkbox"> das Warnsignal-Muster aus Lektion 11 erklären</label><label><input type="checkbox"> alle drei Live-Lab-Fälle erklären</label>
+</div></section>
+
+<div class="nextModule"><strong>Falls du Modul 01 noch nicht abgeschlossen hast</strong><span>Mental Model, Prompting, Datenschutz und Vertrauensgrenze sind die Grundlage für dieses Modul.</span><p><a href="../modul-01/">Modul 01 öffnen →</a></p></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein</span><span><a href="../modul-01/">← Modul 01</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
+<script src="../../../assets/kif-module-02.js?v=1.0" defer></script>
+<script src="../../../assets/kif-module-02-assessment.js?v=1.0" defer></script>
+</body></html>

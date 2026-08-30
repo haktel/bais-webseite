@@ -70,6 +70,34 @@ test("modul-03 lab_case 'get' is accepted (regression: was missing from LAB_CASE
  assert.deepEqual(body.module.labCases,["get"]);
 });
 
+test("ki-fuehrerschein modul-02 lesson_complete is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-02","lesson_complete",{lessonId:"01"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-02",event:"lesson_complete",lessonId:"01"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.completedLessons,["01"]);
+});
+
+test("ki-fuehrerschein modul-02 lab_case 'kritisch' is accepted",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-02","lab_case",{caseId:"kritisch"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-02",event:"lab_case",caseId:"kritisch"});
+ const res=await onRequestPost({request:req,env});
+ const body=await res.json();
+ assert.equal(res.status,200);
+ assert.deepEqual(body.module.labCases,["kritisch"]);
+});
+
+test("ki-fuehrerschein modul-02 rejects a lab case id that belongs to n8n-bootcamp instead",async()=>{
+ const db=makeDb(()=>null),env={DB:db};
+ const req=makeRequest("modul-02","lab_case",{caseId:"single"});
+ req.json=async()=>({courseSlug:"ki-fuehrerschein",moduleSlug:"modul-02",event:"lab_case",caseId:"single"});
+ const res=await onRequestPost({request:req,env});
+ assert.equal(res.status,422);
+});
+
 test("course-wide percent averages over THIS course's own module count, not a fixed 12 (regression)",async()=>{
  // n8n-bootcamp has 3 real modules (modul-01/02/03). If all three are fully
  // scored (module_percent 100 each, summing to 300), the course must reach
