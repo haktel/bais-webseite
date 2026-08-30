@@ -6,11 +6,11 @@ import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js"
 // count or lab case ids leaking into the other's validation.
 const LESSONS_PER_MODULE={
   "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12},
-  "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12}
+  "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12}
 };
 const LAB_CASES={
   "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"]},
-  "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"]}
+  "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"],"modul-05":["belegt","vage","unbelegt"]}
 };
 
 const parseArray=value=>{
