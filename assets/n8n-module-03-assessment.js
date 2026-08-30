@@ -1,0 +1,77 @@
+(()=> {
+ const STORE={last:"bais-n8n-m03-last",weak:"bais-n8n-m03-weak",attempt:"bais-n8n-m03-attempt"};
+ const q=(id,topic,prompt,correct,wrong,explanation)=>({id,topic,prompt,options:[correct,...wrong].map((text,i)=>({text,correct:i===0})),explanation});
+ const BANK=[
+  q("H01","http","Was ist HTTP?","Ein Request/Response-Protokoll für die Kommunikation zwischen Clients und Servern",["Ein Datenbankformat","Ein Verschlüsselungsalgorithmus","Ein Dateisystem"],"HTTP beschreibt, wie Requests und Responses zwischen Systemen übertragen werden."),
+  q("H02","http","Welche Bestandteile gehören typischerweise zu einem HTTP Request?","Methode, URL, Headers und optional Body",["Nur URL und Passwort","Nur Body","Nur Statuscode"],"Request-Methode, Ziel, Metadaten und ggf. Payload bilden den Request."),
+  q("H03","http","Was enthält eine HTTP Response typischerweise?","Statuscode, Headers und optional Body",["Nur die ursprüngliche URL","Nur Cookies","Immer nur HTML"],"Responses liefern Status, Metadaten und häufig strukturierte Daten."),
+  q("H04","http","Wofür steht HTTPS zusätzlich?","HTTP über TLS mit Transportverschlüsselung und Serverauthentisierung",["HTTP mit JSON-Zwang","HTTP nur für Webhooks","HTTP ohne Header"],"HTTPS schützt die Transportverbindung."),
+  q("R01","rest","Was beschreibt ein REST Resource-Modell?","Fachliche Ressourcen werden über URLs adressiert und mit HTTP-Methoden bearbeitet",["Jede URL muss eine Datei sein","Nur POST ist erlaubt","REST bedeutet immer GraphQL"],"REST orientiert sich an Ressourcen wie /customers oder /orders/123."),
+  q("R02","rest","Welche URL modelliert eine einzelne Bestellung am klarsten?","/orders/123",["/doSomething?order=123","/run/order/button","/postOrderNow"],"Ressourcenorientierte URLs benennen Entitäten, nicht UI-Aktionen."),
+  q("R03","rest","Was ist eine Representation?","Die übertragene Darstellung einer Resource, z. B. als JSON",["Die IP-Adresse des Servers","Ein API Key","Ein HTTP Port"],"REST trennt Resource und ihre übertragene Darstellung."),
+  q("M01","methods","Welche Methode wird typischerweise zum Lesen einer Resource verwendet?","GET",["POST","DELETE","PATCH"],"GET liest Daten ohne beabsichtigte Zustandsänderung."),
+  q("M02","methods","Welche Methode wird typischerweise zum Erstellen einer neuen Resource verwendet?","POST",["GET","HEAD","TRACE"],"POST wird häufig zum Erstellen oder Starten serverseitiger Verarbeitung verwendet."),
+  q("M03","methods","Welche Methode ersetzt eine Resource typischerweise vollständig?","PUT",["PATCH","GET","OPTIONS"],"PUT wird semantisch häufig als vollständiges Ersetzen verstanden."),
+  q("M04","methods","Welche Methode verändert typischerweise nur Teile einer Resource?","PATCH",["GET","HEAD","TRACE"],"PATCH ist für partielle Änderungen gedacht."),
+  q("M05","methods","Welche Methode löscht typischerweise eine Resource?","DELETE",["GET","POST","OPTIONS"],"DELETE drückt die Löschabsicht aus."),
+  q("U01","url","Was ist ein Query Parameter?","Ein Parameter hinter ? in der URL, z. B. ?status=open",["Ein HTTP Statuscode","Ein JSON Key im Body","Ein TLS-Zertifikat"],"Query Parameter filtern, sortieren oder steuern häufig die Abfrage."),
+  q("U02","url","Was ist ein Path Parameter?","Ein variabler Bestandteil des URL-Pfads, z. B. /customers/42",["Ein Header","Ein Cookie","Ein Body-Feld"],"Path Parameter identifizieren häufig eine konkrete Resource."),
+  q("U03","url","Welche URL enthält zwei Query Parameter?","/orders?status=open&limit=20",["/orders/42","/orders#open","/orders/status/open"],"Mehrere Query Parameter werden typischerweise mit & getrennt."),
+  q("HD01","headers","Was beschreibt Content-Type?","Das Format des gesendeten Bodys",["Die gewünschte Response-Sprache zwingend","Die HTTP-Methode","Die Server-IP"],"Content-Type sagt dem Empfänger, wie der Body zu interpretieren ist."),
+  q("HD02","headers","Was beschreibt Accept?","Welche Response-Medientypen der Client akzeptiert",["Welches Passwort gültig ist","Wie viele Items n8n hat","Welcher Port offen ist"],"Accept ist Teil der Content Negotiation."),
+  q("HD03","headers","Wo wird ein Bearer Token normalerweise übertragen?","Im Authorization Header",["Im HTTP Statuscode","Im DNS-Namen","Im JSON Key status"],"Authorization: Bearer ... ist ein verbreitetes Auth-Muster."),
+  q("B01","body","Wann ist ein JSON Body typisch?","Wenn strukturierte Daten an eine API gesendet werden",["Bei jeder GET-Anfrage zwingend","Nur bei TLS","Nur in Responses"],"POST/PATCH/PUT verwenden häufig JSON-Payloads."),
+  q("B02","body","Warum sollte ein API-Body validiert werden?","Damit Pflichtfelder, Typen und erlaubte Werte vor Business-Logik geprüft werden",["Damit jeder Request 200 liefert","Nur wegen CSS","Damit URL kürzer wird"],"Validierung schützt nachgelagerte Verarbeitung."),
+  q("S01","status","Was bedeutet HTTP 200 typischerweise?","Request erfolgreich verarbeitet",["Authentifizierung fehlt","Resource nicht gefunden","Serverfehler"],"2xx steht für erfolgreiche Verarbeitung."),
+  q("S02","status","Was bedeutet HTTP 201 typischerweise?","Eine Resource wurde erfolgreich erstellt",["Client ist nicht authentisiert","Rate Limit erreicht","Server ist dauerhaft offline"],"201 Created signalisiert erfolgreiche Erstellung."),
+  q("S03","status","Was bedeutet HTTP 400 typischerweise?","Der Request ist syntaktisch oder fachlich ungültig",["Server hatte internen Fehler","Erfolg ohne Body","Weiterleitung"],"4xx signalisiert typischerweise Client-seitiges Problem."),
+  q("S04","status","Was bedeutet HTTP 401 typischerweise?","Authentifizierung fehlt oder ist ungültig",["Authentisiert aber verboten","Resource erstellt","Timeout"],"401 bezieht sich primär auf fehlende/ungültige Authentifizierung."),
+  q("S05","status","Was bedeutet HTTP 403 typischerweise?","Zugriff ist trotz bekannter Identität/Policy nicht erlaubt",["Resource nicht gefunden","Erfolg","Rate Limit"],"403 Forbidden ist ein Autorisierungs-/Policy-Problem."),
+  q("S06","status","Was bedeutet HTTP 404?","Die angeforderte Resource wurde nicht gefunden",["Serverfehler","Zu viele Requests","Body ist immer falsch"],"404 steht für nicht gefundene Resource."),
+  q("S07","status","Was bedeutet HTTP 422 häufig?","Der Request ist formal lesbar, aber semantisch/validierungsseitig ungültig",["TLS fehlt","Immer Auth-Fehler","Erfolg"],"422 wird häufig für Validierungsfehler genutzt."),
+  q("S08","status","Was bedeutet HTTP 429?","Zu viele Requests / Rate Limit",["Resource erstellt","Serverfehler","Redirect"],"429 signalisiert Rate-Limitierung."),
+  q("S09","status","Was bedeutet HTTP 500?","Interner Serverfehler",["Client nicht authentisiert","Resource gelöscht","Request erfolgreich"],"5xx beschreibt serverseitige Fehler."),
+  q("W01","webhook","Was ist der zentrale Unterschied zwischen Webhook und Polling?","Webhook pusht bei Ereignis; Polling fragt regelmäßig nach Änderungen",["Webhook ist immer GET","Polling hat keine HTTP Requests","Es gibt keinen Unterschied"],"Webhooks sind ereignisgesteuert, Polling zeitgesteuert."),
+  q("W02","webhook","Wann ist ein Webhook besonders sinnvoll?","Wenn das Quellsystem Ereignisse aktiv melden kann",["Wenn es keine Netzwerkverbindung gibt","Nur für lokale Dateien","Wenn jede Sekunde blind abgefragt werden soll"],"Push reduziert unnötige Abfragen und Reaktionszeit."),
+  q("N01","n8n","Wozu dient der n8n HTTP Request Node?","Externe HTTP APIs aus einem Workflow aufzurufen",["Nur lokale Variablen zu setzen","Credentials zu löschen","HTML zu rendern"],"Der Node ist das universelle API-Integrationswerkzeug."),
+  q("N02","n8n","Was prüfst du bei einem fehlerhaften HTTP Request Node zuerst?","Methode, URL, Headers, Body und Response-Status",["Node-Farbe","Browser-Zoom","Workflow-Name"],"Die Request-Anatomie liefert die systematische Debugging-Reihenfolge."),
+  q("D01","docs","Welche Informationen brauchst du aus API-Dokumentation mindestens?","Endpoint, Methode, Auth, Parameter/Body, Response und Fehlercodes",["Nur Logo und Firmenname","Nur SDK-Sprache","Nur Preis"],"Ohne Vertrag ist eine Integration nicht zuverlässig implementierbar."),
+  q("D02","docs","Warum ist curl hilfreich?","Ein Request kann außerhalb von n8n reproduzierbar getestet werden",["curl ersetzt TLS","curl ist eine Datenbank","curl erstellt automatisch Credentials"],"curl isoliert API-Probleme vom Workflow."),
+  q("O01","ops","Was ist ein Timeout?","Maximale Wartezeit auf eine Operation/Response",["Ein API Key","Ein Statuscode für Erfolg","Ein Query Parameter zwingend"],"Timeouts verhindern unbegrenztes Warten."),
+  q("O02","ops","Was ist Pagination?","Aufteilung großer Ergebnismengen in mehrere Seiten",["Verschlüsselung","Authentifizierung","Webhook-Signatur"],"APIs liefern große Mengen oft seitenweise."),
+  q("O03","ops","Was sollte bei HTTP 429 berücksichtigt werden?","Retry-After bzw. kontrolliertes Backoff statt sofortigem Dauerfeuer",["Unbegrenzt parallel erneut senden","Credential veröffentlichen","Immer DELETE verwenden"],"Rate Limits erfordern kontrollierte Wiederholung."),
+  q("O04","ops","Warum ist blindes Retry bei POST riskant?","Nicht-idempotente Aktionen können doppelt ausgeführt werden",["POST kann nie fehlschlagen","Retries löschen Headers","HTTP verbietet Wiederholungen"],"Doppelte Bestellungen/Zahlungen sind klassische Retry-Risiken.")
+ ];
+ const factories=[
+  ()=>{const codes=[200,201,401,403,404,422,429,500];const code=codes[Math.floor(Math.random()*codes.length)];const meaning={200:"Erfolg",201:"Resource erstellt",401:"Authentifizierung fehlt/ungültig",403:"Zugriff verboten",404:"Resource nicht gefunden",422:"Validierungsfehler",429:"Rate Limit",500:"Serverfehler"}[code];return q("GSTATUS-"+code,"status","Ein API-Call liefert HTTP "+code+". Welche Interpretation passt am besten?",meaning,["Immer Netzwerkfehler","Immer JSON-Syntaxfehler","Immer erfolgreicher Request"],"Statuscodes helfen, Fehlerklasse und nächste Diagnose zu bestimmen.");},
+  ()=>{const methods=["GET","POST","PATCH","DELETE"];const method=methods[Math.floor(Math.random()*methods.length)];const purpose={GET:"Resource lesen",POST:"Resource erstellen/Verarbeitung starten",PATCH:"Resource teilweise ändern",DELETE:"Resource löschen"}[method];return q("GMETHOD-"+method,"methods","Welche typische Absicht hat "+method+"?",purpose,["Nur Header lesen","DNS auflösen","TLS-Zertifikat erstellen"],"HTTP-Methoden drücken die beabsichtigte Operation aus.");},
+  ()=>{const limit=[20,50,100][Math.floor(Math.random()*3)],total=[240,500,1000][Math.floor(Math.random()*3)],pages=Math.ceil(total/limit);return q("GPAGE-"+limit+"-"+total,"ops","Eine API hat "+total+" Datensätze und liefert maximal "+limit+" pro Seite. Wie viele Seiten brauchst du mindestens?",String(pages),[String(pages+1),String(Math.max(1,pages-1)),String(total)],"Seitenzahl = ceil(Gesamtmenge / Seitengröße).");},
+  ()=>{const id=["42","C-1042","ORD-88"][Math.floor(Math.random()*3)];return q("GPATH-"+id,"url","Welche Variante nutzt "+id+" als Path Parameter für eine einzelne Customer-Resource?","/customers/"+id,["/customers?id="+id,"/customers#"+id,"/customers/body/"+id],"Path Parameter stehen im Ressourcenpfad.");},
+  ()=>{const filter=["open","paid","failed"][Math.floor(Math.random()*3)];return q("GQUERY-"+filter,"url","Welche URL übergibt status="+filter+" als Query Parameter?","/orders?status="+filter,["/orders/"+filter,"/orders#status="+filter,"/orders/status:"+filter],"Query Parameter beginnen nach ?.")
+ ];
+ const shuffle=a=>{const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;};
+ const weak=()=>JSON.parse(localStorage.getItem(STORE.weak)||"{}"),saveWeak=v=>localStorage.setItem(STORE.weak,JSON.stringify(v));
+ function select(count=12){
+   const prev=new Set(JSON.parse(localStorage.getItem(STORE.last)||"[]")),pool=[...BANK,...factories.map(f=>f())],fresh=pool.filter(x=>!prev.has(x.id)),source=fresh.length>=count?fresh:pool,weighted=[],w=weak();
+   source.forEach(item=>{weighted.push(item);for(let i=0;i<Math.min(Number(w[item.topic]||0),3);i++)weighted.push(item);});
+   const picked=[],used=new Set();
+   for(const item of shuffle(weighted)){if(used.has(item.id))continue;used.add(item.id);picked.push(item);if(picked.length===count)break;}
+   localStorage.setItem(STORE.last,JSON.stringify(picked.map(x=>x.id)));return shuffle(picked);
+ }
+ function init(){
+   const root=document.querySelector("[data-assessment]");if(!root)return;
+   const list=root.querySelector("[data-assessment-list]"),result=root.querySelector("[data-assessment-result]"),restart=root.querySelector("[data-assessment-restart]"),counter=root.querySelector("[data-assessment-counter]");
+   let questions=[],answered=0,correct=0;
+   const render=()=>{questions=select(12);answered=0;correct=0;const attempt=Number(localStorage.getItem(STORE.attempt)||0)+1;localStorage.setItem(STORE.attempt,String(attempt));counter.textContent="Versuch "+attempt+" · 12 wechselnde Fragen";result.hidden=true;result.innerHTML="";list.innerHTML=questions.map((item,index)=>'<article class="assessmentItem" data-q="'+item.id+'" data-topic="'+item.topic+'"><div class="assessmentMeta"><span>FRAGE '+(index+1)+'/12</span><span>'+item.topic.toUpperCase()+'</span></div><h3>'+item.prompt+'</h3><div class="assessmentOptions">'+shuffle(item.options).map(o=>'<button type="button" data-answer data-correct="'+o.correct+'">'+o.text+'</button>').join("")+'</div><div class="assessmentExplain" data-explain hidden></div></article>').join("");};
+   list.addEventListener("click",event=>{
+     const b=event.target.closest("[data-answer]");if(!b||b.disabled)return;
+     const card=b.closest(".assessmentItem"),item=questions.find(x=>x.id===card.dataset.q),buttons=[...card.querySelectorAll("[data-answer]")];
+     buttons.forEach(x=>x.disabled=true);const ok=b.dataset.correct==="true";b.classList.add(ok?"correct":"wrong");buttons.find(x=>x.dataset.correct==="true")?.classList.add("correct");
+     const ex=card.querySelector("[data-explain]");ex.hidden=false;ex.innerHTML="<strong>"+(ok?"Richtig":"Nicht ganz")+"</strong><p>"+item.explanation+"</p>";
+     answered++;if(ok)correct++;else{const w=weak();w[item.topic]=Number(w[item.topic]||0)+1;saveWeak(w);}
+     if(answered===questions.length){const pct=Math.round(correct/questions.length*100),grade=window.percentToNote?window.percentToNote(pct):{note:pct>=50?4:5,label:pct>=50?"ausreichend":"nicht ausreichend",passed:pct>=50},credited=pct>=81;result.hidden=false;result.innerHTML='<div class="gradeRow"><span class="gradeBadge grade-'+grade.note+'">Note '+grade.note+'</span><div><strong>'+correct+'/'+questions.length+' richtig · '+pct+'%</strong><span class="gradeLabel">'+grade.label+(grade.passed?" · bestanden":" · nicht bestanden")+'</span></div></div><p>'+(credited?"Modul-Testat erreicht. Ein neuer Versuch verwendet erneut andere Fragen und Werte.":grade.passed?'Akademisch bestanden, aber für den BAIS Modul-Nachweis ist mindestens Note 2 („gut“, ≥81%) erforderlich.':'Noch nicht bestanden. Der nächste Versuch gewichtet schwächere Themen stärker.')+'</p>';window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-03",score:pct,grade:grade.note,passed:grade.passed,credited}}));result.scrollIntoView({behavior:"smooth",block:"center"});}
+   });
+   restart.addEventListener("click",()=>{render();root.scrollIntoView({behavior:"smooth",block:"start"});});render();
+ }
+ document.addEventListener("DOMContentLoaded",init);
+})();
