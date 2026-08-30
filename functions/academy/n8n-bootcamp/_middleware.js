@@ -7,7 +7,8 @@ export const onRequest=async context=>{
   const{request,env}=context;
   const url=new URL(request.url);
   const match=url.pathname.match(/\/academy\/n8n-bootcamp\/modul-(\d{2})(?:\/|$)/);
-  if(!match)return context.next();
+  const isFinalExam=/\/academy\/n8n-bootcamp\/abschlusspruefung(?:\/|$)/.test(url.pathname);
+  if(!match&&!isFinalExam)return context.next();
 
   const db=assertDatabase(env);
   try{
@@ -24,6 +25,20 @@ export const onRequest=async context=>{
       target.searchParams.set("course","n8n-bootcamp");
       target.searchParams.set("reason","enrollment_required");
       return Response.redirect(target,302);
+    }
+
+    if(isFinalExam){
+      const rows=await db.prepare(
+        "SELECT module_slug,module_percent FROM academy_module_progress WHERE user_id=? AND course_id=?"
+      ).bind(user.user_id,enrollment.course_id).all();
+      const map=new Map((rows.results||[]).map(row=>[row.module_slug,Number(row.module_percent||0)]));
+      const missing=Array.from({length:12},(_,i)=>"modul-"+pad(i+1)).find(slug=>Number(map.get(slug)||0)<100);
+      if(missing){
+        const target=new URL(`/academy/n8n-bootcamp/${missing}/`,request.url);
+        target.searchParams.set("reason","final_exam_locked");
+        return Response.redirect(target,302);
+      }
+      return context.next();
     }
 
     const current=Number(match[1]);
