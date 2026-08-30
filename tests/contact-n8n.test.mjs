@@ -2,7 +2,11 @@ import test from"node:test";import assert from"node:assert/strict";import{buildL
 
 test("buildLeadPayload fills defaults and forces consent for real submissions",()=>{
  const payload=buildLeadPayload({name:"Jane Doe",email:"jane@example.com",company:"",topic:"",message:"Hallo, wir brauchen Automation."});
- assert.deepEqual(payload,{name:"Jane Doe",email:"jane@example.com",company:"",topic:"Sonstiges",message:"Hallo, wir brauchen Automation.",consent:true});
+ assert.deepEqual(payload,{name:"Jane Doe",email:"jane@example.com",company:"Privatperson",topic:"Sonstiges",message:"Hallo, wir brauchen Automation.",consent:true});
+});
+
+test("buildLeadPayload never sends an empty company (n8n rejects it as a missing required field)",()=>{
+ assert.equal(buildLeadPayload({name:"Jane",email:"jane@example.com",message:"Test"}).company,"Privatperson");
 });
 
 test("buildLeadPayload preserves a provided company and topic",()=>{
