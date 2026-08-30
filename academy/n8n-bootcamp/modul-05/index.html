@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 05 – Flow Control, IF, Switch, Merge & Loops | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich zu n8n Flow Control, IF, AND/OR, Switch, Fallback, Merge, Loop Over Items, Batching, Decision Tables, Idempotency und Production Routing.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-05/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-05.css?v=1.0">
+</head><body data-module="modul-05">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-04/">Modul 04</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 05 · PRIVATER LERNBEREICH</span><h1>Flow Control, IF, Switch, Merge &amp; Loops</h1><p class="lead">Hier wird aus einem linearen Workflow echte Business-Logik. Du lernst Grenzwerte, AND/OR-Regeln, Multi-Routing, Fallbacks, Datenzusammenführung, Schleifen, Batching und Idempotency so, dass du komplexe Kundenprozesse kontrolliert modellieren kannst.</p></div>
+<div class="heroDiagram"><div class="courseMap"><div><b>ENTSCHEIDEN</b><span>IF · AND · OR</span></div><div><b>ROUTEN</b><span>Switch · Fallback</span></div><div><b>WIEDERHOLEN</b><span>Loop · Batch</span></div><div><b>ZUSAMMENFÜHREN</b><span>Merge · Data Integrity</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 05 · Lernpfad</strong>
+<a href="#l1">01 · Flow-Control Mental Model</a><a href="#l2">02 · IF & Grenzwerte</a><a href="#l3">03 · AND / OR</a><a href="#l4">04 · Switch</a><a href="#l5">05 · Fallback & Default</a><a href="#l6">06 · Merge</a><a href="#l7">07 · Merge & Datenintegrität</a><a href="#l8">08 · Loop Over Items</a><a href="#l9">09 · Batching & Rate Limits</a><a href="#l10">10 · Loop Safety & Idempotency</a><a href="#l11">11 · Decision Tables</a><a href="#l12">12 · Production Flow Control</a><a href="#lab">13 · Live Routing Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+ <div><span class="ey">REALE BUSINESS-AUTOMATION</span><h2>Flow Control entscheidet, ob Automation zuverlässig oder gefährlich wird.</h2><p>Delivery Hero automatisiert Freigabe- und Account-Prozesse, Stepstone verarbeitet große Batches und Vodafone routet Security- und Monitoring-Ereignisse an passende Teams. Hinter solchen Workflows stehen immer Entscheidungsregeln, Schleifen und Fallbacks.</p></div>
+ <div class="realWorldGrid">
+  <article><strong>Delivery Hero</strong><span>Approval & Recovery</span><b>Entscheidung → Aktion</b></article>
+  <article><strong>Stepstone</strong><span>Batch Processing</span><b>700+ aktive Workflows</b></article>
+  <article><strong>Vodafone</strong><span>Security Routing</span><b>automatisierte Triage</b></article>
+ </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Ein Workflow ist ein gerichteter Entscheidungsgraph</h2><p>Linear ist nur der Anfang. Reale Prozesse verzweigen, wiederholen, stoppen, eskalieren und führen Daten später wieder zusammen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="caseFlow"><b>Input</b><span>→</span><b>Validate</b><span>→</span><b>Decide</b><span>→</span><b>Route</b><span>→</span><b>Act</b><span>→</span><b>Join / Finish</b></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Kontrollfluss und Datenfluss gleichzeitig denken</h3><p>Eine Branch-Entscheidung verändert nicht nur, welcher Node als nächstes läuft. Sie verändert auch, welche Daten später verfügbar sind, wie viele Items weiterlaufen und welche Seiteneffekte entstehen. Deshalb musst du jeden Pfad als Kombination aus <b>Regel + Daten + Aktion + Fehlerpfad</b> verstehen.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Kontrollfrage</strong><p>Welcher Pfad wird gewählt?</p></div><div class="lessonCallout"><strong>Datenfrage</strong><p>Welche Felder/Items existieren danach?</p></div></div>
+<div class="incident"><b>Realer Denkfehler:</b> „Der IF ist nur eine Linie nach rechts.“ In Production kann TRUE eine Zahlung auslösen und FALSE einen manuellen Review. Das ist Geschäftslogik, kein Layout.</div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">IF</div><h2>Binäre Entscheidungen sauber formulieren</h2><p>IF eignet sich für klare Ja/Nein-Fragen: Betrag über Grenzwert? Feld vorhanden? Kunde aktiv? Risiko hoch?</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="decisionTree"><div><b>total ≥ 500?</b><p>Grenzwert exakt definieren.</p></div><span>→</span><div class="branches"><div class="yes"><b>TRUE</b> High Value</div><div class="no"><b>FALSE</b> Standard</div></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Grenzwerte sind typische Fehlerstellen</h3><p><code>&gt; 500</code> und <code>&gt;= 500</code> sind fachlich unterschiedliche Regeln. Wenn 500 Euro bereits High Value ist, muss genau dieser Wert im TRUE-Pfad landen.</p></div>
+<table class="depthTable"><tr><th>Test</th><th>Input</th><th>Erwartung bei ≥500</th></tr><tr><td>unter Grenze</td><td>499</td><td>FALSE</td></tr><tr><td>Grenze</td><td>500</td><td>TRUE</td></tr><tr><td>über Grenze</td><td>501</td><td>TRUE</td></tr><tr><td>falscher Typ</td><td><code>"500"</code></td><td>Typ kontrollieren</td></tr><tr><td>kein Wert</td><td>null</td><td>Validation/Fallback</td></tr></table>
+<div class="lessonCallout"><strong>Boundary Testing</strong><p>Teste immer knapp unter, exakt auf und knapp über dem Grenzwert.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BOOLEAN LOGIC</div><h2>AND und OR machen Regeln mächtig – und schnell unlesbar</h2><p>Mehrere Bedingungen müssen logisch bewusst kombiniert werden. Ein falsches AND/OR kann ganze Kundengruppen falsch routen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="logicGrid"><div><b>AND</b><code>A && B</code><p>beide müssen wahr sein</p></div><div><b>OR</b><code>A || B</code><p>mindestens eine wahr</p></div><div><b>NOT</b><code>!A</code><p>Bedingung negieren</p></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Business-Satz zuerst, Node danach</h3><p>Formuliere erst in natürlicher Sprache: „Manual Review, wenn Betrag mindestens 500 <b>ODER</b> Priority high ist.“ Danach übersetzt du in Node-Bedingungen. So erkennst du leichter, ob AND oder OR fachlich stimmt.</p></div>
+<table class="decisionTable"><tr><th>Total ≥500</th><th>Priority high</th><th>AND</th><th>OR</th></tr><tr><td>false</td><td>false</td><td>false</td><td>false</td></tr><tr><td>true</td><td>false</td><td>false</td><td>true</td></tr><tr><td>false</td><td>true</td><td>false</td><td>true</td></tr><tr><td>true</td><td>true</td><td>true</td><td>true</td></tr></table>
+<div class="lessonCallout"><strong>Code Smell</strong><p>Wenn eine IF-Node zehn verschachtelte Bedingungen hat, prüfe, ob Decision Table, Switch oder vorgelagerte Normalisierung besser wäre.</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">SWITCH</div><h2>Mehrere klare Routes statt IF-Kaskade</h2><p>Switch ist für Multi-Route-Entscheidungen gedacht, zum Beispiel Region, Ticket-Typ, Kanal oder Risikoklasse.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="switchVisual"><div class="switchCore">region</div><span>→</span><div class="outputs"><span>DE</span><span>EU</span><span>US</span><span>Fallback</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Switch macht Regeln sichtbar</h3><p>Drei oder vier explizite Ausgänge sind leichter zu verstehen als IF → FALSE → IF → FALSE → IF. Switch kann nach Regeln oder Expression routen.</p></div>
+<div class="caseFlow"><b>DE</b><span>→</span><b>24h SLA</b><b>EU</b><span>→</span><b>48h SLA</b><b>US</b><span>→</span><b>96h SLA</b></div>
+<div class="lessonCallout"><strong>Wichtig</strong><p>Mehrere passende Regeln können je nach Konfiguration mehrere Outputs bekommen. Entscheide bewusst: first match oder all matches.</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">FALLBACK</div><h2>Unbekannte Werte dürfen nicht still verschwinden</h2><p>Neue Region, neuer Ticket-Typ oder Tippfehler: Production braucht einen kontrollierten Default-Pfad.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">DE → domestic
+EU → eu
+US → international
+OTHER → manual review</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Fallback ist eine Sicherheitsfunktion</h3><p>Wenn morgen <code>region="CH"</code> ankommt und du nur DE/EU/US definiert hast, sollte das Item nicht unsichtbar verschwinden. Ein Fallback kann Manual Review, Error Queue oder Quarantine sein.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Bad Default</strong><p>Alles Unbekannte automatisch als DE behandeln.</p></div><div class="lessonCallout"><strong>Good Default</strong><p>Unbekannte Werte markieren, speichern und bewusst prüfen.</p></div></div>
+<div class="incident"><b>Change Management:</b> Fallback-Metriken zeigen dir, wenn ein Quellsystem neue Werte eingeführt hat, bevor daraus stille Datenverluste werden.</div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">MERGE</div><h2>Pfade wieder kontrolliert zusammenführen</h2><p>Nach parallelen Verarbeitungspfaden müssen Daten häufig wieder zu einem gemeinsamen Datensatz oder gemeinsamen Fortsetzungs-Pfad werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="mergeJoin"><div><b>CRM</b><code>C-100 · Mina</code></div><span>→</span><div class="core">MERGE</div><span>←</span><div><b>Billing</b><code>C-100 · 129€</code></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Merge kann warten, kombinieren oder anhängen</h3><p>Je nach Modus kann Merge auf mehrere Inputs warten, Items kombinieren oder Daten anhängen. Die fachliche Frage lautet: <b>Welche Datensätze gehören wirklich zusammen?</b></p></div>
+<table class="depthTable"><tr><th>Modell</th><th>Zweck</th><th>Risiko</th></tr><tr><td>Append</td><td>Listen hintereinander</td><td>keine fachliche Verbindung</td></tr><tr><td>Combine by Key</td><td>gleiche ID zusammenführen</td><td>Key muss stabil sein</td></tr><tr><td>By Position</td><td>Item 1 mit Item 1</td><td>Reihenfolge kann falsch sein</td></tr></table>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">DATA INTEGRITY</div><h2>Falscher Merge ist ein Datenschutz- und Business-Risiko</h2><p>Daten verschiedener Kunden falsch zu kombinieren ist schlimmer als ein sichtbarer Fehler.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">CRM orderId=O-7  ─┐
+                   ├→ Merge by orderId → korrekt
+ERP orderId=O-7  ──┘</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Identity before Merge</h3><p>Bevor zwei Pfade zusammengeführt werden, muss klar sein, welcher Schlüssel die fachliche Identität beschreibt: <code>customerId</code>, <code>orderId</code>, <code>ticketId</code>. Namen oder Listenposition sind oft ungeeignet.</p></div>
+<div class="incident"><b>Incident-Beispiel:</b> Zwei Arrays haben gleiche Länge, aber unterschiedliche Sortierung. Merge by Position verbindet Mina mit Jonas’ Rechnungsdaten. Der Workflow läuft grün – die Daten sind trotzdem falsch.</div>
+<div class="lessonCallout"><strong>Test</strong><p>Absichtlich unterschiedliche Reihenfolgen verwenden und prüfen, ob der Join trotzdem korrekt bleibt.</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">LOOP OVER ITEMS</div><h2>Viele Items kontrolliert nacheinander oder in Batches verarbeiten</h2><p>Loop Over Items teilt die Eingabemenge in Batches und führt denselben Verarbeitungspfad wiederholt aus.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="loopVisual"><div>100 Items</div><span>→</span><div class="loopCore">Batch 10</div><span>↻</span><div>10 Durchläufe</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Zwei Outputs mental verstehen</h3><p><b>Loop Output</b> läuft pro Batch. Der Verarbeitungspfad führt zurück zum Loop Node. <b>Done Output</b> wird erst ausgelöst, wenn alle Batches abgearbeitet sind.</p></div>
+<div class="caseFlow"><b>Loop Over Items</b><span>→ each batch →</span><b>Process</b><span>↺ zurück</span><b>Done</b><span>→</span><b>Aggregate / Report</b></div>
+<div class="lessonCallout"><strong>Typischer Fehler</strong><p>Der Rückweg zum Loop fehlt. Ergebnis: nur der erste Batch wird verarbeitet.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">BATCHING</div><h2>Batch Size ist eine Betriebsentscheidung</h2><p>Batch-Größe beeinflusst Throughput, Rate Limits, Memory, API-Kosten und Fehlerauswirkung.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="batchCompare"><div><b>Batch 1</b><span>maximale Kontrolle, langsam</span></div><div><b>Batch 10</b><span>ausgewogener Durchsatz</span></div><div><b>Batch 1000</b><span>hohe Last / Blast Radius</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Downstream bestimmt dein Tempo</h3><p>Wenn eine API 60 Requests pro Minute erlaubt, darf dein Workflow nicht 1.000 Items gleichzeitig feuern. Batching, Wait und Retry-Strategien passen den Datenfluss an die Kapazität des Zielsystems an.</p></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>Großvolumige Batch-Verarbeitung</h3><p>Stepstone beschreibt hunderte produktive Workflows und Millionen jobbezogener Dokumente pro Monat. Bei solchen Datenmengen werden Batch-Größe, Verarbeitungsgeschwindigkeit und kontrollierte Parallelität zu echten Betriebsparametern.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>2–3 Mio.</strong><span>Dokumente / Monat</span></div></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">LOOP SAFETY</div><h2>Schleifen, Retries und Idempotency</h2><p>Wiederholung ist gefährlich, wenn die Aktion einen Seiteneffekt hat: Zahlung, Order, E-Mail oder Datenbank-Insert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Item O-1001
+→ POST order
+→ Timeout
+→ Retry
+→ ??? zweite Order?</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Idempotency schützt vor Doppelaktionen</h3><p>Wenn derselbe fachliche Request erneut ausgeführt wird, sollte er nicht unbeabsichtigt einen zweiten Seiteneffekt erzeugen. Dafür können Idempotency Keys, eindeutige Business IDs oder Dedupe-Tabellen verwendet werden.</p></div>
+<table class="depthTable"><tr><th>Aktion</th><th>Retry-Risiko</th><th>Schutz</th></tr><tr><td>GET Customer</td><td>niedrig</td><td>normaler Retry</td></tr><tr><td>POST Payment</td><td>hoch</td><td>Idempotency Key</td></tr><tr><td>Send Email</td><td>mittel/hoch</td><td>messageId / sent-log</td></tr><tr><td>DB INSERT</td><td>hoch</td><td>unique key / upsert</td></tr></table>
+<div class="lessonCallout"><strong>Infinite Loop</strong><p>Jede Schleife braucht eine erreichbare Terminierung. Counters, max pages, max retries und Timeouts sind technische Sicherheitsgrenzen.</p></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">DECISION TABLES</div><h2>Komplexe Regeln zuerst auf Papier lösen</h2><p>Decision Tables machen Business-Regeln unabhängig von Node-Layout prüfbar.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="decisionTable"><tr><th>Total</th><th>Region</th><th>Priority</th><th>Route</th><th>Review</th></tr><tr><td>&lt;500</td><td>DE</td><td>normal</td><td>domestic</td><td>no</td></tr><tr><td>≥500</td><td>DE</td><td>any</td><td>domestic</td><td>yes</td></tr><tr><td>any</td><td>US</td><td>high</td><td>international</td><td>yes</td></tr><tr><td>any</td><td>unknown</td><td>any</td><td>manual</td><td>yes</td></tr></table>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Warum vor dem Workflow?</h3><p>Eine Tabelle zeigt fehlende Kombinationen und widersprüchliche Regeln. Erst wenn die fachliche Matrix stimmt, übersetzt du sie in IF, Switch und Fallback.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Coverage</strong><p>Gibt es für jede erlaubte Kombination ein Ergebnis?</p></div><div class="lessonCallout"><strong>Conflict</strong><p>Können zwei Regeln denselben Fall unterschiedlich behandeln?</p></div></div>
+<div class="lessonCallout"><strong>Test-Automation</strong><p>Aus Decision Tables lassen sich direkt Testfälle ableiten – jeder Tabellen-Eintrag wird ein reproduzierbarer Scenario Test.</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRODUCTION FLOW CONTROL</div><h2>Entscheidungen müssen nachvollziehbar, testbar und betriebssicher sein</h2><p>Production-Flow-Control braucht Fallbacks, Observability, sichere Grenzwerte und kontrollierte Seiteneffekte.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="productionPyramid"><div>BUSINESS RULE OWNER</div><div>DECISION TABLE + TEST CASES</div><div>IF / SWITCH + FALLBACK</div><div>LOOP LIMITS + IDEMPOTENCY</div><div>ROUTE METRICS + AUDIT</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Route als Observability-Daten behandeln</h3><p>Speichere nicht nur das Endergebnis, sondern warum ein Pfad gewählt wurde: <code>valueClass=high</code>, <code>route=manual</code>, <code>reason=unknown_region</code>. Das hilft bei Audit, Debugging und Business-Analyse.</p></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · DELIVERY HERO</span><h3>Freigabe entscheidet über automatisierte Account-Aktion</h3><p>Delivery Hero beschreibt einen automatisierten Account-Recovery-Prozess, in dem Manager-Freigaben nachgelagerte Aktionen in mehreren Systemen auslösen. Genau solche Prozesse brauchen klar definierte True/False-Pfade, Ownership und nachvollziehbare Entscheidungen.</p><a href="https://n8n.io/case-studies/delivery-hero/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>Approval</strong><span>als Business-Gate</span></div></div>
+<div class="lessonCallout"><strong>Production Checklist</strong><p>Grenzwerte getestet · unbekannte Werte mit Fallback · Loop-Limit · Idempotency · Route geloggt · Owner bekannt · Seiteneffekte kontrolliert.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER N8N FLOW-CONTROL WORKFLOW</div><h2>Orders → Loop → IF → Switch → Aggregate</h2><p class="muted">Der Workflow verwendet echte n8n Nodes: Loop Over Items, IF und Switch. Jeder Order-Datensatz wird einzeln klassifiziert und geroutet.</p>
+<div class="flowPresetBar"><button type="button" data-flow-preset="mixed">A · Mixed Batch</button><button type="button" data-flow-preset="high">B · High Value</button><button type="button" data-flow-preset="fallback">C · Unknown Regions</button><button type="button" data-flow-preset="invalid">D · Invalid Batch</button></div>
+<div class="flowLab"><div><textarea data-flow-input spellcheck="false"></textarea><button class="flowRun" type="button" data-flow-run>Live Flow-Control Workflow starten</button></div><div><div class="module5Flow"><div data-m05-node>Webhook</div><div data-m05-node>Validate</div><div data-m05-node>Loop</div><div data-m05-node>IF</div><div data-m05-node>Switch</div><div data-m05-node>Route</div><div data-m05-node>Aggregate</div><div data-m05-node>Respond</div></div><pre class="flowOutput" data-flow-output>Bereit.</pre></div></div>
+<div class="flowAnalysis" data-flow-analysis hidden></div>
+<details><summary>Lab-Auftrag &amp; Break/Fix öffnen</summary>
+<div class="labMission"><h3>A · Mixed Batch</h3><ol><li>Prognostiziere vor Start jede Route.</li><li>Erkläre, welche Orders TRUE im High-Value-IF sind.</li><li>Prüfe domestic/eu/international Counts.</li></ol></div>
+<div class="labMission"><h3>B · High Value</h3><ol><li>Beide Orders müssen <code>valueClass=high</code> erhalten.</li><li>Erkläre, warum Region trotzdem eine separate Switch-Entscheidung bleibt.</li></ol></div>
+<div class="labMission break"><h3>C · Fallback</h3><ol><li>APAC und CH matchen keine definierte Region.</li><li>Erkläre, warum <code>manual</code> besser ist als stilles Droppen.</li></ol></div>
+<div class="labMission break"><h3>D · BREAK IT</h3><ol><li>Order ID entfernen.</li><li>Total negativ setzen.</li><li>Region leer lassen.</li><li>Prüfe, dass der Batch vor Loop/IF/Switch mit 422 stoppt.</li></ol></div>
+<div class="labMission fix"><h3>E · DESIGN IT</h3><ol><li>Erweitere gedanklich die Decision Table um UK.</li><li>Welche Route würdest du wählen?</li><li>Welche Tests brauchst du vor Production?</li><li>Wie verhinderst du doppelte Aktionen bei Retry?</li></ol></div>
+</details></section>
+
+<section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 05</div><h2>Entscheidungslogik statt Node-Namen auswendig lernen</h2><p>Grenzwerte, Regionen, Batchgrößen und Boolean-Werte ändern sich pro Versuch. Schwache Themen werden stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 05 ist erst fertig, wenn du das ohne Vorlage kannst</h2><div class="teachList">
+<label><input type="checkbox"> Flow-Control als Business-Logik erklären</label><label><input type="checkbox"> IF-Grenzwerte testen</label><label><input type="checkbox"> AND / OR korrekt anwenden</label><label><input type="checkbox"> Switch statt IF-Kaskade wählen</label><label><input type="checkbox"> Fallback designen</label><label><input type="checkbox"> Merge-Modi erklären</label><label><input type="checkbox"> Merge by Key begründen</label><label><input type="checkbox"> Loop Over Items verkabeln</label><label><input type="checkbox"> Batch Size wählen</label><label><input type="checkbox"> Idempotency erklären</label><label><input type="checkbox"> Decision Table bauen</label><label><input type="checkbox"> Production Routing auditierbar machen</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 06 · Error Handling, Retry, Resilience &amp; Monitoring</strong><span>Error Workflows, Retry/Backoff, 429/5xx, Continue-on-Fail, Dead Letter Patterns, Alerts, Runbooks und Recovery.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-04/">← Modul 04</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-05.js?v=1.0" defer></script><script src="../../../assets/n8n-module-05-assessment.js?v=1.0" defer></script>
+</body></html>

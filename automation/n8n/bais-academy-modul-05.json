@@ -1,0 +1,738 @@
+{
+  "name": "BAIS Academy · Modul 05 · Flow Control IF Switch Loops Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-05",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1060,
+        0
+      ],
+      "id": "m05-webhook",
+      "name": "Webhook",
+      "webhookId": "m05-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body=$input.first().json.body??{};\nconst orders=Array.isArray(body.orders)?body.orders.slice(0,20):[];\nconst normalized=orders.map((order,index)=>({\n  orderId:String(order?.orderId??\"\").trim(),\n  total:Number(order?.total),\n  region:String(order?.region??\"\").trim().toUpperCase(),\n  priority:String(order?.priority??\"normal\").trim().toLowerCase(),\n  index\n}));\nconst invalid=normalized.filter(o=>!o.orderId||!Number.isFinite(o.total)||o.total<0||!o.region);\nreturn [{json:{\n  batchValid:normalized.length>0&&invalid.length===0,\n  orderCount:normalized.length,\n  invalidCount:invalid.length,\n  orders:normalized,\n  error:normalized.length===0?\"orders array is required\":invalid.length?\"one or more orders are invalid\":\"\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        0
+      ],
+      "id": "m05-validate",
+      "name": "Validate Batch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "m05-valid-cond",
+              "leftValue": "={{ $json.batchValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -620,
+        0
+      ],
+      "id": "m05-valid-if",
+      "name": "Batch Valid?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const orders=$input.first().json.orders??[];\nreturn orders.map(order=>({json:order}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -100
+      ],
+      "id": "m05-create-items",
+      "name": "Create Order Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        -100
+      ],
+      "id": "m05-loop",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "m05-high-cond",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        40,
+        20
+      ],
+      "id": "m05-high-if",
+      "name": "High Value?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-h1",
+              "name": "valueClass",
+              "value": "high",
+              "type": "string"
+            },
+            {
+              "id": "m05-h2",
+              "name": "manualReview",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        -40
+      ],
+      "id": "m05-high-set",
+      "name": "Mark High Value"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-s1",
+              "name": "valueClass",
+              "value": "standard",
+              "type": "string"
+            },
+            {
+              "id": "m05-s2",
+              "name": "manualReview",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        100
+      ],
+      "id": "m05-standard-set",
+      "name": "Mark Standard"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m05-r-de",
+                    "leftValue": "={{ $json.region }}",
+                    "rightValue": "DE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m05-r-eu",
+                    "leftValue": "={{ $json.region }}",
+                    "rightValue": "EU",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EU"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m05-r-us",
+                    "leftValue": "={{ $json.region }}",
+                    "rightValue": "US",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "US"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        500,
+        20
+      ],
+      "id": "m05-switch",
+      "name": "Route by Region"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-d1",
+              "name": "route",
+              "value": "domestic",
+              "type": "string"
+            },
+            {
+              "id": "m05-d2",
+              "name": "shippingSlaHours",
+              "value": 24,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        -160
+      ],
+      "id": "m05-de",
+      "name": "DE Route"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-e1",
+              "name": "route",
+              "value": "eu",
+              "type": "string"
+            },
+            {
+              "id": "m05-e2",
+              "name": "shippingSlaHours",
+              "value": 48,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        -40
+      ],
+      "id": "m05-eu",
+      "name": "EU Route"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-u1",
+              "name": "route",
+              "value": "international",
+              "type": "string"
+            },
+            {
+              "id": "m05-u2",
+              "name": "shippingSlaHours",
+              "value": 96,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        80
+      ],
+      "id": "m05-us",
+      "name": "US Route"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-f1",
+              "name": "route",
+              "value": "manual",
+              "type": "string"
+            },
+            {
+              "id": "m05-f2",
+              "name": "shippingSlaHours",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "m05-f3",
+              "name": "manualReview",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        200
+      ],
+      "id": "m05-fallback",
+      "name": "Fallback Route"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results=$input.all().map(item=>item.json);\nreturn [{json:{\n  ok:true,\n  module:\"05\",\n  itemCount:results.length,\n  highValueCount:results.filter(r=>r.valueClass===\"high\").length,\n  manualReviewCount:results.filter(r=>r.manualReview===true).length,\n  routes:results.reduce((acc,r)=>{acc[r.route]=(acc[r.route]||0)+1;return acc;},{}),\n  results\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -240
+      ],
+      "id": "m05-aggregate",
+      "name": "Aggregate Results"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m05-i1",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "m05-i2",
+              "name": "module",
+              "value": "05",
+              "type": "string"
+            },
+            {
+              "id": "m05-i3",
+              "name": "case",
+              "value": "invalid",
+              "type": "string"
+            },
+            {
+              "id": "m05-i4",
+              "name": "error",
+              "value": "={{ $json.error }}",
+              "type": "string"
+            },
+            {
+              "id": "m05-i5",
+              "name": "invalidCount",
+              "value": "={{ $json.invalidCount }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -380,
+        180
+      ],
+      "id": "m05-invalid",
+      "name": "Invalid Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        320,
+        -240
+      ],
+      "id": "m05-respond-ok",
+      "name": "Respond OK"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -140,
+        180
+      ],
+      "id": "m05-respond-invalid",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Batch": {
+      "main": [
+        [
+          {
+            "node": "Batch Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Valid?": {
+      "main": [
+        [
+          {
+            "node": "Create Order Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "High Value?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Value?": {
+      "main": [
+        [
+          {
+            "node": "Mark High Value",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Standard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark High Value": {
+      "main": [
+        [
+          {
+            "node": "Route by Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Standard": {
+      "main": [
+        [
+          {
+            "node": "Route by Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Region": {
+      "main": [
+        [
+          {
+            "node": "DE Route",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "EU Route",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "US Route",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DE Route": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EU Route": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "US Route": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Route": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-05",
+    "body": {
+      "orders": [
+        {
+          "orderId": "O-1001",
+          "total": 750,
+          "region": "DE",
+          "priority": "high"
+        },
+        {
+          "orderId": "O-1002",
+          "total": 120,
+          "region": "EU",
+          "priority": "normal"
+        },
+        {
+          "orderId": "O-1003",
+          "total": 980,
+          "region": "US",
+          "priority": "high"
+        }
+      ]
+    },
+    "expect": {
+      "filter": ".itemCount",
+      "value": "3"
+    }
+  }
+}
