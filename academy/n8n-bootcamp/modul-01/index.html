@@ -4,7 +4,7 @@
 <meta name="description" content="Privater BAIS Academy Lernbereich: n8n Grundlagen, Architektur, JSON, Webhooks, Executions, Credentials, Production Lifecycle, Security und Live-Labs.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-01/">
-<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.1">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.2">
 </head><body>
 <header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
 
@@ -20,35 +20,79 @@
 <div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
 
 <div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE PRODUKTIONSBEISPIELE</span><h2>Wir lernen an echten Einsatzmustern – nicht an Fantasie-Workflows.</h2><p>Die folgenden öffentlich dokumentierten n8n-Fälle tauchen in den Lektionen wieder auf. Wir benutzen sie, um Architektur, Security, Lifecycle und Skalierung greifbar zu machen.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Delivery Hero</strong><span>Account Recovery</span><b>≈ 200 h/Monat gespart</b></article>
+    <article><strong>Stepstone</strong><span>Enterprise Automation</span><b>700+ aktive Workflows</b></article>
+    <article><strong>Vodafone</strong><span>Security Orchestration</span><b>5.000+ Personentage gespart</b></article>
+  </div>
+</div>
+
 
 <article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">MENTAL MODEL</div><h2>Was n8n wirklich ist</h2><p>n8n ist eine Orchestrierungs- und Integrationsplattform: Ein Ereignis startet einen kontrollierten Datenfluss zwischen Systemen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="visualFlow"><div class="vfNode">Ereignis</div><div class="vfArrow">→</div><div class="vfNode">Workflow</div><div class="vfArrow">→</div><div class="vfNode">Ergebnis</div></div>
-<details><summary>Vertiefung öffnen</summary><div class="lessonGrid"><div class="lessonCallout"><strong>Wichtig</strong><p>n8n ersetzt nicht automatisch CRM, Datenbank oder Backend. Es verbindet und koordiniert sie.</p></div><div class="lessonCallout"><strong>Business-Beispiel</strong><p>Kontaktformular → prüfen → Lead bewerten → CRM → Follow-up → Logging.</p></div></div><p>Bevor du Nodes auswählst, definierst du Prozessstart, Input, Regeln, Output, Fehlerpfad und Owner.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Was passiert in einem echten Unternehmen?</h3><p>n8n sitzt häufig zwischen bereits vorhandenen Systemen. Ein Formular, Ticket oder Security-Event löst etwas aus; n8n liest Daten, ruft APIs auf, trifft regelbasierte Entscheidungen und schreibt das Ergebnis in andere Systeme zurück. Es ist damit eher <b>Orchestrator</b> als Ersatz für CRM, Datenbank oder Identity-System.</p></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · DELIVERY HERO</span><h3>Account-Recovery ohne IT-Flaschenhals</h3><p>Delivery Hero automatisierte einen Account-Recovery-Prozess mit n8n. Manager-Freigabe löst API-Aufrufe zu Okta, Jira und Google-Systemen aus. Laut offizieller n8n Case Study sank die durchschnittliche Sperrzeit von 35 auf 20 Minuten und der Prozess sparte rund 200 Stunden pro Monat.</p><a href="https://n8n.io/case-studies/delivery-hero/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div>
+<div class="barCompare" aria-label="Delivery Hero Zeitvergleich"><div><span>Vorher · 35 min</span><i style="--bar:100%"></i></div><div><span>Automatisiert · 20 min</span><i style="--bar:57%"></i></div></div></div>
+<div class="caseFlow"><b>Mitarbeiter gesperrt</b><span>→</span><b>Manager Approval</b><span>→</span><b>n8n</b><span>→</span><b>Okta / Jira / Google API</b></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Warum das wichtig ist</strong><p>Der Wert entsteht nicht durch „viele Nodes“, sondern dadurch, dass ein realer Geschäftsprozess schneller, nachvollziehbarer und weniger manuell wird.</p></div><div class="lessonCallout"><strong>Trainer-Frage</strong><p>Welche Systeme besitzt der Kunde bereits? Was darf n8n nur koordinieren und was bleibt System of Record?</p></div></div>
+</details></article>
 
 <article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">LIFECYCLE</div><h2>Vom Prozess zum Workflow</h2><p>Ein professioneller Workflow beginnt mit Prozessverständnis und endet nicht beim ersten grünen Lauf.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">DISCOVERY → DESIGN → BUILD → TEST → SECURE → DEPLOY → MONITOR → MAINTAIN</div>
-<details><summary>Vertiefung öffnen</summary><p><b>Discovery:</b> Was soll automatisiert werden? <b>Design:</b> Welche Systeme, Regeln und Grenzen? <b>Build:</b> Nodes und Datenmapping. <b>Test:</b> Normal- und Fehlerfälle. <b>Secure:</b> Secrets, Input, Rechte. <b>Deploy:</b> Production. <b>Monitor:</b> Fehler und KPIs. <b>Maintain:</b> Änderungen kontrollieren.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein Workflow ist ein Produkt mit Lebenszyklus</h3><p><b>Discovery</b> klärt Prozess, Volumen, Nutzer, Systeme und Risiko. <b>Design</b> definiert Datenfluss, Verantwortlichkeiten und Fehlerpfade. <b>Build</b> setzt die Logik um. <b>Test</b> prüft Happy Path, Grenzwerte und Fehler. <b>Secure</b> reduziert Rechte und schützt Secrets. <b>Deploy</b> bringt eine kontrollierte Version live. <b>Monitor</b> erkennt Störungen. <b>Maintain</b> behandelt API-Änderungen und neue Anforderungen.</p></div>
+<div class="caseFlow lifecycle"><b>Discovery</b><span>→</span><b>Design</b><span>→</span><b>Build</b><span>→</span><b>Test</b><span>→</span><b>Secure</b><span>→</span><b>Deploy</b><span>→</span><b>Monitor</b></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · VODAFONE</span><h3>Automation mit CI/CD statt „einmal bauen und vergessen“</h3><p>Vodafone beschreibt in seiner n8n Case Study, wie Workflows modular aufgebaut und über einen DevOps-/CI/CD-Lifecycle entwickelt, getestet und deployed wurden. Das ist genau der Unterschied zwischen einer Demo und einem betrieblich verantworteten Automationssystem.</p><a href="https://n8n.io/case-studies/vodafone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>33</strong><span>produktive Workflows laut Case Study</span></div></div>
+<div class="lessonCallout"><strong>Typischer Fehler</strong><p>Ein Workflow läuft einmal grün und wird sofort „Production“ genannt. Ohne Monitoring, Owner, Fehlerpfad und Wiederherstellung ist das nur ein funktionierender Test.</p></div>
+</details></article>
 
 <article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BAUSTEINE</div><h2>Trigger, Action und Node</h2><p>Trigger startet. Action tut etwas. Node ist der einzelne Verarbeitungsschritt, der Daten erhält und weitergibt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">Webhook [TRIGGER] → Edit Fields [NODE] → IF [NODE] → E-Mail [ACTION]</div>
-<details><summary>Vertiefung öffnen</summary><table class="depthTable"><tr><th>Begriff</th><th>Frage</th><th>Beispiel</th></tr><tr><td>Trigger</td><td>Was startet?</td><td>Webhook, Schedule, neue E-Mail</td></tr><tr><td>Node</td><td>Was passiert mit Daten?</td><td>Set, IF, Merge, Code</td></tr><tr><td>Action</td><td>Welche Wirkung entsteht?</td><td>API aufrufen, Mail senden, DB aktualisieren</td></tr></table></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Begriff</th><th>Leitfrage</th><th>Praxisbeispiel</th><th>Fehlannahme</th></tr><tr><td>Trigger</td><td>Welches Ereignis startet?</td><td>Webhook, Schedule, neue E-Mail, neues Ticket</td><td>„Jede erste Node ist automatisch ein Trigger.“</td></tr><tr><td>Node</td><td>Welche einzelne Verantwortung?</td><td>Validate, Transform, IF, Merge</td><td>„Je mehr Logik in einer Node, desto professioneller.“</td></tr><tr><td>Action</td><td>Welche Wirkung nach außen?</td><td>API aufrufen, E-Mail senden, DB aktualisieren</td><td>„Action bedeutet nur E-Mail.“</td></tr></table>
+<div class="caseFlow"><b>Webhook Trigger</b><span>→</span><b>Validate Node</b><span>→</span><b>IF Node</b><span>→</span><b>CRM Action</b></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>700+ aktive Workflows brauchen klare Bausteine</h3><p>Stepstone berichtet von mehr als 700 aktiven n8n Workflows und Millionen verarbeiteter jobbezogener Dokumente pro Monat. In dieser Größenordnung werden klare Node-Verantwortungen, Workflow-Ownership und nachvollziehbare Datenflüsse unverzichtbar.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>700+</strong><span>aktive Workflows</span></div></div>
+</details></article>
 
 <article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">DATENMODELL</div><h2>Items und JSON</h2><p>n8n transportiert strukturierte Datensätze. JSON ist dabei eines der wichtigsten Formate.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">Item 1 → {"name":"Anna","budget":7500}
 Item 2 → {"name":"Mehmet","budget":3200}</div>
-<details><summary>Vertiefung öffnen</summary><p>JSON kann Strings, Numbers, Booleans, Arrays und Objects enthalten. Ein Node kann ein oder viele Items verarbeiten. Du musst immer wissen: <b>Welche Struktur kommt hinein, welche Struktur soll heraus?</b></p><div class="lessonCallout"><strong>Mini-Übung</strong><p>Finde Key und Value in <code>{"company":"BAIS","active":true}</code>. Lösung: Keys = company/active; Values = BAIS/true.</p></div></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>JSON ist der Vertrag zwischen Systemen</h3><p>APIs und Webhooks liefern nicht „nur Text“, sondern strukturierte Daten. Ein Feld kann String, Number, Boolean, Array, Object oder null sein. Für n8n ist entscheidend, ob ein Node <b>ein Item mit einem Array</b> oder <b>mehrere Items</b> erhält – das verändert spätere Loops, E-Mails und API-Aufrufe.</p></div>
+<div class="codeCompare"><div><span>Ein Item mit Array</span><pre>{"customers":[{"id":1},{"id":2}]}</pre></div><div><span>Zwei Items</span><pre>Item 1 {"id":1}
+Item 2 {"id":2}</pre></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Realer Alltag</strong><p>Ein CRM liefert 500 Kontakte als Array. Bevor du 500 E-Mails sendest, musst du wissen, ob du splitten, filtern, batchen oder aggregieren willst.</p></div><div class="lessonCallout"><strong>Gefahr</strong><p>Ein unerwartetes Array kann aus „eine E-Mail senden“ plötzlich „500 E-Mails senden“ machen.</p></div></div>
+<div class="lessonCallout"><strong>Mini-Übung</strong><p>In <code>{"company":"BAIS","active":true,"services":["AI","n8n"]}</code>: company=String, active=Boolean, services=Array.</p></div>
+</details></article>
 
 <article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">DYNAMISCHE DATEN</div><h2>Expressions und Datenreferenzen</h2><p>Expressions lesen Werte dynamisch aus dem aktuellen oder einem anderen Node-Kontext.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">{{$json.name}} → aktueller Name
 {{$json.budget}} → aktuelles Budget</div>
-<details><summary>Vertiefung öffnen</summary><p>Wenn eine Expression <code>undefined</code> liefert, prüfst du zuerst den Input des Nodes. Nicht raten. Datenpfad ansehen, Feldnamen prüfen, Typen kontrollieren.</p><div class="lessonCallout"><strong>Merksatz</strong><p>Expression-Probleme sind sehr oft Datenstruktur-Probleme.</p></div></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Expressions sind Datenzugriff, keine Magie</h3><p><code>{{$json.name}}</code> funktioniert nur, wenn im aktuellen Item tatsächlich ein Feld <code>name</code> existiert. Nach einer Transformation kann das Feld anders heißen oder tiefer verschachtelt sein. Deshalb prüft ein Professional immer zuerst den Input der betroffenen Node.</p></div>
+<div class="codeCompare"><div><span>Input</span><pre>{"customer":{"name":"Mina"}}</pre></div><div><span>Korrekt</span><pre>{{$json.customer.name}}</pre></div></div>
+<div class="caseFlow"><b>Node Input prüfen</b><span>→</span><b>Pfad lesen</b><span>→</span><b>Expression testen</b><span>→</span><b>Output kontrollieren</b></div>
+<div class="lessonCallout"><strong>Realer Fehler</strong><p>Eine API-Version ändert <code>email</code> zu <code>contact.email</code>. Der Workflow läuft weiter, aber deine Expression liefert <code>undefined</code>. Ohne Datenprüfung suchst du am falschen Ort.</p></div>
+</details></article>
 
 <article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">HTTP</div><h2>Webhooks als Eingangstor</h2><p>Ein Webhook ist ein HTTP-Endpunkt. Externe Systeme können damit einen Workflow ereignisgesteuert starten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">POST /webhook/bais-academy-modul-01
 Content-Type: application/json
 ↓
 {"name":"Max","email":"max@example.com","budget":7500}</div>
-<details><summary>Vertiefung öffnen</summary><p><b>Test:</b> <code>/webhook-test/...</code> für Entwicklung. <b>Production:</b> <code>/webhook/...</code> für aktive Workflows. Prüfe Methode, URL, Content-Type, Body, Statuscode und Response.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Webhook = öffentlicher Eingang mit Vertrag</h3><p>Ein Webhook besteht nicht nur aus einer URL. Zum Vertrag gehören HTTP-Methode, Pfad, Headers, Content-Type, Body-Schema, Authentifizierung, erwartete Statuscodes und Timeout-Verhalten. Production muss außerdem Rate Limits, Validation und Missbrauch berücksichtigen.</p></div>
+<div class="httpCard"><div><b>REQUEST</b><pre>POST /webhook/order
+Content-Type: application/json
+
+{"orderId":"A-1042","total":129.90}</pre></div><div><b>RESPONSE</b><pre>200 OK
+{"ok":true,"status":"accepted"}</pre></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Test URL</strong><p><code>/webhook-test/...</code> ist für die Entwicklung und temporäres Listening.</p></div><div class="lessonCallout"><strong>Production URL</strong><p><code>/webhook/...</code> gehört in reale Anwendungen und benötigt einen aktiven Workflow.</p></div></div>
+<div class="lessonCallout"><strong>Realer Alltag</strong><p>Shop-Systeme, Stripe-Events, CRM-Callbacks, GitHub-Events und Website-Formulare starten Prozesse über Webhooks. Die meisten Fehler entstehen durch falsche Methode, falschen Body oder fehlende Authentifizierung.</p></div>
+</details></article>
 
 <article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">OBSERVABILITY</div><h2>Executions verstehen</h2><p>Jeder konkrete Workflow-Lauf ist eine Execution. Sie ist deine wichtigste Spur beim Debugging.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">Execution #1842
@@ -57,15 +101,30 @@ Validate     OK
 Transform    OK
 IF           OK
 Respond      OK</div>
-<details><summary>Vertiefung öffnen</summary><p>Wenn es keine Execution gibt, liegt der Fehler meist vor oder am Trigger. Wenn eine Execution existiert und Node 4 fehlschlägt, untersuchst du Node 4 Input, Konfiguration, Error und Output.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Execution = dein forensischer Laufzettel</h3><p>Eine Execution zeigt, welcher konkrete Request wann durch welche Nodes gelaufen ist und wo er scheiterte. Ohne Execution ist der Trigger vermutlich nie erreicht worden. Mit Execution kannst du den ersten fehlerhaften Schritt isolieren.</p></div>
+<div class="executionTrace"><div class="ok">1 · Webhook <b>OK</b></div><div class="ok">2 · Validate <b>OK</b></div><div class="bad">3 · HTTP Request <b>401</b></div><div>4 · Database <b>nicht ausgeführt</b></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Keine Execution</strong><p>URL, DNS, Methode, Workflow-Aktivierung, Reverse Proxy und Request prüfen.</p></div><div class="lessonCallout"><strong>Execution vorhanden</strong><p>Erste rote Node öffnen: Input → Parameter → Error → HTTP-Status → Output.</p></div></div>
+<div class="lessonCallout"><strong>Praxis</strong><p>Ein Kunde meldet „Formular geht nicht“. Statt alles neu zu bauen suchst du die konkrete Execution-ID und kannst reproduzierbar feststellen, ob das Problem im Browser, Backend, n8n oder externen API liegt.</p></div>
+</details></article>
 
 <article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">SECRETS</div><h2>Credentials und Environment Variables</h2><p>API Keys, Tokens und Passwörter gehören nicht als Klartext in öffentliche Dateien oder frei sichtbare Workflow-Felder.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">Workflow → Credential Store → API
 Environment → API_BASE_URL / ENVIRONMENT / Konfiguration</div>
-<details><summary>Vertiefung öffnen</summary><p>Least Privilege, getrennte Service Accounts, Rotation und getrennte Development-/Production-Werte gehören zum professionellen Betrieb. Secrets dürfen auch nicht versehentlich in Logs landen.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Credentials sind Produktionsvermögen</h3><p>Ein API Key kann Kundendaten lesen, E-Mails senden oder Daten löschen. Deshalb gehören Credentials in einen Secret-/Credential-Mechanismus und erhalten nur die Scopes, die ein Workflow tatsächlich braucht. Development und Production sollten unterschiedliche Zugangsdaten besitzen.</p></div>
+<div class="caseFlow"><b>Workflow</b><span>→</span><b>Credential Store</b><span>→</span><b>kurzlebiges / begrenztes Secret</b><span>→</span><b>API</b></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>Skalierung macht Credential-Management sichtbar</h3><p>Stepstone beschreibt, dass bei hunderten Workflows ein gemeinsamer Master-Account und geteilte Credentials nicht mehr tragfähig waren. Der Enterprise-Ausbau brachte unter anderem Rollen, Credential-/Workflow-Permissions und externe Secret-Verwaltung in den Fokus.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>3.000</strong><span>Mitarbeitende im Rollout</span></div></div>
+<div class="lessonCallout"><strong>Nie tun</strong><p>API Key in HTML, Screenshot, Git-Repository, Chat oder Execution-Log kopieren. Bei Leak: Key sofort rotieren und Audit durchführen.</p></div>
+</details></article>
 
 <article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">BETRIEBSMODELL</div><h2>Cloud vs Self-hosted</h2><p>Managed Cloud reduziert Betriebsaufwand. Self-hosted bietet mehr Kontrolle, verschiebt aber Verantwortung zu dir.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
-<details><summary>Vertiefung öffnen</summary><table class="depthTable"><tr><th></th><th>Managed</th><th>Self-hosted</th></tr><tr><td>Betrieb</td><td>stärker beim Anbieter</td><td>stärker bei dir</td></tr><tr><td>Kontrolle</td><td>begrenzt</td><td>hoch</td></tr><tr><td>Updates/Backups</td><td>teilweise integriert</td><td>selbst planen</td></tr><tr><td>Security</td><td>geteilt</td><td>mehr Eigenverantwortung</td></tr></table><p>Unser n8n läuft auf eigener RepoCloud-Instanz. Damit müssen wir Deployment, Secrets, Monitoring und Workflow-Betrieb bewusst gestalten.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Bereich</th><th>Managed Cloud</th><th>Self-hosted</th></tr><tr><td>Patchen</td><td>Anbieter übernimmt viel</td><td>du planst Updates und Wartungsfenster</td></tr><tr><td>Backups</td><td>abhängig vom Angebot</td><td>du definierst DB-/Config-Backup und Restore-Test</td></tr><tr><td>Netzwerk</td><td>weniger Kontrolle</td><td>Reverse Proxy, Firewall, TLS, private Netze möglich</td></tr><tr><td>Secrets</td><td>Plattformmechanismen</td><td>eigene Policy und Rotation</td></tr><tr><td>Monitoring</td><td>teilweise inklusive</td><td>du brauchst Healthchecks, Logs und Alerts</td></tr></table>
+<div class="caseFlow"><b>Internet</b><span>→</span><b>TLS / Reverse Proxy</b><span>→</span><b>n8n</b><span>→</span><b>DB / APIs</b></div>
+<div class="lessonCallout"><strong>Unser Labor</strong><p>BAIS nutzt eine eigene n8n-Instanz auf RepoCloud. Dadurch haben wir Kontrolle über API-Deployment und Workflows – aber auch Verantwortung für Keys, Verfügbarkeit, Backups und Update-Strategie.</p></div>
+<div class="lessonCallout"><strong>Entscheidungsfrage</strong><p>Self-hosted ist nicht automatisch „sicherer“. Es ist nur kontrollierbarer, wenn Betrieb und Security tatsächlich professionell umgesetzt werden.</p></div>
+</details></article>
 
 <article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">SECURITY ARCHITECTURE</div><h2>Security Boundary</h2><p>Externe Daten sind untrusted. Eine Vertrauensgrenze prüft Input, Identität, Rechte oder Bot-Schutz, bevor interne Systeme handeln.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">INTERNET [UNTRUSTED]
@@ -75,14 +134,29 @@ Cloudflare / Validation / Policy
 n8n
         ↓
 Database / API / E-Mail</div>
-<details><summary>Vertiefung öffnen</summary><p>Bei BAIS ist das Zielmuster: Browser → Backend/Validation → n8n. So wird n8n nicht unnötig direkt zur offenen Steuerfläche interner Systeme.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Trust Boundary: Wo endet Vertrauen?</h3><p>Browser, externe Webhooks und Partner-APIs gelten zunächst als untrusted. Bevor Daten interne Workflows, Datenbanken oder privilegierte APIs steuern, werden Schema, Authentizität, Berechtigungen, Größe und erlaubte Werte geprüft.</p></div>
+<div class="securityZones"><div class="zone danger">INTERNET<br><small>untrusted</small></div><span>→</span><div class="zone guard">VALIDATION<br><small>Turnstile · Auth · Schema</small></div><span>→</span><div class="zone safe">n8n / Backend<br><small>controlled</small></div><span>→</span><div class="zone safe">DB / CRM / API</div></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · VODAFONE</span><h3>Security-Automation in kontrollierten Modulen</h3><p>Vodafone setzte n8n für Security-Orchestration und Monitoring ein und beschreibt wiederverwendbare Module sowie getrennte Lifecycle-Schritte. Bei solchen Prozessen ist die Vertrauensgrenze besonders wichtig, weil ein unvalidierter Input direkt Security-Aktionen auslösen könnte.</p><a href="https://n8n.io/case-studies/vodafone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>5.000+</strong><span>eingesparte Personentage laut Case Study</span></div></div>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Browser → Cloudflare Function → Input Validation / Origin / Bot-Schutz → n8n. n8n ist nicht der erste ungeprüfte Kontaktpunkt für sensible Aktionen.</p></div>
+</details></article>
 
 <article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">DEBUGGING</div><h2>Nicht raten – Datenfluss verfolgen</h2><p>Professionelles Debugging folgt einer festen Reihenfolge.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="miniArchitecture">INPUT → TRIGGER → EXECUTION → NODE → OUTPUT</div>
-<details><summary>Vertiefung öffnen</summary><p><b>Keine Execution?</b> Endpoint, Methode, Aktivierung, Request. <b>Execution vorhanden?</b> Ersten fehlerhaften Node finden. <b>401?</b> Authentifizierung. <b>422?</b> Payload gegen Validierung prüfen. <b>undefined?</b> Datenstruktur/Expression prüfen.</p><div class="lessonCallout"><strong>Trainer-Regel</strong><p>Du musst Fehler absichtlich erzeugen und anschließend reproduzierbar reparieren können.</p></div></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Debugging-Matrix statt planloses Klicken</h3><p>Gehe immer vom beobachtbaren Symptom zur Schicht: Erreicht der Request das System? Entsteht eine Execution? Wo ist die erste Abweichung? Welcher Statuscode kommt? Welche Daten lagen unmittelbar davor an?</p></div>
+<table class="depthTable"><tr><th>Symptom</th><th>Wahrscheinliche Schicht</th><th>Erster Check</th></tr><tr><td>Keine Execution</td><td>Trigger / Netzwerk</td><td>URL, Methode, Aktivierung</td></tr><tr><td>401</td><td>Authentication</td><td>Credential, Header, Token-Gültigkeit</td></tr><tr><td>403</td><td>Authorization / Policy</td><td>Scopes, Rollen, Origin</td></tr><tr><td>422</td><td>Input Validation</td><td>Payload gegen Schema</td></tr><tr><td>429</td><td>Rate Limit</td><td>Retry-After, Batch-Größe</td></tr><tr><td>undefined</td><td>Datenpfad</td><td>Node-Input und Expression</td></tr></table>
+<div class="incident"><b>Praxisfall:</b> Website sendet Lead, aber CRM bleibt leer. 1) Browser Network: 200? 2) Backend Log: Request angenommen? 3) n8n Execution vorhanden? 4) erster roter Node? 5) CRM Response 401/429/5xx? 6) nach Fix denselben Testfall reproduzieren.</div>
+<div class="lessonCallout"><strong>Trainer-Regel</strong><p>Du bist erst „Ready to Teach“, wenn du einen Fehler absichtlich erzeugen, erklären, lokalisieren und beheben kannst.</p></div>
+</details></article>
 
 <article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRODUCTION</div><h2>Demo, PoC und Production sauber trennen</h2><p>Ein einmal funktionierender Workflow ist kein Produktionssystem.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
-<details><summary>Vertiefung öffnen</summary><table class="depthTable"><tr><th>Reifegrad</th><th>Zweck</th><th>Pflicht</th></tr><tr><td>Demo</td><td>Idee zeigen</td><td>transparent begrenzen</td></tr><tr><td>PoC</td><td>Machbarkeit prüfen</td><td>technischen Kern belegen</td></tr><tr><td>Production</td><td>dauerhaft betreiben</td><td>Validation, Security, Error Handling, Monitoring, Recovery, Doku, Owner</td></tr></table></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Reifegrad</th><th>Zweck</th><th>Was noch fehlen darf</th><th>Was Production zwingend braucht</th></tr><tr><td>Demo</td><td>Idee sichtbar machen</td><td>Monitoring, Recovery, vollständige Security</td><td>nicht als produktiv verkaufen</td></tr><tr><td>PoC</td><td>technische Machbarkeit belegen</td><td>Skalierung, Runbook, SLA</td><td>klare Grenzen dokumentieren</td></tr><tr><td>Production</td><td>dauerhaft Geschäft betreiben</td><td>nichts Kritisches „später“</td><td>Validation, Auth, Error Handling, Retry, Monitoring, Backup, Owner, Doku</td></tr></table>
+<div class="productionPyramid"><div>BUSINESS OWNER</div><div>MONITORING · RUNBOOK · ALERTS</div><div>ERROR HANDLING · RETRY · RECOVERY</div><div>VALIDATION · AUTH · LEAST PRIVILEGE</div><div>WORKFLOW LOGIC</div></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>Von frühen Workflows zu Enterprise-Betrieb</h3><p>Stepstone startete klein und wuchs auf 700+ aktive Workflows. Laut Case Study wurden bei wachsender Last Themen wie Workflow-Ownership, Credential-Berechtigungen, Execution-Monitoring und getrennte Security-Umgebungen zentral. Genau diese Dinge markieren den Übergang von „funktioniert“ zu „betreibbar“.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>2–3 Mio.</strong><span>jobbezogene Dokumente pro Monat</span></div></div>
+<div class="lessonCallout"><strong>Abschlussfrage</strong><p>Wenn du nachts um 03:00 nicht erklären kannst, wer alarmiert wird, wie man den Fehler erkennt und wie man Daten sicher erneut verarbeitet, ist der Workflow noch nicht Production-ready.</p></div>
+</details></article>
 
 <section class="liveLab" id="lab"><div class="ey">ECHTER REPOCLOUD-N8N WORKFLOW</div><h2>3 Lernfälle – derselbe Production Workflow</h2><p class="muted">Du sollst nicht nur den Happy Path sehen. Lade verschiedene Szenarien und beobachte Routing bzw. kontrollierte Ablehnung.</p>
 <div class="labPresets"><button type="button" data-lab-preset="qualified" aria-pressed="false">A · Qualified Lead</button><button type="button" data-lab-preset="standard" aria-pressed="false">B · Standard Lead</button><button type="button" data-lab-preset="invalid" aria-pressed="false">C · Validation kaputt</button></div>
@@ -105,6 +179,6 @@ Database / API / E-Mail</div>
 </div></div></section></main>
 
 <footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
-<script src="../../../assets/n8n-module-study.js?v=1.1" defer></script>
-<script src="../../../assets/n8n-module-01-assessment.js?v=1.0" defer></script>
+<script src="../../../assets/n8n-module-study.js?v=1.2" defer></script>
+<script src="../../../assets/n8n-module-01-assessment.js?v=1.1" defer></script>
 </body></html>

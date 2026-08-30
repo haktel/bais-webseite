@@ -1,18 +1,62 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{coursePath}from"../../_lib/academy.js";
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
+
+const N8N_MODULE_COUNT=12;
+
 const list=async(db,userId)=>{
- const result=await db.prepare("SELECT c.slug,c.title,e.status AS enrollment_status,COALESCE(p.progress_percent,0) AS progress_percent,COALESCE(p.status,'not_started') AS progress_status,p.updated_at FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id LEFT JOIN course_progress p ON p.user_id=e.user_id AND p.course_id=c.id WHERE e.user_id=? ORDER BY e.enrolled_at DESC").bind(userId).all();
- return(result.results||[]).map(course=>({...course,path:coursePath(course.slug)}));
+ const result=await db.prepare(
+  "SELECT c.id AS course_id,c.slug,c.title,e.status AS enrollment_status,COALESCE(p.progress_percent,0) AS progress_percent,COALESCE(p.status,'not_started') AS progress_status,p.updated_at FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id LEFT JOIN course_progress p ON p.user_id=e.user_id AND p.course_id=c.id WHERE e.user_id=? ORDER BY e.enrolled_at DESC"
+ ).bind(userId).all();
+
+ const courses=[];
+ for(const course of result.results||[]){
+  let percent=Number(course.progress_percent)||0,status=course.progress_status;
+  if(course.slug==="n8n-bootcamp"){
+   const aggregate=await db.prepare(
+    "SELECT COALESCE(SUM(module_percent),0) AS total,MAX(updated_at) AS updated_at FROM academy_module_progress WHERE user_id=? AND course_id=?"
+   ).bind(userId,course.course_id).first();
+   percent=Math.max(0,Math.min(100,Math.round(Number(aggregate?.total||0)/N8N_MODULE_COUNT)));
+   status=percent===100?"completed":percent>0?"in_progress":"not_started";
+   course.updated_at=aggregate?.updated_at||course.updated_at;
+  }
+  courses.push({...course,progress_percent:percent,progress_status:status,path:coursePath(course.slug)});
+ }
+ return courses;
 };
-export const onRequestGet=async({request,env})=>{const traceId=requestId(request);try{const db=assertDatabase(env);await ensureAuthSchema(db);const user=await requireSession(db,request);return json({ok:true,courses:await list(db,user.user_id),requestId:traceId});}catch(error){return handleError(error,traceId);}};
+
+export const onRequestGet=async({request,env})=>{
+ const traceId=requestId(request);
+ try{
+  const db=assertDatabase(env);
+  await ensureAuthSchema(db);
+  const user=await requireSession(db,request);
+  return json({ok:true,courses:await list(db,user.user_id),requestId:traceId});
+ }catch(error){return handleError(error,traceId);}
+};
+
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{
-  assertSameOrigin(request);const db=assertDatabase(env);await ensureAuthSchema(db);const user=await requireSession(db,request),body=await readJson(request),slug=cleanText(body.courseSlug,120),percent=Number(body.progressPercent);
-  if(!slug||!Number.isInteger(percent)||percent<0||percent>100)throw new ApiError(422,"validation_failed","Programm und Lernfortschritt zwischen 0 und 100 sind erforderlich.");
-  const course=await db.prepare("SELECT c.id FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug=? LIMIT 1").bind(user.user_id,slug).first();
+  assertSameOrigin(request);
+  const db=assertDatabase(env);
+  await ensureAuthSchema(db);
+  const user=await requireSession(db,request),
+   body=await readJson(request),
+   slug=cleanText(body.courseSlug,120),
+   percent=Number(body.progressPercent);
+
+  if(slug==="n8n-bootcamp")
+   throw new ApiError(409,"automatic_progress_required","Der n8n-Bootcamp-Fortschritt wird automatisch aus Lektionen, Labs und Assessments berechnet.");
+
+  if(!slug||!Number.isInteger(percent)||percent<0||percent>100)
+   throw new ApiError(422,"validation_failed","Programm und Lernfortschritt zwischen 0 und 100 sind erforderlich.");
+
+  const course=await db.prepare(
+   "SELECT c.id FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug=? LIMIT 1"
+  ).bind(user.user_id,slug).first();
   if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
+
   const status=percent===100?"completed":percent>0?"in_progress":"not_started",now=new Date().toISOString();
   await db.batch([
    db.prepare("INSERT INTO course_progress(user_id,course_id,progress_percent,status,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id,course_id) DO UPDATE SET progress_percent=excluded.progress_percent,status=excluded.status,updated_at=excluded.updated_at").bind(user.user_id,course.id,percent,status,now),
@@ -22,4 +66,5 @@ export const onRequestPost=async({request,env})=>{
   return json({ok:true,courses:await list(db,user.user_id),requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
+
 export const onRequest=()=>json({ok:false,error:{code:"method_not_allowed",message:"Methode nicht erlaubt."}},405,{allow:"GET, POST"});
