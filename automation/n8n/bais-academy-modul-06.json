@@ -1,0 +1,266 @@
+{
+  "name": "BAIS Academy · Modul 06 · Error Handling Retry Resilience Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-06",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -760,
+        0
+      ],
+      "id": "m06-webhook",
+      "name": "Webhook",
+      "webhookId": "m06-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst map={\n success:{statusCode:200,expectedAction:\"continue\",retryable:false},\n client:{statusCode:400,expectedAction:\"reject\",retryable:false},\n rate:{statusCode:429,expectedAction:\"retry_backoff\",retryable:true},\n server:{statusCode:500,expectedAction:\"retry_backoff\",retryable:true}\n};\nif(!map[scenario])return [{json:{valid:false,scenario,error:\"unknown_scenario\"}}];\nreturn [{json:{valid:true,scenario,...map[scenario]}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        0
+      ],
+      "id": "m06-prepare",
+      "name": "Prepare Scenario"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "m06-valid-cond",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "m06-valid",
+      "name": "Scenario Valid?"
+    },
+    {
+      "parameters": {
+        "url": "=https://postman-echo.com/status/{{ $json.statusCode }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -80,
+        -100
+      ],
+      "id": "m06-http",
+      "name": "Call Unstable Upstream"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response=$input.first().json;\nconst prepared=$('Prepare Scenario').item.json;\nconst status=Number(response.statusCode??response.status??response.body?.status??0);\nlet failureClass=\"success\",action=\"continue\",retryable=false,reason=\"2xx response\";\nif(status===429){failureClass=\"rate_limit\";action=\"retry_backoff\";retryable=true;reason=\"Rate limit: Retry-After/Backoff beachten\";}\nelse if(status>=500){failureClass=\"server_error\";action=\"retry_backoff\";retryable=true;reason=\"Temporärer Upstream-Fehler kann retrybar sein\";}\nelse if(status>=400){failureClass=\"client_error\";action=\"reject\";retryable=false;reason=\"Request/Policy korrigieren statt blind retryen\";}\nconst matches=action===prepared.expectedAction&&retryable===prepared.retryable;\nreturn [{json:{\n  ok:matches,module:\"06\",case:prepared.scenario,\n  upstream:{status,body:response.body??null},\n  classification:{failureClass,retryable,action,reason},\n  expected:{action:prepared.expectedAction,retryable:prepared.retryable},\n  policy:{\n    retryableStatuses:[429,500,502,503,504],\n    nonGenericRetry:[400,401,403,404,422],\n    maxRetries:3,\n    backoffExampleSeconds:[1,2,4],\n    note:\"Retry nur, wenn Operation sicher wiederholbar/idempotent ist.\"\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -100
+      ],
+      "id": "m06-classify",
+      "name": "Classify Failure"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m06-i1",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "m06-i2",
+              "name": "module",
+              "value": "06",
+              "type": "string"
+            },
+            {
+              "id": "m06-i3",
+              "name": "case",
+              "value": "invalid",
+              "type": "string"
+            },
+            {
+              "id": "m06-i4",
+              "name": "error",
+              "value": "Unknown resilience scenario",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        140
+      ],
+      "id": "m06-invalid",
+      "name": "Invalid Scenario"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        440,
+        -100
+      ],
+      "id": "m06-respond",
+      "name": "Respond Lab"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        200,
+        140
+      ],
+      "id": "m06-respond-invalid",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Scenario": {
+      "main": [
+        [
+          {
+            "node": "Scenario Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scenario Valid?": {
+      "main": [
+        [
+          {
+            "node": "Call Unstable Upstream",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Unstable Upstream": {
+      "main": [
+        [
+          {
+            "node": "Classify Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Failure": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Scenario": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-06",
+    "body": {
+      "scenario": "server"
+    },
+    "expect": {
+      "filter": ".classification.action",
+      "value": "retry_backoff"
+    }
+  }
+}
