@@ -8,8 +8,8 @@
 <link rel="canonical" href="https://bais-solutions.de/referenzen/n8n-live-demo/">
 <link rel="stylesheet" href="/assets/site.css?v=49.9">
 <link rel="stylesheet" href="/assets/bais-design-system.css?v=1.0">
-<link rel="stylesheet" href="/assets/n8n-live-demo.css?v=1.0">
-<script src="/assets/n8n-live-demo.js?v=1.0" defer></script>
+<link rel="stylesheet" href="/assets/n8n-live-demo.css?v=2.0">
+<script src="/assets/n8n-live-demo.js?v=2.0" defer></script>
 </head>
 <body>
 <a class="skipLink" href="#main">Zum Inhalt springen</a>
@@ -66,10 +66,15 @@
 <div><span>LEAD SCORE</span><strong id="resultScore">—</strong></div>
 <div><span>ROUTE</span><strong id="resultRoute">—</strong></div>
 <div><span>EXECUTION ID</span><strong id="resultExecution">—</strong></div>
-<div><span>LATENCY</span><strong id="resultLatency">—</strong></div>
+<div><span>SERVER LATENCY</span><strong id="resultLatency">—</strong></div>
+<div><span>REQUEST ID</span><strong id="resultRequest">—</strong></div>
+<div><span>UPSTREAM HTTP</span><strong id="resultUpstream">—</strong></div>
+<div><span>INPUT HASH</span><strong id="resultInputHash">—</strong></div>
+<div><span>RESULT HASH</span><strong id="resultHash">—</strong></div>
 </div>
 <div class="nextAction"><span>NEXT ACTION</span><p id="resultNext">Workflow noch nicht ausgeführt.</p></div>
 <div class="auditLine"><span>Audit status</span><b id="resultAudit">—</b><span>Workflow</span><b id="resultWorkflow">bais-lead-qualification</b></div>
+<div class="verifiedTrace"><div class="traceHead"><span>VERIFIED TRACE</span><b>Nur serverseitig bestätigte Schritte</b></div><ol id="resultTrace"><li><span>READY</span> Noch keine Ausführung.</li></ol></div>
 <details class="rawResult"><summary>Sanitisierten JSON-Output anzeigen</summary><pre id="rawOutput">{ "status": "ready" }</pre></details>
 <p class="srStatus" id="demoStatus" role="status" aria-live="polite"></p>
 </div>
@@ -81,7 +86,7 @@
 <article><span>01 · CLIENT</span><h3>Szenario statt freier Payload</h3><p>Nur drei vordefinierte Business-Szenarien und zwei Dringlichkeitsstufen sind erlaubt. Keine frei eingebbaren Webhook-Ziele oder Credentials.</p></article>
 <article><span>02 · EDGE</span><h3>Cloudflare Function</h3><p><code>/api/n8n-demo</code> validiert Origin, Content-Type, Payload-Größe und Whitelist, bevor ein synthetischer Datensatz erzeugt wird.</p></article>
 <article><span>03 · AUTOMATION</span><h3>Produktiver n8n Webhook</h3><p>Der gleiche Lead-Qualification-Workflow wird auch hinter echten BAIS Kontakt- und Academy-Prozessen verwendet.</p></article>
-<article><span>04 · EVIDENCE</span><h3>Nur verifizierbarer Output</h3><p>Die Seite zeigt ausschließlich den vom Live-Run zurückgegebenen Score, Route, Execution-ID, Next Action, Audit-Status und die gemessene End-to-End-Laufzeit.</p></article>
+<article><span>04 · EVIDENCE</span><h3>Nur verifizierbarer Output</h3><p>Die Seite zeigt ausschließlich Live-Resultate plus Request-ID, Upstream-Status und SHA-256-Fingerprints. Interne Node-Zeiten werden nicht erfunden, wenn n8n sie nicht zurückliefert.</p></article>
 </div></div></section>
 
 <section class="demoBoundary"><div class="c"><div><div class="ey">EVIDENCE BOUNDARY</div><h2>Demo heißt nicht Kundenreferenz.</h2></div><p>Die Ausführung ist technisch echt, die Geschäftsdaten sind absichtlich synthetisch. So kann die Automation öffentlich geprüft werden, ohne reale Kunden, Leads oder vertrauliche Systeme offenzulegen.</p></div></section>
