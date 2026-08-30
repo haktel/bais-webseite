@@ -229,7 +229,7 @@
   // (accordion behaviour below), so the clock always reflects time
   // actually spent on that one lesson - it can't be padded by opening
   // several sections at once and waiting once for all of them.
-  const READ_WPM=130,MIN_READ_SECONDS=45,MAX_READ_SECONDS=240;
+  const READ_WPM=130,MIN_READ_SECONDS=50,MAX_READ_SECONDS=240;
   const estimateReadSeconds=text=>{
     const words=text.trim().split(/\s+/).filter(Boolean).length;
     return Math.min(MAX_READ_SECONDS,Math.max(MIN_READ_SECONDS,Math.round(words/READ_WPM*60)));
