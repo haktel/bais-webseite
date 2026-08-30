@@ -2,11 +2,7 @@ import test from"node:test";
 import assert from"node:assert/strict";
 import{readFile}from"node:fs/promises";
 
-const diagramTokens=[
-  "caseFlow","miniArchitecture","barCompare","securityZones","productionPyramid",
-  "visualFlow","decisionTree","workflowCanvas","ragPipeline","documentPipeline",
-  "contractDiagram","threatMap","dataFlow","processMap","architecture","lessonGrid"
-];
+const visualClassPattern=/class="[^"]*(?:visual|grid|flow|diagram|map|compare|timeline|model|tree|pyramid|architecture)[^"]*"/i;
 
 test("every n8n module keeps 12 deep lessons with real sourced cases and visual explanations",async()=>{
   for(let i=1;i<=12;i++){
@@ -21,8 +17,9 @@ test("every n8n module keeps 12 deep lessons with real sourced cases and visual 
       assert.match(lesson,/<details>/,"modul-"+n+" lesson "+(index+1)+" needs Vertiefung");
       assert.match(lesson,/class="realCase"/,"modul-"+n+" lesson "+(index+1)+" needs a real-world case");
       assert.match(lesson,/https:\/\//,"modul-"+n+" lesson "+(index+1)+" real-world case needs a source link");
-      assert.ok(
-        diagramTokens.some(token=>lesson.includes(token)),
+      assert.match(
+        lesson,
+        visualClassPattern,
         "modul-"+n+" lesson "+(index+1)+" needs at least one visual/diagram component"
       );
     }
