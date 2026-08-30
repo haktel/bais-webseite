@@ -2,6 +2,12 @@ import test from"node:test";import assert from"node:assert/strict";
 import{onRequestPost}from"../functions/api/academy/module-progress.js";
 
 const future=new Date(Date.now()+3600_000).toISOString();
+const allLessons=Array.from({length:12},(_,i)=>String(i+1).padStart(2,"0"));
+const progressRow=(lessons=[],labs=[],best=0)=>({
+ completed_lessons_json:JSON.stringify(lessons),
+ lab_cases_json:JSON.stringify(labs),
+ assessment_best:best
+});
 
 function makeDb(getProgressRow,aggregate={total:0}){
  return{
@@ -40,12 +46,13 @@ test("modul-02 lesson_complete is accepted (regression: was missing from LESSONS
  assert.deepEqual(body.module.completedLessons,["01"]);
 });
 
-test("modul-02 lab_case 'single' is accepted (regression: was missing from LAB_CASES)",async()=>{
- const db=makeDb(()=>null),env={DB:db};
+test("modul-02 first lab case is accepted only after all lessons",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,[])),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-02","lab_case",{caseId:"single"}),env});
  const body=await res.json();
  assert.equal(res.status,200);
  assert.deepEqual(body.module.labCases,["single"]);
+ assert.equal(body.module.sequence.nextLabCase,"batch");
 });
 
 test("modul-02 rejects a lab case id that isn't one of its three real cases",async()=>{
@@ -62,12 +69,37 @@ test("modul-03 lesson_complete is accepted (regression: was missing from LESSONS
  assert.deepEqual(body.module.completedLessons,["01"]);
 });
 
-test("modul-03 lab_case 'get' is accepted (regression: was missing from LAB_CASES)",async()=>{
- const db=makeDb(()=>null),env={DB:db};
+test("modul-03 first lab case is accepted only after all lessons",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,[])),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-03","lab_case",{caseId:"get"}),env});
  const body=await res.json();
  assert.equal(res.status,200);
  assert.deepEqual(body.module.labCases,["get"]);
+ assert.equal(body.module.sequence.nextLabCase,"post");
+});
+
+test("n8n lesson 02 is blocked until lesson 01 is complete",async()=>{
+ const db=makeDb(()=>progressRow([],[])),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-02","lesson_complete",{lessonId:"02"}),env});
+ assert.equal(res.status,409);
+});
+
+test("n8n lab is blocked until all 12 lessons are complete",async()=>{
+ const db=makeDb(()=>progressRow(["01","02"],[])),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-02","lab_case",{caseId:"single"}),env});
+ assert.equal(res.status,409);
+});
+
+test("n8n later lab case is blocked until previous required case is complete",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,[])),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-02","lab_case",{caseId:"batch"}),env});
+ assert.equal(res.status,409);
+});
+
+test("n8n assessment is blocked until all required labs are complete",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,["single","batch"])),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-02","assessment_result",{score:90}),env});
+ assert.equal(res.status,409);
 });
 
 test("ki-fuehrerschein modul-02 lesson_complete is accepted",async()=>{
@@ -166,21 +198,23 @@ test("course-wide percent averages over all 12 real n8n modules",async()=>{
  assert.equal(body.course.percent,100);
 });
 
-test("n8n modul-11 security lab case is accepted",async()=>{
- const db=makeDb(()=>null),env={DB:db};
+test("n8n modul-11 security lab respects required case order",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,["trusted","tampered","pii"])),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-11","lab_case",{caseId:"ssrf"}),env});
  const body=await res.json();
  assert.equal(res.status,200);
- assert.deepEqual(body.module.labCases,["ssrf"]);
+ assert.deepEqual(body.module.labCases,["trusted","tampered","pii","ssrf"]);
  assert.equal(body.module.labTotal,5);
+ assert.equal(body.module.sequence.nextLabCase,"destructive");
 });
 
-test("n8n modul-12 capstone lab case is accepted",async()=>{
- const db=makeDb(()=>null),env={DB:db};
+test("n8n modul-12 capstone lab case is accepted in required order",async()=>{
+ const db=makeDb(()=>progressRow(allLessons,["happy","high","invalid","security"])),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-12","lab_case",{caseId:"weakroi"}),env});
  const body=await res.json();
  assert.equal(res.status,200);
- assert.deepEqual(body.module.labCases,["weakroi"]);
+ assert.deepEqual(body.module.labCases,["happy","high","invalid","security","weakroi"]);
  assert.equal(body.module.lessonTotal,12);
  assert.equal(body.module.labTotal,5);
+ assert.equal(body.module.sequence.assessmentUnlocked,true);
 });
