@@ -16,3 +16,6 @@
 .costTrace{display:grid;grid-template-columns:auto auto auto auto auto auto;gap:8px;align-items:center;margin-top:12px;padding:12px;border:1px solid #365766;border-radius:10px;background:#0d2a38}.costTrace span{font-size:.68rem;color:#96b0ba}.costTrace small{grid-column:1/-1;color:#8da5ae}
 @media(max-width:900px){.llmStack,.chunkVisual,.toolBoundary,.costModel,.ragStatusGrid{grid-template-columns:1fr 1fr}.ragPipeline,.injectionZones,.vectorVisual,.ragLab{grid-template-columns:1fr}.groundingCompare{grid-template-columns:1fr}.module9Flow{grid-template-columns:1fr 1fr}.costTrace{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.llmStack,.chunkVisual,.toolBoundary,.costModel,.ragStatusGrid,.module9Flow{grid-template-columns:1fr}}
+
+.stateChoice{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}.stateChoice>div{padding:14px;border:1px solid #d7e3e6;border-radius:10px;background:#fff;position:relative}.stateChoice>div:before{content:"";display:block;width:28px;height:4px;border-radius:99px;background:#173f52;margin-bottom:9px}.stateChoice b,.stateChoice span{display:block}.stateChoice span{margin-top:5px;color:#617983;font-size:.73rem}
+@media(max-width:900px){.stateChoice{grid-template-columns:1fr}}
