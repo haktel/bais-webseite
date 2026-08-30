@@ -1,5 +1,6 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
+import{firstIncompletePriorN8nModule}from"../../_lib/n8n-course-access.js";
 
 // Keyed by courseSlug -> moduleSlug, not just moduleSlug, so two different
 // courses can each have their own "modul-01" without one course's lesson
@@ -119,6 +120,10 @@ export const onRequestGet=async({request,env})=>{
     if(!courseSlug||!/^modul-(0[1-9]|1[0-2])$/.test(moduleSlug))throw new ApiError(422,"validation_failed","Programm und Modul sind erforderlich.");
     const course=await courseForUser(db,user.user_id,courseSlug);
     if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
+    if(courseSlug==="n8n-bootcamp"&&user.role!=="admin"){
+      const requiredModule=await firstIncompletePriorN8nModule(db,user.user_id,course.id,moduleSlug);
+      if(requiredModule)throw new ApiError(409,"module_sequence_locked",`Bitte zuerst ${requiredModule} vollständig abschließen.`);
+    }
     const row=await db.prepare(
       "SELECT completed_lessons_json,lab_cases_json,assessment_best,module_percent,updated_at FROM academy_module_progress WHERE user_id=? AND course_id=? AND module_slug=? LIMIT 1"
     ).bind(user.user_id,course.id,moduleSlug).first();
@@ -155,6 +160,10 @@ export const onRequestPost=async({request,env})=>{
 
     const course=await courseForUser(db,user.user_id,courseSlug);
     if(!course)throw new ApiError(404,"enrollment_not_found","Für dieses Programm besteht keine aktive Anmeldung.");
+    if(courseSlug==="n8n-bootcamp"&&user.role!=="admin"){
+      const requiredModule=await firstIncompletePriorN8nModule(db,user.user_id,course.id,moduleSlug);
+      if(requiredModule)throw new ApiError(409,"module_sequence_locked",`Bitte zuerst ${requiredModule} vollständig abschließen.`);
+    }
 
     const current=await db.prepare(
       "SELECT completed_lessons_json,lab_cases_json,assessment_best FROM academy_module_progress WHERE user_id=? AND course_id=? AND module_slug=? LIMIT 1"
