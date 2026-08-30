@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 03 – Webhooks & REST APIs | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich zu HTTP, REST, Methoden, URLs, Headers, JSON Bodies, Statuscodes, Webhooks, n8n HTTP Request, API-Dokumentation, Pagination, Rate Limits und Debugging.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-03/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-03.css?v=1.0">
+</head><body data-module="modul-03">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-02/">Modul 02</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 03 · PRIVATER LERNBEREICH</span><h1>Webhooks &amp; REST APIs</h1><p class="lead">Nach diesem Modul liest du API-Dokumentation nicht mehr wie Fremdsprache. Du zerlegst HTTP Requests systematisch in Methode, URL, Query, Headers und Body, interpretierst Statuscodes und baust echte n8n API-Integrationen.</p></div>
+<div class="heroDiagram"><div class="courseMap"><div><b>REQUEST</b><span>Methode · URL · Header · Body</span></div><div><b>RESPONSE</b><span>Status · Header · JSON</span></div><div><b>INTEGRIEREN</b><span>Webhook &amp; HTTP Request</span></div><div><b>BETREIBEN</b><span>Timeout · Pagination · Rate Limit</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 03 · Lernpfad</strong>
+<a href="#l1">01 · HTTP Mental Model</a><a href="#l2">02 · REST & Resources</a><a href="#l3">03 · HTTP-Methoden</a><a href="#l4">04 · URL / Path / Query</a><a href="#l5">05 · Headers</a><a href="#l6">06 · Body & JSON Schema</a><a href="#l7">07 · Statuscodes</a><a href="#l8">08 · Webhook vs Polling</a><a href="#l9">09 · HTTP Request Node</a><a href="#l10">10 · API-Doku & curl</a><a href="#l11">11 · Timeout / Pagination / Rate Limits</a><a href="#l12">12 · Production Integration</a><a href="#lab">13 · Live API Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE API-AUTOMATION</span><h2>REST ist nicht „ein Node“ – es ist der Vertrag zwischen Systemen.</h2><p>Stepstone beschreibt direkten API-Zugriff als Aha-Moment für interne Teams, Formula Bot verbindet zahlreiche externe Datenquellen und Vodafone verarbeitet Milliarden Security-Events und kritische Feeds. Diese realen Muster zeigen, warum Request-Aufbau, Fehlercodes und Betriebsgrenzen verstanden werden müssen.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Stepstone</strong><span>API Access & Batch</span><b>700+ produktive Workflows</b></article>
+    <article><strong>Formula Bot</strong><span>Data Connectors</span><b>~1,5 Tage pro Connector</b></article>
+    <article><strong>Vodafone</strong><span>Critical Feeds</span><b>3–5 Mrd. Events / Monat</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">HTTP MENTAL MODEL</div><h2>Request rein – Response zurück</h2><p>HTTP ist ein Request/Response-Protokoll. Ein Client stellt eine konkrete Anfrage; ein Server antwortet mit Status, Headers und optional Daten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="caseFlow"><b>Client / n8n</b><span>→ REQUEST →</span><b>API Server</b><span>→ RESPONSE →</span><b>n8n</b></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein API-Call ist immer ein Vertrag</h3><p>Der Client sagt: <b>was</b> er will (Methode), <b>wo</b> (URL), <b>unter welchen Bedingungen</b> (Headers) und gegebenenfalls <b>mit welchen Daten</b> (Body). Der Server antwortet mit einem Statuscode, Response-Headers und häufig JSON.</p></div>
+<div class="httpCard"><div><b>REQUEST</b><pre>GET /customers/C-1042 HTTP/1.1
+Host: api.example.com
+Accept: application/json</pre></div><div><b>RESPONSE</b><pre>200 OK
+Content-Type: application/json
+
+{"id":"C-1042","name":"Mina"}</pre></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Transport</strong><p>HTTPS schützt die Verbindung per TLS. Es sagt aber nicht automatisch, ob dein Request fachlich erlaubt oder dein Token ausreichend berechtigt ist.</p></div><div class="lessonCallout"><strong>Debugging</strong><p>Trenne Netzwerkfehler, Authentifizierung, Validierung und serverseitige Fehler anhand von Status und Response.</p></div></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">REST</div><h2>Resources statt „irgendwelche URLs“</h2><p>REST-orientierte APIs modellieren fachliche Ressourcen wie Customers, Orders oder Tickets und verwenden HTTP-Methoden für Operationen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">/customers
+/customers/C-1042
+/customers/C-1042/orders
+/orders/ORD-88</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Resource und Representation unterscheiden</h3><p>Die Resource ist das fachliche Objekt, z. B. Kunde C-1042. JSON ist nur eine mögliche Darstellung dieser Resource. Das hilft beim API-Design und beim Lesen fremder APIs.</p></div>
+<div class="requestAnatomy"><div><b>Collection</b><code>/customers</code></div><span>→</span><div><b>Single Resource</b><code>/customers/C-1042</code></div><span>→</span><div><b>Subresource</b><code>/customers/C-1042/orders</code></div></div>
+<div class="lessonCallout"><strong>Praxisfrage</strong><p>Wenn du alle offenen Tickets eines Kunden brauchst: Ist <code>/customers/C-1042/tickets?status=open</code> verständlicher als <code>/doTicketSearch?cust=C-1042&amp;s=1</code>? Gute APIs reduzieren Interpretationsaufwand.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">METHODEN</div><h2>GET, POST, PUT, PATCH, DELETE</h2><p>Die Methode beschreibt die Absicht des Requests. Falsche Methode kann zu 405, unerwarteter Business-Logik oder gefährlichen Seiteneffekten führen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="httpMethodStrip"><div><b>GET</b><span>lesen</span></div><div><b>POST</b><span>erstellen / starten</span></div><div><b>PUT</b><span>ersetzen</span></div><div><b>PATCH</b><span>teilweise ändern</span></div><div><b>DELETE</b><span>löschen</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Methode</th><th>Typische Absicht</th><th>Beispiel</th><th>Seiteneffekt</th></tr><tr><td>GET</td><td>lesen</td><td><code>GET /orders/88</code></td><td>sollte keinen fachlichen Zustand ändern</td></tr><tr><td>POST</td><td>erstellen / Aktion starten</td><td><code>POST /orders</code></td><td>kann neue Resource erzeugen</td></tr><tr><td>PUT</td><td>vollständig ersetzen</td><td><code>PUT /profiles/42</code></td><td>bestehenden Zustand ersetzen</td></tr><tr><td>PATCH</td><td>teilweise ändern</td><td><code>PATCH /tickets/7</code></td><td>gezielte Felder ändern</td></tr><tr><td>DELETE</td><td>löschen</td><td><code>DELETE /files/5</code></td><td>destruktiv</td></tr></table>
+<div class="incident"><b>Retry-Risiko:</b> Ein GET kann meist gefahrloser wiederholt werden als ein POST, der eine Bestellung erzeugt. Bei nicht-idempotenten Aktionen brauchst du Duplicate Protection / Idempotency Keys.</div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">URL ANATOMIE</div><h2>Path, Query und Resource-ID</h2><p>Path-Parameter identifizieren häufig Ressourcen; Query-Parameter filtern, sortieren oder steuern eine Abfrage.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">https://api.example.com/orders/ORD-88?include=items&currency=EUR
+└──────── base ────────┘ └resource┘ └──── query ────┘</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="requestAnatomy"><div><b>Base URL</b><code>https://api.example.com</code></div><span>+</span><div><b>Path</b><code>/orders/ORD-88</code></div><span>+</span><div><b>Query</b><code>?include=items</code></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Path Parameter</strong><p><code>/customers/C-1042</code> adressiert einen konkreten Kunden.</p></div><div class="lessonCallout"><strong>Query Parameter</strong><p><code>/orders?status=paid&amp;limit=50</code> steuert die Ergebnismenge.</p></div></div>
+<div class="lessonCallout"><strong>Encoding</strong><p>Sonderzeichen gehören URL-kodiert. Baue Query Parameters im HTTP Request Node lieber strukturiert als per String-Konkatenation.</p></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">HEADERS</div><h2>Metadaten des Requests</h2><p>Headers transportieren Informationen über Content-Type, akzeptierte Formate, Authentifizierung, Caching, Correlation IDs und mehr.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Content-Type: application/json
+Accept: application/json
+Authorization: Bearer ***
+X-Correlation-ID: req-123</div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Header</th><th>Bedeutung</th><th>Typischer Fehler</th></tr><tr><td>Content-Type</td><td>Format des gesendeten Bodys</td><td>JSON gesendet, Header fehlt/falsch</td></tr><tr><td>Accept</td><td>gewünschtes Response-Format</td><td>API liefert anderes Format</td></tr><tr><td>Authorization</td><td>Credential/Token</td><td>401 bei fehlendem/abgelaufenem Token</td></tr><tr><td>Correlation-ID</td><td>Request nachvollziehen</td><td>Fehlende Traceability</td></tr></table>
+<div class="lessonCallout"><strong>Security</strong><p>Authorization-Header niemals in Screenshots, Logs oder öffentliche Workflow-Exports kopieren. Credentials werden in Modul 04 vertieft.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">BODY & SCHEMA</div><h2>JSON senden, aber mit Vertrag</h2><p>POST, PUT und PATCH senden häufig strukturierte Daten im Body. Production braucht Schema, Pflichtfelder, Datentypen und Validierungsregeln.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="codeCompare"><div><span>Request Body</span><pre>{
+ "customerId":"C-2048",
+ "name":"Mina Yilmaz",
+ "email":"mina@example.com"
+}</pre></div><div><span>Validierung</span><pre>customerId: required string
+name: required string
+email: valid email</pre></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Ein lesbares JSON ist noch kein gültiger Business Request</h3><p><code>{"email":"abc"}</code> ist syntaktisch gültiges JSON, aber fachlich möglicherweise ungültig. Deshalb trennt man Parsing von Schema-/Business-Validierung.</p></div>
+<div class="caseFlow"><b>Raw Body</b><span>→</span><b>JSON Parse</b><span>→</span><b>Schema Validation</b><span>→</span><b>Business Logic</b></div>
+<div class="lessonCallout"><strong>422 statt stiller Fehler</strong><p>Ein kontrollierter 4xx-Response ist besser als Daten ungeprüft zu speichern und später inkonsistente Systeme zu reparieren.</p></div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">STATUSCODES</div><h2>Der erste Diagnosehinweis</h2><p>Statuscodes teilen Fehlerklassen grob ein: Erfolg, Redirect, Clientproblem oder Serverproblem.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="statusGrid"><div class="s2xx"><strong>2xx</strong><span>Erfolg</span></div><div class="s3xx"><strong>3xx</strong><span>Redirect</span></div><div class="s4xx"><strong>4xx</strong><span>Client / Policy</span></div><div class="s5xx"><strong>5xx</strong><span>Server</span></div><div><strong>429</strong><span>Rate Limit</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Code</th><th>Bedeutung</th><th>Nächster Check</th></tr><tr><td>200</td><td>OK</td><td>Response-Inhalt prüfen</td></tr><tr><td>201</td><td>Created</td><td>neue ID / Location</td></tr><tr><td>400</td><td>Bad Request</td><td>Syntax / Parameter</td></tr><tr><td>401</td><td>Unauthenticated</td><td>Token/Credential</td></tr><tr><td>403</td><td>Forbidden</td><td>Scopes/Rollen/Policy</td></tr><tr><td>404</td><td>Not Found</td><td>URL/Resource ID</td></tr><tr><td>422</td><td>Validation</td><td>Payload gegen Schema</td></tr><tr><td>429</td><td>Rate Limit</td><td>Retry-After / Backoff</td></tr><tr><td>500</td><td>Server Error</td><td>Upstream Logs / Retry-Policy</td></tr></table>
+<div class="incident"><b>Nicht nur auf 200 prüfen:</b> Manche APIs antworten bei erfolgreicher Erstellung mit 201, bei asynchroner Annahme mit 202 oder bei Löschung ohne Body mit 204.</div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">WEBHOOKS</div><h2>Push statt dauernd nachfragen</h2><p>Webhook: Quellsystem meldet ein Ereignis aktiv. Polling: dein Workflow fragt regelmäßig nach, ob sich etwas geändert hat.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="pushPull"><div><b>WEBHOOK · PUSH</b><span>Event passiert → System sendet sofort HTTP Request → Workflow startet.</span></div><div><b>POLLING · PULL</b><span>Schedule → API GET → „Gibt es Neues?“ → wiederholen.</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Webhook gut</strong><p>Wenn Provider Events zuverlässig pushen kann: Zahlung, GitHub Event, Formular, CRM Callback.</p></div><div class="lessonCallout"><strong>Polling nötig</strong><p>Wenn Provider keine Webhooks bietet oder periodischer Abgleich bewusst gewünscht ist.</p></div></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · VODAFONE</span><h3>Kritische Feeds alle fünf Minuten überwachen</h3><p>Vodafone beschreibt einen Workflow, der kritische Feeds alle fünf Minuten überwacht, bei Ausfall Basistriage durchführt und Tickets an das richtige Team erstellt. Das ist ein reales Polling-/Monitoring-Muster mit hohen Datenmengen.</p><a href="https://n8n.io/case-studies/vodafone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>5 min</strong><span>Monitoring-Intervall kritischer Feeds</span></div></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">N8N HTTP REQUEST</div><h2>Das universelle Integrationswerkzeug</h2><p>Wenn es keinen speziellen n8n Node gibt, kannst du fast jede dokumentierte HTTP API über den HTTP Request Node ansprechen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">n8n HTTP Request
+├─ Method
+├─ URL
+├─ Authentication
+├─ Query Parameters
+├─ Headers
+├─ Body
+└─ Options / Timeout / Response</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="apiDocMock"><header>API-Dokumentation → n8n Mapping</header><section><b>POST</b><code>Method = POST</code></section><section><b>/customers</b><code>URL = https://api.example.com/customers</code></section><section><b>Authorization</b><code>Credential / Header</code></section><section><b>JSON Body</b><code>Send Body → JSON</code></section></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>API-Zugriff als unmittelbarer Produktivitätsgewinn</h3><p>Stepstone beschreibt ein internes Team, das zwei Monate auf externen API-Zugang gewartet hatte. Mit n8n konnten Schlüssel eingetragen und notwendige Daten unmittelbar abgerufen werden – ein typischer „Aha“-Moment für direkte API-Automation.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>2 Monate</strong><span>zuvor auf API-Zugang gewartet</span></div></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">API-DOKUMENTATION</div><h2>Endpoint lesen und außerhalb von n8n testen</h2><p>Professionals isolieren Probleme. Mit curl oder Postman kannst du einen API-Request unabhängig vom Workflow reproduzieren.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">API Docs → curl/Postman Test → n8n HTTP Request → Production Workflow</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="codeCompare"><div><span>curl</span><pre>curl -X GET  'https://api.example.com/orders?status=open'  -H 'Accept: application/json'</pre></div><div><span>n8n Mapping</span><pre>Method: GET
+URL: /orders
+Query: status=open
+Header: Accept application/json</pre></div></div>
+<div class="lessonCallout"><strong>Warum isolieren?</strong><p>Wenn curl bereits 401 liefert, ist dein n8n IF-Node vermutlich nicht die Ursache. Wenn curl funktioniert, n8n aber nicht, vergleichst du Request-Details exakt.</p></div>
+<div class="checkList"><b>Docs lesen:</b> Base URL · Endpoint · Methode · Auth · Query · Headers · Body · Beispiel-Response · Error Codes · Rate Limits · Pagination.</div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">BETRIEBSGRENZEN</div><h2>Timeout, Pagination und Rate Limits</h2><p>Eine Integration ist nicht production-ready, wenn sie nur mit einem Datensatz und unbegrenzter API-Kapazität funktioniert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="paginationVisual"><div><b>Page 1</b><small>1–100</small></div><div><b>Page 2</b><small>101–200</small></div><div><b>Page 3</b><small>201–300</small></div><div><b>…</b><small>bis Ende</small></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Pagination</h3><p>Viele APIs begrenzen Ergebnisse pro Response. Du musst Seiten, Cursor oder Next-Links so lange abarbeiten, bis keine Daten mehr folgen – ohne Duplikate oder Endlosschleife.</p></div>
+<div class="retryTimeline"><div>Request</div><div class="wait">429</div><div class="wait">Wait / Backoff</div><div>Retry</div><div class="ok">200</div></div>
+<table class="depthTable"><tr><th>Problem</th><th>Symptom</th><th>Strategie</th></tr><tr><td>Timeout</td><td>API antwortet zu spät</td><td>Timeout setzen, Fehlerpfad, ggf. asynchron</td></tr><tr><td>Pagination</td><td>nur erste 100 Datensätze</td><td>next/cursor/page iterieren</td></tr><tr><td>Rate Limit</td><td>429</td><td>Retry-After, Batching, Backoff</td></tr><tr><td>Large Payload</td><td>Memory/Laufzeit</td><td>Batching/Streaming-Konzept</td></tr></table>
+<div class="realCase"><div><span class="caseTag">REALER FALL · FORMULA BOT</span><h3>Langlebige Daten-Workflows ohne Lambda-Timeout-Druck</h3><p>Formula Bot beschreibt den Wechsel von stärkerem Custom-Code/Lambda-Einsatz zu n8n für komplexe Datenintegrationen und lange Workflows. Datenquellen, Transformationen und Zeitlimits waren konkrete Architekturthemen.</p><a href="https://n8n.io/case-studies/formula-bot/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>20–30 h</strong><span>Integrations-/Backendzeit pro Monat gespart</span></div></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRODUCTION INTEGRATION</div><h2>API-Fehler systematisch lokalisieren</h2><p>Ein professioneller Integrator kann aus einem Symptom ableiten, welche Schicht zuerst geprüft werden muss.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Input → Build Request → Send → Status → Parse → Validate Response → Business Logic</div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Symptom</th><th>Erster Check</th><th>Typische Ursache</th></tr><tr><td>DNS/Connect Error</td><td>URL/Netzwerk</td><td>Host falsch / nicht erreichbar</td></tr><tr><td>401</td><td>Authorization</td><td>Token fehlt/abgelaufen</td></tr><tr><td>403</td><td>Scopes/Policy</td><td>Recht fehlt</td></tr><tr><td>404</td><td>Path/ID</td><td>Endpoint oder Resource falsch</td></tr><tr><td>422</td><td>Body/Schema</td><td>Pflichtfeld/Typ falsch</td></tr><tr><td>429</td><td>Rate Limit</td><td>zu viele Requests</td></tr><tr><td>5xx</td><td>Upstream/Retry</td><td>Serverproblem</td></tr></table>
+<div class="caseFlow lifecycle"><b>Observe</b><span>→</span><b>Reproduce</b><span>→</span><b>Isolate</b><span>→</span><b>Fix</b><span>→</span><b>Regression Test</b><span>→</span><b>Monitor</b></div>
+<div class="lessonCallout"><strong>Production-Dokumentation</strong><p>Pro Integration: Owner, Endpoint, Auth-Methode, Limits, Timeout, Retry-Policy, erwartete Statuscodes, Beispiel-Payload, Runbook und Monitoring dokumentieren.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER N8N HTTP REQUEST WORKFLOW</div><h2>BAIS → n8n → Postman Echo API</h2><p class="muted">Dieser Lab ruft über den echten n8n HTTP Request Node einen externen HTTP-Testdienst auf. Du siehst Methode, Query, Headers, Body und das vom externen Server zurückgespiegelte Ergebnis.</p>
+<div class="httpPresetBar"><button type="button" data-http-preset="get" aria-pressed="false">A · GET + Query</button><button type="button" data-http-preset="post" aria-pressed="false">B · POST + JSON Body</button><button type="button" data-http-preset="invalid" aria-pressed="false">C · Validation 422</button></div>
+<div class="httpLab"><div class="httpLabForm"><label>Operation<select data-http-operation><option>GET</option><option>POST</option></select></label><label>Customer ID<input data-http-customer value="C-1042"></label><label>Name<input data-http-name></label><label>E-Mail<input data-http-email></label><button class="httpRun" type="button" data-http-run>Live HTTP Workflow starten</button></div>
+<div><div class="module3Flow"><div data-m03-node>Webhook</div><div data-m03-node>Validate</div><div data-m03-node>IF</div><div data-m03-node>HTTP Request</div><div data-m03-node>Echo API</div><div data-m03-node>Explain</div><div data-m03-node>Respond</div></div><pre class="httpOutput" data-http-output>Bereit.</pre></div></div>
+<div class="httpBreakdown" data-http-breakdown hidden></div>
+<details><summary>Lab-Auftrag &amp; Break/Fix öffnen</summary>
+<div class="labMission"><h3>A · GET verstehen</h3><ol><li>Starte GET und identifiziere Methode, Base URL, Query Parameters und Headers.</li><li>Vergleiche gesendete Query-Werte mit dem Echo des externen Servers.</li><li>Erkläre, warum GET hier keinen JSON Body braucht.</li></ol></div>
+<div class="labMission"><h3>B · POST verstehen</h3><ol><li>Starte POST und unterscheide Headers von JSON Body.</li><li>Prüfe, ob externe API die gesendeten JSON-Werte zurückspiegelt.</li><li>Erkläre, warum <code>Content-Type: application/json</code> relevant ist.</li></ol></div>
+<div class="labMission break"><h3>C · BREAK IT</h3><ol><li>Entferne Customer ID.</li><li>Verwende beim POST eine ungültige E-Mail.</li><li>Erkläre, warum der Workflow vor dem externen HTTP Request mit 422 stoppen soll.</li></ol></div>
+<div class="labMission fix"><h3>D · DEBUG IT</h3><ol><li>Stelle dir HTTP 401 vor: Welche Schicht prüfst du?</li><li>HTTP 429: Welche Retry-Strategie wäre korrekt?</li><li>HTTP 500: Wann retry, wann abbrechen?</li><li>Zeichne aus dem Kopf Request → Response inklusive Methode, URL, Header, Body, Status.</li></ol></div>
+</details></section>
+
+<section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 03</div><h2>API-Verständnis statt Statuscode-Auswendiglernen</h2><p>Fragen, Werte und Reihenfolge ändern sich. Einige Aufgaben berechnen Pagination dynamisch oder geben wechselnde Statuscodes, Methoden und URLs vor. Schwächere Themen werden im nächsten Versuch stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 03 ist erst fertig, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> HTTP Request/Response zeichnen</label><label><input type="checkbox"> REST Resource erklären</label><label><input type="checkbox"> GET/POST/PUT/PATCH/DELETE unterscheiden</label><label><input type="checkbox"> Path vs Query erklären</label><label><input type="checkbox"> Content-Type und Accept erklären</label><label><input type="checkbox"> JSON Body validieren</label><label><input type="checkbox"> 200/201/401/403/404/422/429/500 diagnostizieren</label><label><input type="checkbox"> Webhook vs Polling entscheiden</label><label><input type="checkbox"> HTTP Request Node aus API-Doku konfigurieren</label><label><input type="checkbox"> curl-Request lesen</label><label><input type="checkbox"> Pagination/Rate Limit erklären</label><label><input type="checkbox"> API-Fehler systematisch debuggen</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 04 · Authentication, Credentials &amp; OAuth2</strong><span>API Key, Bearer Token, Basic Auth, OAuth2, Access/Refresh Token, Scopes, Credential Rotation und Least Privilege.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-02/">← Modul 02</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-03.js?v=1.0" defer></script><script src="../../../assets/n8n-module-03-assessment.js?v=1.0" defer></script>
+</body></html>
