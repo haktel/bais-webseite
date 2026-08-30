@@ -1,0 +1,241 @@
+{
+  "name": "BAIS Academy · Modul 11 · Security Governance Controls Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-11",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        0
+      ],
+      "id": "m11-webhook",
+      "name": "Webhook",
+      "webhookId": "m11-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst samples={\n trusted:{\n  canonicalBody:'{\"eventId\":\"evt-1001\",\"action\":\"sync_customer\",\"customerId\":\"C-1001\",\"amount\":129.9}',\n  expectedHash:\"21e0ffb32b239fe4bf990fa0c922f68c5e666b7923ffe734b399dbf1092b3d64\",\n  source:\"partner-api\",targetUrl:\"https://api.example.com/customers/C-1001\",action:\"sync_customer\",\n  data:{eventId:\"evt-1001\",customerId:\"C-1001\",amount:129.9}\n },\n tampered:{\n  canonicalBody:'{\"eventId\":\"evt-1002\",\"action\":\"sync_customer\",\"customerId\":\"C-1002\",\"amount\":8999.5}',\n  expectedHash:\"897dae642dfa8210ae6e713895b781a02c9aecdb8d8e5f1c028062f68aa403b0\",\n  source:\"partner-api\",targetUrl:\"https://api.example.com/customers/C-1002\",action:\"sync_customer\",\n  data:{eventId:\"evt-1002\",customerId:\"C-1002\",amount:8999.5}\n },\n pii:{\n  canonicalBody:'{\"eventId\":\"evt-1003\",\"action\":\"support_ticket\",\"customerId\":\"C-1003\",\"email\":\"mina@example.com\",\"phone\":\"+49-170-1234567\",\"token\":\"tok_demo_123\",\"message\":\"VPN problem\"}',\n  expectedHash:\"21f77952c50b823c162c23f91c678dabe1abc4255d905329c1c13b4eac8c6f82\",\n  source:\"support-form\",targetUrl:\"https://api.example.com/tickets\",action:\"support_ticket\",\n  data:{eventId:\"evt-1003\",customerId:\"C-1003\",email:\"mina@example.com\",phone:\"+49-170-1234567\",token:\"tok_demo_123\",message:\"VPN problem\"}\n },\n ssrf:{\n  canonicalBody:'{\"eventId\":\"evt-1004\",\"action\":\"fetch_url\",\"customerId\":\"C-1004\",\"targetUrl\":\"http://169.254.169.254/latest/meta-data/\"}',\n  expectedHash:\"a82a0b4f0761b00effd5808a800c2eb31701ef2921ffb89c43cc726101d0d133\",\n  source:\"user-input\",targetUrl:\"http://169.254.169.254/latest/meta-data/\",action:\"fetch_url\",\n  data:{eventId:\"evt-1004\",customerId:\"C-1004\",targetUrl:\"http://169.254.169.254/latest/meta-data/\"}\n },\n destructive:{\n  canonicalBody:'{\"eventId\":\"evt-1005\",\"action\":\"delete_user\",\"customerId\":\"C-1005\",\"requestedBy\":\"automation\"}',\n  expectedHash:\"a674bd5094e7f5276ff5753826e6acbcb64fe69a6c88a89c39cff073095910dd\",\n  source:\"internal-agent\",targetUrl:\"https://api.example.com/users/C-1005\",action:\"delete_user\",\n  data:{eventId:\"evt-1005\",customerId:\"C-1005\",requestedBy:\"automation\"}\n }\n};\nconst selected=samples[scenario];\nif(!selected)return [{json:{valid:false,scenario,error:\"unknown_scenario\"}}];\nreturn [{json:{valid:true,scenario,...selected}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -900,
+        0
+      ],
+      "id": "m11-prepare",
+      "name": "Prepare Security Scenario"
+    },
+    {
+      "parameters": {
+        "action": "hash",
+        "binaryData": false,
+        "type": "SHA256",
+        "value": "={{ $json.canonicalBody }}",
+        "dataPropertyName": "computedHash",
+        "encoding": "hex"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        -660,
+        0
+      ],
+      "id": "m11-hash",
+      "name": "Compute SHA256 Integrity"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json;\nconst integrityOk=String(x.computedHash||\"\")===String(x.expectedHash||\"\");\nlet networkAllowed=true,networkReason=\"allowed\";\ntry{\n const u=new URL(String(x.targetUrl||\"https://example.invalid/\"));\n const host=u.hostname.toLowerCase();\n const privatePatterns=[\n  /^localhost$/,\n  /^127\\./,\n  /^10\\./,\n  /^192\\.168\\./,\n  /^169\\.254\\./,\n  /^172\\.(1[6-9]|2\\d|3[0-1])\\./,\n  /^0\\./,\n  /^\\[?::1\\]?$/\n ];\n if(u.protocol!==\"https:\"){networkAllowed=false;networkReason=\"non_https_target\";}\n if(privatePatterns.some(rx=>rx.test(host))){networkAllowed=false;networkReason=\"private_or_link_local_target\";}\n}catch{networkAllowed=false;networkReason=\"invalid_target_url\";}\n\nconst destructiveActions=new Set([\"delete_user\",\"transfer_money\",\"disable_account\",\"delete_data\"]);\nconst requiresApproval=destructiveActions.has(String(x.action||\"\"));\nconst actionAllowed=!requiresApproval;\n\nfunction redact(value){\n if(value===null||value===undefined)return value;\n const s=String(value);\n if(/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(s)){\n  const [local,domain]=s.split(\"@\");return (local.slice(0,1)||\"*\")+\"***@\"+domain;\n }\n if(/^\\+?[0-9][0-9\\-\\s]{6,}$/.test(s))return \"***PHONE***\";\n if(/^(tok_|sk_|key_|bearer\\s)/i.test(s))return \"***SECRET_REDACTED***\";\n return value;\n}\nconst safeLog={};\nfor(const [k,v] of Object.entries(x.data||{})){\n if(/token|secret|password|authorization|api.?key/i.test(k))safeLog[k]=\"***SECRET_REDACTED***\";\n else if(/email|phone/i.test(k))safeLog[k]=redact(v);\n else safeLog[k]=v;\n}\nconst piiDetected=Object.keys(x.data||{}).filter(k=>/email|phone|name|address|token|secret|password|authorization|api.?key/i.test(k));\nconst allowed=Boolean(x.valid&&integrityOk&&networkAllowed&&actionAllowed);\n\nreturn [{json:{\n ok:true,module:\"11\",case:x.scenario,\n integrity:{algorithm:\"SHA-256\",expected:x.expectedHash,computed:x.computedHash,match:integrityOk},\n network:{targetUrl:x.targetUrl,allowed:networkAllowed,reason:networkReason,policy:\"HTTPS + public allowlisted destinations; block private/link-local targets\"},\n action:{name:x.action,destructive:requiresApproval,requiresApproval,allowed:actionAllowed},\n dataProtection:{detectedSensitiveFields:piiDetected,rawFieldCount:Object.keys(x.data||{}).length,auditLog:safeLog,rule:\"Secrets are omitted; selected personal fields are masked in logs.\"},\n decision:{\n  allowed,\n  status:allowed?\"allow\":\"block\",\n  reasons:[\n   ...(!integrityOk?[\"integrity_mismatch\"]:[]),\n   ...(!networkAllowed?[networkReason]:[]),\n   ...(requiresApproval?[\"human_approval_required\"]:[])\n  ]\n },\n lesson:x.scenario===\"tampered\"?\"Payload integrity mismatch blocks processing before business action.\"\n  :x.scenario===\"pii\"?\"Sensitive values may be necessary for business processing but must not leak into general logs.\"\n  :x.scenario===\"ssrf\"?\"User-controlled URLs must not reach private or link-local infrastructure.\"\n  :x.scenario===\"destructive\"?\"High-impact actions require an explicit approval boundary outside autonomous workflow logic.\"\n  :\"Multiple independent controls must pass before the workflow is allowed to act.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        0
+      ],
+      "id": "m11-controls",
+      "name": "Apply Security Controls"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "m11-allow-cond",
+              "leftValue": "={{ $json.decision.allowed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -180,
+        0
+      ],
+      "id": "m11-allow",
+      "name": "Policy Allows Action?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json;return [{json:{...x,enforcement:{route:\"approved_action_path\",executedBusinessSideEffect:false,demo:\"Academy lab intentionally stops before any external side effect.\"}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -100
+      ],
+      "id": "m11-allowed",
+      "name": "Approved Path"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json;return [{json:{...x,enforcement:{route:\"blocked_or_review_path\",executedBusinessSideEffect:false,demo:\"Blocked/review cases never reach a destructive or network side effect.\"}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        100
+      ],
+      "id": "m11-blocked",
+      "name": "Blocked or Review Path"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        340,
+        0
+      ],
+      "id": "m11-respond",
+      "name": "Respond Lab"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Security Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Security Scenario": {
+      "main": [
+        [
+          {
+            "node": "Compute SHA256 Integrity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute SHA256 Integrity": {
+      "main": [
+        [
+          {
+            "node": "Apply Security Controls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Security Controls": {
+      "main": [
+        [
+          {
+            "node": "Policy Allows Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Policy Allows Action?": {
+      "main": [
+        [
+          {
+            "node": "Approved Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Blocked or Review Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved Path": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blocked or Review Path": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-11",
+    "body": {
+      "scenario": "trusted"
+    },
+    "expect": {
+      "filter": ".decision.status",
+      "value": "allow"
+    }
+  }
+}

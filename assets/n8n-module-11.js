@@ -1,0 +1,22 @@
+(()=> {
+ const out=document.querySelector("[data-sec-output]"),analysis=document.querySelector("[data-sec-analysis]"),run=document.querySelector("[data-sec-run]"),presets=[...document.querySelectorAll("[data-sec-preset]")],nodes=[...document.querySelectorAll("[data-m11-node]")];
+ let active="trusted";
+ const meta={trusted:"Trusted request",tampered:"Integrity mismatch",pii:"PII redaction",ssrf:"SSRF blocked",destructive:"Human approval required"};
+ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+ const pretty=v=>JSON.stringify(v,null,2);
+ const connector=window.mountLabConnector?window.mountLabConnector(document.querySelector(".module11Flow")):{lines:[],reset(){}};
+ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+ function choose(id){active=id;presets.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.secPreset===id)));analysis.hidden=true;analysis.innerHTML="";out.textContent=meta[id]+" geladen. Vorhersage: allow, block oder review?";nodes.forEach(n=>n.classList.remove("active","ok","error"));}
+ presets.forEach(b=>b.addEventListener("click",()=>choose(b.dataset.secPreset)));
+ async function animate(){connector.reset();for(let i=0;i<nodes.length;i++){const n=nodes[i];if(i>0)connector.lines[i-1]?.classList.add("active");n.classList.add("active");await wait(180);n.classList.remove("active");n.classList.add("ok");if(i>0){connector.lines[i-1]?.classList.remove("active");connector.lines[i-1]?.classList.add("done");}}}
+ function render(body){if(!analysis)return;analysis.hidden=false;const integ=body.integrity||{},net=body.network||{},act=body.action||{},dp=body.dataProtection||{},dec=body.decision||{};
+ analysis.innerHTML='<div class="ey">SECURITY CONTROL TRACE</div>'+
+ '<div class="secStatusGrid"><section><span>INTEGRITY</span><strong>'+esc(integ.match?"MATCH":"MISMATCH")+'</strong></section><section><span>NETWORK</span><strong>'+esc(net.allowed?"ALLOW":"BLOCK")+'</strong></section><section><span>ACTION</span><strong>'+esc(act.requiresApproval?"REVIEW":act.allowed?"ALLOW":"BLOCK")+'</strong></section><section><span>FINAL</span><strong>'+esc(dec.status||"—")+'</strong></section></div>'+
+ '<div class="integrityCompare"><div><b>Expected SHA-256</b><code>'+esc(integ.expected||"—")+'</code></div><div><b>Computed SHA-256</b><code>'+esc(integ.computed||"—")+'</code></div></div>'+
+ '<div class="controlCards"><article><b>Network Policy</b><p>'+esc(net.targetUrl||"—")+'</p><code>'+esc(net.reason||"")+'</code></article><article><b>Action Guard</b><p>'+esc(act.name||"—")+'</p><code>approval='+esc(act.requiresApproval)+'</code></article><article><b>Detected Sensitive Fields</b><p>'+esc((dp.detectedSensitiveFields||[]).join(", ")||"none")+'</p></article></div>'+
+ '<div class="auditPreview"><strong>Sanitized Audit Log</strong><pre>'+esc(pretty(dp.auditLog||{}))+'</pre></div>'+
+ '<div class="decisionCard '+(dec.allowed?"allow":"block")+'"><strong>'+esc((dec.status||"").toUpperCase())+'</strong><p>'+esc(body.lesson||"")+'</p><code>'+esc((dec.reasons||[]).join(", ")||"all_controls_passed")+'</code></div>';
+ }
+ run?.addEventListener("click",async()=>{run.disabled=true;run.textContent="Security Controls laufen…";analysis.hidden=true;nodes.forEach(n=>n.classList.remove("active","ok","error"));try{const response=await fetch("/api/n8n-module-11",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({scenario:active})});const body=await response.json().catch(()=>({}));await animate();out.textContent=pretty(body);if(response.ok)render(body);const ok=(active==="trusted"&&body.decision?.status==="allow")||(active==="tampered"&&body.integrity?.match===false&&body.decision?.status==="block")||(active==="pii"&&String(body.dataProtection?.auditLog?.token||"").includes("REDACTED"))||(active==="ssrf"&&body.network?.allowed===false)||(active==="destructive"&&body.action?.requiresApproval===true);if(response.ok&&ok){window.dispatchEvent(new CustomEvent("bais:lab-case",{detail:{caseId:active}}));out.textContent+="\n\n✓ Security-Lernfall korrekt durchgeführt und gespeichert.";}else out.textContent+="\n\nKontrol zincirini tekrar incele: integrity → network → action → logging → decision.";}catch(e){nodes[0]?.classList.add("error");out.textContent="FEHLER: "+e.message+"\n\nDebugging: payload → hash → network policy → action guard → redacted audit → decision.";}finally{run.disabled=false;run.textContent="Live Security Workflow starten";}});
+ choose("trusted");
+})();
