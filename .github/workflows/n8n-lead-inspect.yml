@@ -17,25 +17,38 @@ jobs:
       N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
       N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
     steps:
-      - name: Print sanitized workflow topology
+      - name: Inspect topology and both request paths
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           BASE="${N8N_BASE_URL%/}"
-          LIST="$(curl -fsS             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=250")"
+          LIST="$(curl -fsS -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H "Accept: application/json" "${BASE}/api/v1/workflows?limit=250")"
 
           FOUND=""
           while read -r ID; do
-            WF="$(curl -fsS               -H "X-N8N-API-KEY: ${N8N_API_KEY}"               -H "Accept: application/json"               "${BASE}/api/v1/workflows/${ID}")"
+            WF="$(curl -fsS -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H "Accept: application/json" "${BASE}/api/v1/workflows/${ID}")"
             if echo "${WF}" | jq -e '.nodes[]? | select((.type|ascii_downcase|contains("webhook")) and .parameters.path=="bais-lead-qualification")' >/dev/null; then
               FOUND="${WF}"
               break
             fi
           done < <(echo "${LIST}" | jq -r '.data[]?.id')
 
-          test -n "${FOUND}"
+          test -n "${FOUND}" || exit 1
+          echo "=== TOPOLOGY ==="
           echo "${FOUND}" | jq '{
             id,name,active,
             nodes:[.nodes[]|{name,type,typeVersion,position,parameterKeys:(.parameters|keys),webhookPath:(.parameters.path//null)}],
             connections
           }'
+
+          echo "=== UNSIGNED DIRECT ==="
+          UHTTP="$(curl -sS --max-time 20 -o /tmp/u.json -w "%{http_code}" -X POST -H "Content-Type: application/json"             "${BASE}/webhook/bais-lead-qualification"             --data '{"name":"Direct Probe","email":"probe@example.com","company":"Probe GmbH","topic":"Automation / n8n","message":"Unsigned diagnostic request.","consent":true}' || true)"
+          echo "HTTP=${UHTTP}"
+          cat /tmp/u.json 2>/dev/null || true
+          echo
+
+          echo "=== SIGNED BAIS ==="
+          SHTTP="$(curl -sS --max-time 25 -o /tmp/s.json -w "%{http_code}" -X POST             -H "Origin: https://bais-solutions.de" -H "Content-Type: application/json"             "https://bais-solutions.de/api/n8n-demo"             --data '{"scenario":"automation","urgency":"planned"}' || true)"
+          echo "HTTP=${SHTTP}"
+          cat /tmp/s.json 2>/dev/null || true
+          echo
