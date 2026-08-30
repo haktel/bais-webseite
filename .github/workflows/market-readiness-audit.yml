@@ -1,0 +1,197 @@
+name: BAIS Market Readiness Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "preise/**"
+      - "kontakt/**"
+      - "impressum/**"
+      - "datenschutz/**"
+      - "referenzen/**"
+      - "loesungen/**"
+      - "ueber-bais/**"
+      - "project-portal/**"
+      - "sitemap.xml"
+      - "robots.txt"
+      - "_headers"
+      - "functions/api/n8n-demo.js"
+      - "functions/_lib/n8n*.js"
+      - ".github/workflows/market-readiness-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+    steps:
+      - name: Run live technical and sales-readiness checks
+        shell: bash
+        run: |
+          set -uo pipefail
+          BASE_URL="https://bais-solutions.de"
+          FAIL=0
+          WARN=0
+
+          pass(){ printf 'PASS  %s\n' "$*"; }
+          fail(){ printf 'FAIL  %s\n' "$*"; FAIL=$((FAIL+1)); }
+          warn(){ printf 'WARN  %s\n' "$*"; WARN=$((WARN+1)); }
+
+          echo "=== 1. CORE PAGES ==="
+          for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
+            code="$(curl -LsS --max-time 20 -o /tmp/page -w '%{http_code}' "${BASE_URL}${path}" || true)"
+            if [ "$code" = "200" ]; then pass "${path} HTTP 200"; else fail "${path} HTTP ${code}"; fi
+            if [ "$code" = "200" ]; then
+              grep -qi '<meta[^>]*name="viewport"' /tmp/page && pass "${path} viewport" || fail "${path} missing viewport"
+              grep -qi '<title>[^<]' /tmp/page && pass "${path} title" || fail "${path} missing title"
+            fi
+          done
+
+          echo
+          echo "=== 2. ERROR BEHAVIOR ==="
+          code="$(curl -LsS --max-time 20 -o /tmp/missing -w '%{http_code}' "${BASE_URL}/this-path-must-not-exist-market-audit-934781/" || true)"
+          [ "$code" = "404" ] && pass "unknown path returns 404" || fail "unknown path returned ${code}, expected 404"
+
+          echo
+          echo "=== 3. SECURITY HEADERS ==="
+          curl -LsSI --max-time 20 "${BASE_URL}/" >/tmp/headers || true
+          for header in strict-transport-security x-content-type-options x-frame-options referrer-policy permissions-policy content-security-policy; do
+            grep -qi "^${header}:" /tmp/headers && pass "${header}" || fail "missing ${header}"
+          done
+          grep -qi "frame-ancestors 'none'" /tmp/headers && pass "CSP frame-ancestors none" || fail "CSP frame-ancestors not locked"
+          grep -qi "object-src 'none'" /tmp/headers && pass "CSP object-src none" || fail "CSP object-src not locked"
+
+          echo
+          echo "=== 4. SEO / CRAWLABILITY ==="
+          scode="$(curl -LsS --max-time 20 -o /tmp/sitemap.xml -w '%{http_code}' "${BASE_URL}/sitemap.xml" || true)"
+          [ "$scode" = "200" ] && pass "sitemap.xml HTTP 200" || fail "sitemap.xml HTTP ${scode}"
+          if command -v xmllint >/dev/null 2>&1; then
+            xmllint --noout /tmp/sitemap.xml 2>/tmp/xmlerr && pass "sitemap.xml valid XML" || { fail "sitemap.xml invalid XML"; sed -n '1,6p' /tmp/xmlerr; }
+          else
+            python3 - <<'PY' && pass "sitemap.xml valid XML" || fail "sitemap.xml invalid XML"
+import xml.etree.ElementTree as ET
+ET.parse('/tmp/sitemap.xml')
+PY
+          fi
+
+          rcode="$(curl -LsS --max-time 20 -o /tmp/robots.txt -w '%{http_code}' "${BASE_URL}/robots.txt" || true)"
+          if [ "$rcode" = "200" ]; then
+            pass "robots.txt HTTP 200"
+            grep -qi 'sitemap:' /tmp/robots.txt && pass "robots.txt advertises sitemap" || warn "robots.txt has no Sitemap directive"
+          else
+            warn "robots.txt HTTP ${rcode}"
+          fi
+
+          echo
+          echo "=== 5. COMMERCIAL BASICS ==="
+          curl -LsS --max-time 20 "${BASE_URL}/preise/" >/tmp/pricing || true
+          grep -Eq '[0-9][0-9.]* ?€/Tag|Tagessätze' /tmp/pricing && pass "pricing page exposes commercial pricing" || fail "pricing page lacks visible day rates"
+          grep -qi 'Projekt einordnen\|Kontakt' /tmp/pricing && pass "pricing page has CTA" || fail "pricing page lacks CTA"
+
+          curl -LsS --max-time 20 "${BASE_URL}/impressum/" >/tmp/imprint || true
+          for needle in 'Inhaber' 'USt' 'Dortmund'; do
+            grep -qi "$needle" /tmp/imprint && pass "imprint contains ${needle}" || fail "imprint missing ${needle}"
+          done
+
+          curl -LsS --max-time 20 "${BASE_URL}/datenschutz/" >/tmp/privacy || true
+          for needle in 'DSGVO' 'Cloudflare' 'D1' 'Turnstile'; do
+            grep -qi "$needle" /tmp/privacy && pass "privacy covers ${needle}" || warn "privacy does not mention ${needle}"
+          done
+
+          curl -LsS --max-time 20 "${BASE_URL}/kontakt/" >/tmp/contact || true
+          grep -qi '/api/contact' /tmp/contact && pass "contact form wired to API" || fail "contact form API wiring not found"
+          grep -qi 'challenges.cloudflare.com\|turnstile' /tmp/contact && pass "contact form Turnstile present" || fail "contact form Turnstile not found"
+          grep -qi 'mailto:info@bais-solutions.de\|info@bais-solutions.de' /tmp/contact && pass "fallback contact email present" || warn "fallback email not visible"
+
+          echo
+          echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
+          python3 - <<'PY'
+import re, urllib.parse, urllib.request, sys
+base='https://bais-solutions.de'
+pages=['/','/preise/','/kontakt/','/referenzen/','/referenzen/n8n-live-demo/']
+seen=set()
+fail=[]
+for page in pages:
+    try:
+        html=urllib.request.urlopen(base+page,timeout=20).read().decode('utf-8','replace')
+    except Exception as e:
+        fail.append((page,'PAGE',str(e))); continue
+    for attr,url in re.findall(r'\b(href|src)=["\']([^"\']+)["\']',html,re.I):
+        if url.startswith(('mailto:','tel:','#','javascript:','data:')): continue
+        absu=urllib.parse.urljoin(base+page,url)
+        p=urllib.parse.urlparse(absu)
+        if p.netloc!='bais-solutions.de': continue
+        key=p.scheme+'://'+p.netloc+p.path
+        if key in seen: continue
+        seen.add(key)
+        req=urllib.request.Request(key,headers={'User-Agent':'BAIS-Market-Audit/1.0'})
+        try:
+            with urllib.request.urlopen(req,timeout=15) as r:
+                if r.status>=400: fail.append((page,key,str(r.status)))
+        except Exception as e:
+            code=getattr(e,'code',None)
+            fail.append((page,key,str(code or e)))
+print(f'CHECKED_INTERNAL={len(seen)}')
+for item in fail[:40]: print('BROKEN',*item)
+if fail: sys.exit(1)
+PY
+          if [ "$?" = "0" ]; then pass "key internal links/assets resolve"; else fail "broken internal link/asset detected"; fi
+
+          echo
+          echo "=== 7. LIVE N8N PRODUCTION PATH ==="
+          demo_http="$(curl -sS --max-time 25 -o /tmp/demo.json -w '%{http_code}'             -X POST -H 'Origin: https://bais-solutions.de' -H 'Content-Type: application/json'             "${BASE_URL}/api/n8n-demo" --data '{"scenario":"automation","urgency":"planned"}' || true)"
+          if [ "$demo_http" = "200" ] && jq -e '.ok==true and .source=="live-n8n" and .requestAuth=="hmac-sha256" and (.executionId|length>0)' /tmp/demo.json >/dev/null 2>&1; then
+            pass "signed BAIS -> n8n live execution"
+            exec_id="$(jq -r '.executionId' /tmp/demo.json)"
+            route="$(jq -r '.route' /tmp/demo.json)"
+            echo "INFO  execution=${exec_id} route=${route}"
+            if [ -n "${N8N_BASE_URL:-}" ] && [ -n "${N8N_API_KEY:-}" ]; then
+              verify_http="$(curl -sS --max-time 20 -o /tmp/execution.json -w '%{http_code}'                 -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H 'Accept: application/json'                 "${N8N_BASE_URL%/}/api/v1/executions/${exec_id}" || true)"
+              if [ "$verify_http" = "200" ] && [ "$(jq -r '.id // empty' /tmp/execution.json)" = "$exec_id" ]; then
+                pass "RepoCloud confirms execution ${exec_id}"
+              else
+                fail "RepoCloud execution verification failed"
+              fi
+
+              unsigned_http="$(curl -sS --max-time 20 -o /tmp/unsigned.json -w '%{http_code}'                 -X POST -H 'Content-Type: application/json'                 "${N8N_BASE_URL%/}/webhook/bais-lead-qualification"                 --data '{"name":"Market Audit","email":"audit@example.com","company":"Audit GmbH","topic":"Automation / n8n","message":"Unsigned request must be rejected.","consent":true}' || true)"
+              if [ "$unsigned_http" = "401" ] && jq -e '.error=="UNAUTHORIZED_WEBHOOK"' /tmp/unsigned.json >/dev/null 2>&1; then
+                pass "direct unsigned n8n webhook blocked"
+              else
+                fail "direct unsigned n8n webhook not blocked as expected (HTTP ${unsigned_http})"
+              fi
+            else
+              warn "n8n API secrets unavailable; execution cross-check skipped"
+            fi
+          else
+            fail "live n8n demo failed (HTTP ${demo_http})"
+            cat /tmp/demo.json 2>/dev/null || true
+          fi
+
+          echo
+          echo "=== 8. SALES-READINESS SIGNALS (NON-BLOCKING) ==="
+          curl -LsS --max-time 20 "${BASE_URL}/" >/tmp/home || true
+          grep -qi 'Demo statt Kundenreferenz\|Demonstrator' /tmp/home && pass "claims distinguish demos from real references" || warn "demo/reference boundary not obvious"
+          grep -qi 'AGB' /tmp/home && pass "AGB linked from home" || warn "AGB not linked from home"
+          grep -qi 'AVV\|Auftragsverarbeitung' /tmp/home && pass "AVV/DPA surfaced" || warn "AVV/DPA not surfaced"
+          grep -qi 'SLA\|Service Level' /tmp/home && pass "SLA surfaced" || warn "SLA not surfaced"
+          grep -qi 'Kundenreferenz\|Case Study' /tmp/home && pass "customer proof surfaced" || warn "no real customer case study surfaced"
+
+          echo
+          echo "=== SUMMARY ==="
+          echo "FAILURES=${FAIL}"
+          echo "WARNINGS=${WARN}"
+          if [ "${FAIL}" -gt 0 ]; then
+            echo "TECHNICAL_VERDICT=NO-GO"
+            exit 1
+          fi
+          if [ "${WARN}" -gt 0 ]; then
+            echo "TECHNICAL_VERDICT=GO_WITH_COMMERCIAL_FIXES"
+          else
+            echo "TECHNICAL_VERDICT=GO"
+          fi
