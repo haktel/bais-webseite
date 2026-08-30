@@ -1,9 +1,17 @@
+import{signN8nRequest}from"./n8n-signing.js";
+
 export const N8N_LEAD_WEBHOOK="https://6wejmb5u.rpcld.co/webhook/bais-lead-qualification";
 
-export async function callLeadQualificationWebhook(payload,{signal}={}){
+export async function callLeadQualificationWebhook(payload,{signal,db}={}){
+  if(!db)throw new Error("n8n signing database unavailable");
+  const signed=await signN8nRequest(db,payload);
   return fetch(N8N_LEAD_WEBHOOK,{
     method:"POST",
-    headers:{"Content-Type":"application/json","User-Agent":"BAIS-Website/1.0"},
+    headers:{
+      "Content-Type":"application/json",
+      "User-Agent":"BAIS-Website/1.0",
+      ...signed.headers
+    },
     body:JSON.stringify(payload),
     signal
   });
@@ -13,10 +21,6 @@ export function buildLeadPayload({name,email,company,topic,message}){
   return{
     name,
     email,
-    // n8n's own Input Validation node requires a non-empty company field.
-    // Most of our forms treat company as optional, so fall back to an
-    // honest placeholder rather than silently failing qualification for
-    // every submission without one.
     company:company||"Privatperson",
     topic:topic||"Sonstiges",
     message,
