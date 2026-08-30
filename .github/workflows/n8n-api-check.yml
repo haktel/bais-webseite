@@ -2,6 +2,11 @@ name: n8n API Check
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/n8n-api-check.yml"
   push:
     branches:
       - main
@@ -28,7 +33,7 @@ jobs:
           fi
 
           BASE="${N8N_BASE_URL%/}"
-          STATUS=$(curl -sS             -o /tmp/n8n-response.json             -w "%{http_code}"             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=1")
+          STATUS=$(curl -sS -o /tmp/n8n-response.json -w "%{http_code}"             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=1")
 
           if [ "${STATUS}" -lt 200 ] || [ "${STATUS}" -ge 300 ]; then
             echo "n8n API check failed with HTTP ${STATUS}."
