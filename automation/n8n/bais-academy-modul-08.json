@@ -1,0 +1,520 @@
+{
+  "name": "BAIS Academy · Modul 08 · Files Binary Data Document Automation Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-08",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1160,
+        0
+      ],
+      "id": "m08-webhook",
+      "name": "Webhook",
+      "webhookId": "m08-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst samples={\n csv:{format:\"csv\",records:[\n  {orderId:\"O-1001\",name:\"Mina Yilmaz\",email:\"mina@example.com\",amount:129.9,note:\"standard\"},\n  {orderId:\"O-1002\",name:\"Jonas Weber\",email:\"jonas@example.com\",amount:89.5,note:\"priority\"},\n  {orderId:\"O-1003\",name:\"Elif Kaya\",email:\"elif@example.com\",amount:240,note:\"standard\"}\n ]},\n unicode:{format:\"csv\",records:[\n  {orderId:\"U-1\",name:\"Büşra Şahin\",email:\"busra@example.com\",amount:199.95,note:\"İstanbul\"},\n  {orderId:\"U-2\",name:\"Jörg Müller\",email:\"joerg@example.com\",amount:75.4,note:\"München\"},\n  {orderId:\"U-3\",name:\"Çağla Öztürk\",email:\"cagla@example.com\",amount:310,note:\"Düsseldorf\"}\n ]},\n json:{format:\"json\",records:[\n  {ticketId:\"T-101\",title:\"VPN Problem\",severity:\"high\",open:true},\n  {ticketId:\"T-102\",title:\"Password Reset\",severity:\"low\",open:false}\n ]},\n unsafe:{format:\"csv\",records:[\n  {orderId:\"S-1\",name:\"=2+2\",email:\"safe@example.com\",amount:50,note:\"+SUM(1,1)\"},\n  {orderId:\"S-2\",name:\"@malicious\",email:\"safe2@example.com\",amount:60,note:\"-10+20\"}\n ]},\n invalid:{format:\"invalid\",records:[]}\n};\nconst selected=samples[scenario];\nif(!selected)return [{json:{valid:false,scenario,error:\"unknown_scenario\"}}];\nreturn [{json:{valid:scenario!==\"invalid\",scenario,...selected,error:scenario===\"invalid\"?\"records must not be empty\":\"\"}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -940,
+        0
+      ],
+      "id": "m08-prepare",
+      "name": "Prepare File Scenario"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "m08-valid-cond",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "m08-valid",
+      "name": "Scenario Valid?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m08-format-csv",
+                    "leftValue": "={{ $json.format }}",
+                    "rightValue": "csv",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CSV"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "m08-format-json",
+                    "leftValue": "={{ $json.format }}",
+                    "rightValue": "json",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "JSON"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -500,
+        -100
+      ],
+      "id": "m08-switch",
+      "name": "CSV or JSON?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared=$input.first().json;\nconst risky=/^[=+\\-@]/;\nlet riskCount=0;\nconst rows=(prepared.records??[]).map((record,index)=>{\n const clean={};\n let rowRisk=false;\n for(const [key,value] of Object.entries(record)){\n  if(typeof value===\"string\"&&risky.test(value)){\n   clean[key]=\"'\"+value;\n   riskCount++;\n   rowRisk=true;\n  }else clean[key]=value;\n }\n return {...clean,_row:index+1,_formulaSanitized:rowRisk};\n});\nreturn rows.map(row=>({json:row}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        -200
+      ],
+      "id": "m08-csv-items",
+      "name": "Sanitize & Create CSV Items"
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "binaryPropertyName": "data",
+        "options": {
+          "delimiter": ",",
+          "fileName": "bais-module08-orders.csv",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -40,
+        -200
+      ],
+      "id": "m08-convert-csv",
+      "name": "Convert to CSV File"
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "binaryPropertyName": "data",
+        "options": {
+          "delimiter": ",",
+          "encoding": "utf8",
+          "headerRow": true,
+          "includeEmptyCells": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        -200
+      ],
+      "id": "m08-extract-csv",
+      "name": "Extract CSV File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(item=>item.json);\nconst prepared=$('Prepare File Scenario').item.json;\nconst binary=$('Convert to CSV File').first().binary?.data??{};\nconst riskCount=rows.filter(r=>String(r._formulaSanitized)===\"true\"||r._formulaSanitized===true).length;\nreturn [{json:{\n ok:true,module:\"08\",case:prepared.scenario,format:\"csv\",\n binary:{\n   property:\"data\",\n   fileName:binary.fileName??\"bais-module08-orders.csv\",\n   mimeType:binary.mimeType??\"text/csv\",\n   fileExtension:binary.fileExtension??\"csv\",\n   fileSize:binary.fileSize??null\n },\n extracted:{rowCount:rows.length,rows},\n security:{formulaSanitizedRows:riskCount,rule:\"Cells beginning with = + - @ are prefixed with apostrophe before spreadsheet export.\"},\n lesson:prepared.scenario===\"unsafe\"\n  ?\"Potential spreadsheet-formula cells were neutralized before file creation.\"\n  :\"JSON items became real CSV binary data and were parsed back into JSON rows.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        -200
+      ],
+      "id": "m08-analyze-csv",
+      "name": "Analyze CSV Roundtrip"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared=$input.first().json;\nreturn (prepared.records??[]).map(record=>({json:record}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        -20
+      ],
+      "id": "m08-json-items",
+      "name": "Create JSON Items"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "mode": "once",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "bais-module08-tickets.json",
+          "format": true,
+          "encoding": "utf8",
+          "addBOM": false
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -40,
+        -20
+      ],
+      "id": "m08-convert-json",
+      "name": "Convert to JSON File"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "binaryPropertyName": "data",
+        "destinationKey": "document",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true,
+          "keepSource": "json"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        -20
+      ],
+      "id": "m08-extract-json",
+      "name": "Extract JSON File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item=$input.first().json;\nconst prepared=$('Prepare File Scenario').item.json;\nconst binary=$('Convert to JSON File').first().binary?.data??{};\nconst document=item.document;\nconst records=Array.isArray(document)?document:[document];\nreturn [{json:{\n ok:true,module:\"08\",case:prepared.scenario,format:\"json\",\n binary:{\n  property:\"data\",\n  fileName:binary.fileName??\"bais-module08-tickets.json\",\n  mimeType:binary.mimeType??\"application/json\",\n  fileExtension:binary.fileExtension??\"json\",\n  fileSize:binary.fileSize??null\n },\n extracted:{rowCount:records.length,records},\n lesson:\"Multiple JSON items became one real binary .json file and were parsed back after file conversion.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        -20
+      ],
+      "id": "m08-analyze-json",
+      "name": "Analyze JSON Roundtrip"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m08-i1",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "m08-i2",
+              "name": "module",
+              "value": "08",
+              "type": "string"
+            },
+            {
+              "id": "m08-i3",
+              "name": "case",
+              "value": "invalid",
+              "type": "string"
+            },
+            {
+              "id": "m08-i4",
+              "name": "error",
+              "value": "records must not be empty",
+              "type": "string"
+            },
+            {
+              "id": "m08-i5",
+              "name": "status",
+              "value": 422,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        160
+      ],
+      "id": "m08-invalid",
+      "name": "Invalid File Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        700,
+        -100
+      ],
+      "id": "m08-respond",
+      "name": "Respond Lab"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        160
+      ],
+      "id": "m08-respond-invalid",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare File Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare File Scenario": {
+      "main": [
+        [
+          {
+            "node": "Scenario Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scenario Valid?": {
+      "main": [
+        [
+          {
+            "node": "CSV or JSON?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid File Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV or JSON?": {
+      "main": [
+        [
+          {
+            "node": "Sanitize & Create CSV Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create JSON Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Sanitize & Create CSV Items": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV File": {
+      "main": [
+        [
+          {
+            "node": "Extract CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract CSV File": {
+      "main": [
+        [
+          {
+            "node": "Analyze CSV Roundtrip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze CSV Roundtrip": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create JSON Items": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to JSON File": {
+      "main": [
+        [
+          {
+            "node": "Extract JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract JSON File": {
+      "main": [
+        [
+          {
+            "node": "Analyze JSON Roundtrip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze JSON Roundtrip": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid File Request": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-08",
+    "body": {
+      "scenario": "csv"
+    },
+    "expect": {
+      "filter": ".extracted.rowCount",
+      "value": "3"
+    }
+  }
+}
