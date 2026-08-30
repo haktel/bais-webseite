@@ -1,0 +1,280 @@
+{
+  "name": "BAIS Academy · Modul 02 · Items JSON Expressions Lab",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-02",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -760,
+        0
+      ],
+      "id": "1d114c13-2a96-41ad-90bc-667e55a17d7e",
+      "name": "Webhook",
+      "webhookId": "11cb6a8c-57ea-46c9-baad-b61eebc389a4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body ?? {};\nconst records = Array.isArray(body.records) ? body.records.slice(0, 20) : [];\nif (!records.length) {\n  return [{ json: { _invalid: true, error: \"records array with at least one item is required\" } }];\n}\nreturn records.map((record, index) => ({\n  json: {\n    _invalid: false,\n    index,\n    firstName: String(record.firstName ?? \"\"),\n    lastName: String(record.lastName ?? \"\"),\n    email: String(record.email ?? \"\"),\n    budget: record.budget,\n    tags: Array.isArray(record.tags) ? record.tags : [],\n    source: String(record.source ?? body.source ?? \"unknown\")\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        0
+      ],
+      "id": "b677c46a-688f-4290-b076-55a2d13bf1f0",
+      "name": "Create Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f4c1846c-9a90-44c1-94d8-48b1402d880c",
+              "leftValue": "={{ $json._invalid !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -280,
+        0
+      ],
+      "id": "f2f56bc2-b3cb-4325-850a-c17cf3f01c32",
+      "name": "Has Records"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const tags = Array.isArray($json.tags)\n  ? [...new Set($json.tags.map(tag => String(tag).trim()).filter(Boolean))]\n  : [];\nconst fullName = [String($json.firstName).trim(), String($json.lastName).trim()].filter(Boolean).join(\" \");\nconst email = String($json.email).trim().toLowerCase();\nconst budget = Number($json.budget);\nreturn {\n  json: {\n    index: $json.index,\n    fullName,\n    email,\n    budget: Number.isFinite(budget) ? budget : null,\n    tags,\n    source: String($json.source).trim().toLowerCase(),\n    valid: Boolean(fullName && /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email) && Number.isFinite(budget))\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -100
+      ],
+      "id": "c4fd082b-fd30-4af1-8750-8b9ac0e989d5",
+      "name": "Normalize Each Item"
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = $input.all().map(item => item.json);\nreturn [{\n  json: {\n    ok: true,\n    normalized: true,\n    itemCount: records.length,\n    validCount: records.filter(record => record.valid).length,\n    records\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -100
+      ],
+      "id": "8fa31749-3fd0-4c78-aa1c-214826aa6a6d",
+      "name": "Aggregate Results"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "286b13f4-31f5-43db-b7b2-600982a0f589",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "8e012ebe-dfd0-4dd4-a166-1de23777f81f",
+              "name": "normalized",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "478520f8-8fa7-471c-9e2d-317a7f8d9301",
+              "name": "error",
+              "value": "records array with at least one item is required",
+              "type": "string"
+            },
+            {
+              "id": "0dd6e75d-3021-4362-b379-135433e0c5d7",
+              "name": "module",
+              "value": "02",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        140
+      ],
+      "id": "51aa7532-babc-4c4f-a53c-b953db5f91d4",
+      "name": "Invalid Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        -100
+      ],
+      "id": "0a04b2f9-9556-4727-8eea-2461983646ac",
+      "name": "Respond OK"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        140
+      ],
+      "id": "9ec20221-c49d-494e-8727-488ce1c0a04c",
+      "name": "Respond Invalid"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Items": {
+      "main": [
+        [
+          {
+            "node": "Has Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Records": {
+      "main": [
+        [
+          {
+            "node": "Normalize Each Item",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Each Item": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-02",
+    "body": {
+      "source": " Website ",
+      "records": [
+        {
+          "firstName": " Mina ",
+          "lastName": " Yilmaz ",
+          "email": " MINA@EXAMPLE.COM ",
+          "budget": "7500",
+          "tags": [
+            " AI ",
+            "Automation",
+            "AI"
+          ]
+        },
+        {
+          "firstName": "Jonas",
+          "lastName": "Weber",
+          "email": "JONAS@example.com",
+          "budget": 3200,
+          "tags": [
+            "Support",
+            " Support "
+          ]
+        }
+      ]
+    },
+    "expect": {
+      "filter": ".itemCount",
+      "value": "2"
+    }
+  }
+}

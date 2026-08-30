@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 02 – Nodes, Items, JSON & Expressions | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich zu n8n Items, JSON, Expressions, Edit Fields, Code Node, Split, Aggregate, Merge, Normalisierung und Debugging.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-02/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.1"><link rel="stylesheet" href="../../../assets/n8n-module-02.css?v=1.0">
+</head><body>
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-01/">Modul 01</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 02 · PRIVATER LERNBEREICH</span><h1>Nodes, Items, JSON &amp; Expressions</h1><p class="lead">Hier lernst du den Teil, an dem viele n8n-Anfänger hängen bleiben: Welche Daten kommen wirklich in einen Node, wie sehen Items aus, wie liest du Werte korrekt und wie formst du Rohdaten in ein stabiles internes Schema um?</p></div>
+<div class="heroDiagram"><div class="courseMap"><div><b>LESEN</b><span>JSON &amp; Typen</span></div><div><b>VERSTEHEN</b><span>Items &amp; Arrays</span></div><div><b>TRANSFORMIEREN</b><span>Expressions &amp; Code</span></div><div><b>DEBUGGEN</b><span>Input → Output</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 02 · Lernpfad</strong>
+<a href="#l1">01 · Item-Modell</a><a href="#l2">02 · JSON-Datentypen</a><a href="#l3">03 · Nested Data</a><a href="#l4">04 · Expressions</a><a href="#l5">05 · Node-Referenzen</a><a href="#l6">06 · Edit Fields</a><a href="#l7">07 · Code Node</a><a href="#l8">08 · Mehrere Items</a><a href="#l9">09 · Split / Aggregate</a><a href="#l10">10 · Merge</a><a href="#l11">11 · Normalisierung</a><a href="#l12">12 · Debugging & Datenvertrag</a><a href="#lab">13 · Live Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">ITEM-MODELL</div><h2>Ein Workflow verarbeitet nicht „irgendwie JSON“</h2><p>n8n arbeitet mit Items. Ein Item ist eine einzelne Verarbeitungseinheit mit strukturierten Daten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">Item 1 → { "name": "Mina" }
+Item 2 → { "name": "Jonas" }
+Item 3 → { "name": "Sara" }</div><details><summary>Vertiefung öffnen</summary><p>Wenn ein Node drei Items erhält, kann er drei Datensätze verarbeiten. Das ist etwas anderes als ein einziges Item, das ein Array mit drei Elementen enthält. Genau dieser Unterschied entscheidet später über Split, Loop, Merge und Aggregate.</p></details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">JSON</div><h2>Datentypen sicher lesen</h2><p>Bevor du Expressions oder IF-Regeln baust, musst du erkennen, welcher Typ tatsächlich ankommt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="dataTypeGrid"><div><b>String</b><code>"7500"</code></div><div><b>Number</b><code>7500</code></div><div><b>Boolean</b><code>true</code></div><div><b>Array</b><code>["AI","n8n"]</code></div><div><b>Object</b><code>{"name":"Mina"}</code></div></div>
+<details><summary>Vertiefung öffnen</summary><p><code>"7500"</code> und <code>7500</code> sehen ähnlich aus, sind aber nicht dasselbe. Typfehler erzeugen falsche Vergleiche, Berechnungen und Validierungsfehler. Production-Workflows konvertieren Typen bewusst statt auf Zufall zu vertrauen.</p></details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">NESTED DATA</div><h2>Objects und Arrays verschachteln</h2><p>APIs liefern selten flache Daten. Du musst verschachtelte Strukturen lesen können.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{
+  "customer": {
+    "name": "Mina",
+    "address": { "city": "Dortmund" }
+  },
+  "tags": ["AI","Automation"]
+}</div><details><summary>Vertiefung öffnen</summary><p>Bei nested Objects brauchst du den korrekten Pfad. Bei Arrays musst du zusätzlich entscheiden: Willst du das Array als Ganzes behalten oder jedes Element als eigenes Item weiterverarbeiten?</p></details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">EXPRESSIONS</div><h2>Dynamische Werte mit <code>$json</code></h2><p>Expressions verbinden die Konfiguration eines Nodes mit den Daten des aktuellen Items.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{{$json.email}}
+{{$json.budget}}
+{{$json.customer.address.city}}</div><details><summary>Vertiefung öffnen</summary><p>Wenn eine Expression <code>undefined</code> liefert, ist der erste Verdacht nicht „n8n kaputt“, sondern: Existiert das Feld wirklich im Input dieses Nodes? Ist der Pfad korrekt? Ist das aktuelle Item das erwartete?</p></details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">KONTEXT</div><h2>Daten aus vorherigen Nodes referenzieren</h2><p>Manchmal brauchst du nicht das aktuelle Item, sondern einen Wert aus einem bestimmten vorherigen Node.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{{ $('Webhook').item.json.body.email }}
+{{ $('Normalize').item.json.fullName }}</div><details><summary>Vertiefung öffnen</summary><p>Node-Referenzen sind mächtig, aber sie koppeln deinen Workflow stärker an konkrete Node-Namen und Item-Zuordnung. Verwende sie bewusst und dokumentiere, warum der direkte Datenfluss nicht genügt.</p></details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">EDIT FIELDS</div><h2>Ein internes Schema bauen</h2><p>Edit Fields / Set eignet sich für transparentes Mapping: Felder auswählen, umbenennen, neue Werte erzeugen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">RAW:
+first_name → " Mina "
+mail       → " MINA@EXAMPLE.COM "
+
+INTERN:
+fullName   → "Mina"
+email      → "mina@example.com"</div><details><summary>Vertiefung öffnen</summary><p>Ein Mapping-Node sollte einen klaren Datenvertrag herstellen. Vermeide, dass jede nachfolgende Node erneut wissen muss, wie fünf verschiedene Quellsysteme ihre Felder nennen.</p></details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">CODE NODE</div><h2>Code nur dort, wo er wirklich hilft</h2><p>Ein Code Node ist sinnvoll, wenn Transformationen mit Standard-Nodes unnötig kompliziert werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">const email = String($json.email).trim().toLowerCase();
+const budget = Number($json.budget);</div><details><summary>Vertiefung öffnen</summary><p>Code ist kein Qualitätsbeweis. Standard-Nodes sind oft leichter auditierbar und wartbarer. Code sollte klein, deterministisch, testbar und auf eine klare Aufgabe begrenzt bleiben.</p></details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">MULTI-ITEM</div><h2>Ein Node, viele Datensätze</h2><p>Viele Nodes verarbeiten automatisch jedes eingehende Item. Das ist bequem – und gefährlich, wenn du die Item-Anzahl nicht beachtest.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">3 Items
+↓
+Normalize Each Item
+↓
+3 normalisierte Items</div><details><summary>Vertiefung öffnen</summary><p>Wenn ein E-Mail-Node 100 Items erhält, kann er potenziell 100 E-Mails senden. Item-Anzahl ist deshalb nicht nur Datenmodellierung, sondern auch Kosten-, Rate-Limit- und Sicherheitsfrage.</p></details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">SPLIT & AGGREGATE</div><h2>Array auseinandernehmen – Items wieder sammeln</h2><p>Split verwandelt Elemente in einzelne Items. Aggregate fasst mehrere Items wieder zusammen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">records[3]
+   ↓ SPLIT
+Item · Item · Item
+   ↓ TRANSFORM
+Item · Item · Item
+   ↓ AGGREGATE
+records[3]</div><details><summary>Vertiefung öffnen</summary><p>Das Muster ist extrem häufig bei API-Pagination, CSV/Excel-Importen, CRM-Listen und Batch-Verarbeitung. Entscheidend ist, wann du einzeln handeln und wann du gemeinsam antworten willst.</p></details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">MERGE</div><h2>Zwei Datenströme kontrolliert zusammenführen</h2><p>Merge kombiniert Pfade nach einer definierten Logik – nicht einfach „irgendwie wieder zusammen“.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">CRM Customer ─┐
+              ├→ Merge by ID → Combined Record
+Billing Data ─┘</div><details><summary>Vertiefung öffnen</summary><p>Du musst wissen, ob du nach Position, Schlüssel oder einer anderen Bedingung zusammenführst. Falsches Matching kann Daten verschiedener Kunden vermischen – ein echter Production-Risikofall.</p></details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">DATA QUALITY</div><h2>Normalisieren, bevor Business-Logik entscheidet</h2><p>Whitespace, Groß-/Kleinschreibung, Strings statt Numbers und Duplikate werden früh kontrolliert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">" MINA@EXAMPLE.COM " → "mina@example.com"
+"7500" → 7500
+["AI"," AI ","AI"] → ["AI"]</div><details><summary>Vertiefung öffnen</summary><p>Normalisierung ist kein Kosmetik-Schritt. Sie sorgt dafür, dass nachfolgende IF-Regeln, Datenbank-Queries und Deduplizierung zuverlässig arbeiten.</p></details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">DEBUGGING</div><h2>Input und Output gegeneinander halten</h2><p>Bei Datenfehlern suchst du den ersten Node, an dem sich die Struktur unerwartet verändert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">Node Input
+   ↓
+Konfiguration / Expression / Code
+   ↓
+Node Output
+   ↓
+Erwarteter Datenvertrag?</div><details><summary>Vertiefung öffnen</summary><p>Prüfe Item-Anzahl, Feldnamen, Datentypen, nested Pfade, Null/undefined, Array-Inhalt und Output-Schema. Erst danach gehst du zum nächsten Node. Das spart Stunden planloses Herumklicken.</p></details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER REPOCLOUD-N8N WORKFLOW</div><h2>JSON → Items → Normalize → Aggregate</h2><p class="muted">Du editierst hier echte JSON-Eingaben. Der Button ruft den produktiven Modul-02-Workflow auf.</p>
+<div class="jsonToolbar"><button type="button" data-json-preset="single" aria-pressed="false">A · 1 messy record</button><button type="button" data-json-preset="batch" aria-pressed="false">B · 3 records</button><button type="button" data-json-preset="invalid" aria-pressed="false">C · Leeres Array</button></div>
+<div class="jsonLab"><div class="jsonEditor"><textarea data-json-input spellcheck="false">{
+  "source": " Website ",
+  "records": [
+    {
+      "firstName": " Mina ",
+      "lastName": " Yilmaz ",
+      "email": " MINA@EXAMPLE.COM ",
+      "budget": "7500",
+      "tags": [" AI ", "Automation", "AI"]
+    }
+  ]
+}</textarea><button class="jsonRun" type="button" data-json-run>Live Workflow starten</button></div>
+<div class="jsonResult"><div class="module2Flow"><div data-m02-node>Webhook</div><div data-m02-node>Create Items</div><div data-m02-node>IF</div><div data-m02-node>Normalize</div><div data-m02-node>Aggregate</div><div data-m02-node>Respond</div></div><pre class="jsonOutput" data-json-output>Bereit. Sage vor dem Start voraus, was sich im Output ändern wird.</pre></div></div>
+<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und erkläre jede Normalisierung.</li><li>Starte B und prüfe <code>itemCount</code> sowie <code>validCount</code>.</li><li>Starte C und erkläre den kontrollierten 422-Pfad.</li><li>Ändere ein Budget in <code>"abc"</code>. Was erwartest du bei <code>valid</code>?</li><li>Füge einen doppelten Tag hinzu. Prüfe die Deduplizierung.</li><li>Erkläre am Ende den Unterschied zwischen <code>records[]</code> und mehreren n8n Items.</li></ol></details></section>
+
+<section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 02</div><h2>Jeder Versuch verändert sich</h2><p>12 Fragen werden aus einem größeren Pool gezogen. Reihenfolge und Antwortpositionen ändern sich; zusätzliche Aufgaben erzeugen variable Datenwerte. Falsch beantwortete Themen werden beim nächsten Versuch stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 02 ist erst fertig, wenn du das ohne Vorlage kannst</h2><div class="teachList">
+<label><input type="checkbox"> Item vs Array erklären</label><label><input type="checkbox"> JSON-Typen sicher unterscheiden</label><label><input type="checkbox"> nested Daten lesen</label><label><input type="checkbox"> <code>$json</code> erklären</label><label><input type="checkbox"> Node-Referenz erklären</label><label><input type="checkbox"> Edit Fields sinnvoll einsetzen</label><label><input type="checkbox"> kleinen Code Node schreiben</label><label><input type="checkbox"> mehrere Items erklären</label><label><input type="checkbox"> Split und Aggregate zeichnen</label><label><input type="checkbox"> Merge-Risiko erklären</label><label><input type="checkbox"> Rohdaten normalisieren</label><label><input type="checkbox"> Datenfehler über Input/Output debuggen</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 03 · Webhooks & REST APIs</strong><span>Dann verbinden wir n8n mit echten HTTP-Endpunkten, Methoden, Headers, Query Params, Statuscodes und externen APIs.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-01/">← Modul 01</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-module-02.js?v=1.0" defer></script><script src="../../../assets/n8n-module-02-assessment.js?v=1.0" defer></script>
+</body></html>
