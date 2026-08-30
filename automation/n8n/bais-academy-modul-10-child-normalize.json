@@ -1,0 +1,71 @@
+{
+  "name": "BAIS Academy · Modul 10 · Normalize Lead Contract",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "scenario",
+              "type": "string"
+            },
+            {
+              "name": "leadId",
+              "type": "string"
+            },
+            {
+              "name": "fullName",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        0
+      ],
+      "id": "m10-child-trigger",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item=>{\n const x=item.json;\n const leadId=String(x.leadId??\"\").trim();\n const fullName=String(x.fullName??\"\").trim().replace(/\\s+/g,\" \");\n const email=String(x.email??\"\").trim().toLowerCase();\n const source=String(x.source??\"\").trim().toLowerCase();\n const errors=[];\n if(!leadId)errors.push(\"leadId_required\");\n if(!fullName)errors.push(\"fullName_required\");\n if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email))errors.push(\"email_invalid\");\n return {json:{\n   scenario:String(x.scenario??\"\"),\n   contractVersion:\"1.0\",\n   valid:errors.length===0,\n   errors,\n   lead:{leadId,fullName,email,source},\n   contractFields:[\"scenario\",\"leadId\",\"fullName\",\"email\",\"source\"],\n   component:\"Normalize Lead Contract\"\n }};\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "m10-child-normalize",
+      "name": "Normalize & Validate Contract"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Validate Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

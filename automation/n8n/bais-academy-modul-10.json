@@ -1,0 +1,209 @@
+{
+  "name": "BAIS Academy · Modul 10 · Sub-Workflow Architecture Lab",
+  "baisWorkflowRefs": {
+    "Execute Normalize Contract": "BAIS Academy · Modul 10 · Normalize Lead Contract"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-10",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -820,
+        0
+      ],
+      "id": "m10-webhook",
+      "name": "Webhook",
+      "webhookId": "m10-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst samples={\n standard:{leadId:\"L-1001\",fullName:\"Mina Yilmaz\",email:\"mina@example.com\",source:\"website\"},\n messy:{leadId:\" L-1002 \",fullName:\"  Jörg   Müller  \",email:\" JOERG@EXAMPLE.COM \",source:\" WEBSITE \"},\n extra:{leadId:\"L-1003\",fullName:\"Elif Kaya\",email:\"elif@example.com\",source:\"partner\",internalSecret:\"MUST_NOT_CROSS_CONTRACT\",adminFlag:true},\n invalid:{leadId:\"\",fullName:\"No Mail\",email:\"not-an-email\",source:\"website\"}\n};\nif(!samples[scenario])return [{json:{scenario,validScenario:false,error:\"unknown_scenario\"}}];\nreturn [{json:{scenario,validScenario:true,...samples[scenario]}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -600,
+        0
+      ],
+      "id": "m10-prepare",
+      "name": "Prepare Parent Input"
+    },
+    {
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "__BAIS_PENDING_SUBWORKFLOW_ID__",
+          "mode": "list",
+          "cachedResultName": "BAIS Academy · Modul 10 · Normalize Lead Contract"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scenario": "={{ $json.scenario }}",
+            "leadId": "={{ $json.leadId }}",
+            "fullName": "={{ $json.fullName }}",
+            "email": "={{ $json.email }}",
+            "source": "={{ $json.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "scenario",
+              "displayName": "scenario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "leadId",
+              "displayName": "leadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -360,
+        0
+      ],
+      "id": "m10-execute-child",
+      "name": "Execute Normalize Contract"
+    },
+    {
+      "parameters": {
+        "jsCode": "const child=$input.first().json;\nconst parent=$('Prepare Parent Input').item.json;\nconst parentKeys=Object.keys(parent).sort();\nconst childLeadKeys=Object.keys(child.lead??{}).sort();\nconst crossed=childLeadKeys.includes(\"internalSecret\")||Object.prototype.hasOwnProperty.call(child,\"internalSecret\")||Object.prototype.hasOwnProperty.call(child,\"adminFlag\");\nreturn [{json:{\n ok:true,module:\"10\",case:child.scenario,\n parentWorkflow:\"BAIS Academy · Modul 10 · Sub-Workflow Architecture Lab\",\n subworkflow:{name:\"BAIS Academy · Modul 10 · Normalize Lead Contract\",contractVersion:child.contractVersion,valid:child.valid,errors:child.errors,lead:child.lead},\n contract:{\n  parentKeys,\n  declaredInputs:child.contractFields,\n  extraFieldCrossedBoundary:crossed,\n  waitedForCompletion:true\n },\n architecture:{\n  pattern:\"orchestrator -> typed reusable sub-workflow -> normalized contract\",\n  benefit:\"one component can be reused by multiple callers without copying normalization logic\"\n },\n lesson:child.scenario===\"extra\"\n  ?\"Parent carried extra internal fields, but the declared workflow input mapping prevented them from crossing the sub-workflow contract.\"\n  :child.scenario===\"messy\"\n   ?\"Normalization happened inside one reusable component, not copied into the parent.\"\n   :child.scenario===\"invalid\"\n    ?\"The reusable component returned a stable validation contract instead of throwing uncontrolled business errors.\"\n    :\"Parent called a reusable database sub-workflow and waited for its typed result.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        0
+      ],
+      "id": "m10-explain",
+      "name": "Explain Component Contract"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        160,
+        0
+      ],
+      "id": "m10-respond",
+      "name": "Respond Lab"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Parent Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Parent Input": {
+      "main": [
+        [
+          {
+            "node": "Execute Normalize Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Normalize Contract": {
+      "main": [
+        [
+          {
+            "node": "Explain Component Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain Component Contract": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-10",
+    "body": {
+      "scenario": "standard"
+    },
+    "expect": {
+      "filter": ".subworkflow.valid",
+      "value": "true"
+    }
+  }
+}
