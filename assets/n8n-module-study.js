@@ -313,6 +313,16 @@
         });
         if(!openLessons.includes(entry))openLessons.push(entry);
         banner.hidden=button.classList.contains("done");
+        if(IS_N8N&&lesson.dataset.serverEvidenceOpen!=="true"&&lesson.dataset.serverEvidenceOpen!=="pending"){
+          lesson.dataset.serverEvidenceOpen="pending";
+          api("/api/academy/module-progress",{method:"POST",body:JSON.stringify({courseSlug:COURSE,moduleSlug:MODULE,event:"lesson_open",lessonId:lesson.dataset.lesson})})
+            .then(()=>{lesson.dataset.serverEvidenceOpen="true";})
+            .catch(error=>{
+              lesson.dataset.serverEvidenceOpen="";
+              banner.classList.remove("ready");
+              label.textContent="Server-Lernnachweis konnte nicht gestartet werden: "+error.message;
+            });
+        }
         openedAt=Date.now();
         if(button.dataset.unlocked!=="true"){
           updateButton();
