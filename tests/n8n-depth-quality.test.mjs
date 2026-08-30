@@ -66,7 +66,7 @@ test("all n8n modules load the automatic mastery gate asset",async()=>{
   for(let i=1;i<=12;i++){
     const n=String(i).padStart(2,"0");
     const html=await readFile("academy/n8n-bootcamp/modul-"+n+"/index.html","utf8");
-    assert.match(html,/n8n-module-study\.js\?v=1\.9/,"modul-"+n+" must load n8n study v1.8");
+    assert.match(html,/n8n-module-study\.js\?v=2\.0/,"modul-"+n+" must load n8n study v1.8");
     assert.match(html,/class="teachList"/,"modul-"+n+" must retain the evidence checklist");
   }
 });
@@ -77,6 +77,7 @@ test("n8n lessons require server-backed lesson evidence before completion",async
   const progress=await readFile("functions/api/academy/module-progress.js","utf8");
   const auth=await readFile("functions/_lib/auth.js","utf8");
   assert.match(study,/event:"lesson_open"/);
+  assert.match(study,/MIN_READ_SECONDS=50/);
   assert.match(progress,/academy_lesson_sessions/);
   assert.match(progress,/N8N_MIN_LESSON_SECONDS=45/);
   assert.match(progress,/lesson_evidence_too_short/);
