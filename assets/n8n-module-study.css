@@ -60,3 +60,26 @@
 .gradeBadge.grade-4{background:#c96a2c}
 .gradeBadge.grade-5{background:#b13a2e}
 .gradeLabel{display:block;margin-top:4px;font-size:.8rem;font-weight:800;color:#9fc2cb;text-transform:capitalize}
+
+
+/* n8n Bootcamp strict learning sequence */
+.studyNav a.sequenceLocked{opacity:.48;cursor:not-allowed;background:#f5f7f8;color:#7c8e95}
+.studyNav a.sequenceLocked:before{content:"🔒";font-size:.68rem;flex-shrink:0}
+.lesson.sequenceLocked{opacity:.58;background:#f7f9fa;box-shadow:none}
+.lesson.sequenceLocked details{pointer-events:none}
+.lesson.sequenceLocked .doneButton{cursor:not-allowed}
+.sequenceLockBanner{margin:0 0 16px;padding:12px 14px;border-radius:11px;background:#fff3ef;border:1px solid #e6b2a8;color:#733c32;font-weight:850}
+.sequenceLockBanner.ready{background:#eaf7f1;border-color:#9fcfb9;color:#0b6d58}
+.liveLab.sequenceLocked{position:relative}
+.liveLab.sequenceLocked .module7Flow,
+.liveLab.sequenceLocked .module8Flow,
+.liveLab.sequenceLocked .module9Flow,
+.liveLab.sequenceLocked .module10Flow,
+.liveLab.sequenceLocked .module11Flow,
+.liveLab.sequenceLocked .module12Flow,
+.liveLab.sequenceLocked .labCanvas{opacity:.42}
+.liveLab button.sequenceDone{opacity:.58;text-decoration:line-through}
+.liveLab button.sequenceCurrent{border-color:#5ee1d4!important;box-shadow:0 0 0 3px #5ee1d422!important}
+.assessment.sequenceLocked .assessmentList,
+.assessment.sequenceLocked .assessmentActions{pointer-events:none;opacity:.38;filter:grayscale(.25)}
+.assessment.sequenceLocked .assessmentResult{display:none!important}
