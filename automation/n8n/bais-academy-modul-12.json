@@ -1,0 +1,429 @@
+{
+  "name": "BAIS Academy · Modul 12 · Customer Project Capstone Lab",
+  "baisWorkflowRefs": {
+    "Execute Normalize Contract": "BAIS Academy · Modul 10 · Normalize Lead Contract"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bais-academy-modul-12",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1280,
+        0
+      ],
+      "id": "m12-webhook",
+      "name": "Webhook",
+      "webhookId": "m12-webhook-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scenario=String($input.first().json.body?.scenario??\"\").trim();\nconst samples={\n happy:{runKey:\"cap-happy\",leadId:\"L-1201\",fullName:\"Mina Yilmaz\",email:\"mina@example.com\",source:\"website\",budget:6500,targetUrl:\"https://api.example.com/crm\",manualMinutes:14,monthlyVolume:320,hourlyRate:42,platformCost:180,projectCost:4800,expectedRoute:\"sales_standard\"},\n high:{runKey:\"cap-high\",leadId:\"L-1202\",fullName:\"Jörg Müller\",email:\"joerg@example.com\",source:\"partner\",budget:18000,targetUrl:\"https://api.example.com/crm\",manualMinutes:18,monthlyVolume:450,hourlyRate:48,platformCost:240,projectCost:6500,expectedRoute:\"sales_priority\"},\n invalid:{runKey:\"cap-invalid\",leadId:\"\",fullName:\"Broken Lead\",email:\"not-an-email\",source:\"website\",budget:9000,targetUrl:\"https://api.example.com/crm\",manualMinutes:14,monthlyVolume:320,hourlyRate:42,platformCost:180,projectCost:4800,expectedRoute:\"validation_reject\"},\n security:{runKey:\"cap-security\",leadId:\"L-1204\",fullName:\"Security Test\",email:\"security@example.com\",source:\"upload\",budget:12000,targetUrl:\"http://169.254.169.254/latest/meta-data/\",manualMinutes:16,monthlyVolume:300,hourlyRate:45,platformCost:200,projectCost:6000,expectedRoute:\"security_review\"},\n weakroi:{runKey:\"cap-weakroi\",leadId:\"L-1205\",fullName:\"Small Volume\",email:\"small@example.com\",source:\"website\",budget:4000,targetUrl:\"https://api.example.com/crm\",manualMinutes:5,monthlyVolume:20,hourlyRate:35,platformCost:300,projectCost:9000,expectedRoute:\"sales_standard\"}\n};\nconst s=samples[scenario];\nif(!s)return [{json:{validScenario:false,scenario,error:\"unknown_scenario\"}}];\nreturn [{json:{validScenario:true,scenario,...s}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1060,
+        0
+      ],
+      "id": "m12-prepare",
+      "name": "Prepare Project Scenario"
+    },
+    {
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "__BAIS_PENDING_SUBWORKFLOW_ID__",
+          "mode": "list",
+          "cachedResultName": "BAIS Academy · Modul 10 · Normalize Lead Contract"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scenario": "={{ $json.scenario }}",
+            "leadId": "={{ $json.leadId }}",
+            "fullName": "={{ $json.fullName }}",
+            "email": "={{ $json.email }}",
+            "source": "={{ $json.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "scenario",
+              "displayName": "scenario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "leadId",
+              "displayName": "leadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -820,
+        0
+      ],
+      "id": "m12-child",
+      "name": "Execute Normalize Contract"
+    },
+    {
+      "parameters": {
+        "jsCode": "const child=$input.first().json;\nconst p=$('Prepare Project Scenario').item.json;\nconst rawTarget=String(p.targetUrl||\"\").trim();\nconst m=rawTarget.match(/^([a-z][a-z0-9+.-]*):\\/\\/([^\\/?#]+)/i);\nlet securityAllowed=true,securityReason=\"allowed\";\nif(!m){securityAllowed=false;securityReason=\"invalid_target_url\";}\nelse{\n const proto=String(m[1]||\"\").toLowerCase();\n let host=String(m[2]||\"\").replace(/^[^@]+@/,\"\").replace(/:\\d+$/,\"\").toLowerCase();\n if(host.startsWith(\"[\")&&host.endsWith(\"]\"))host=host.slice(1,-1);\n const blocked=[/^localhost$/, /^127\\./, /^10\\./, /^192\\.168\\./, /^169\\.254\\./, /^172\\.(1[6-9]|2\\d|3[0-1])\\./, /^0\\./, /^::1$/, /^fc[0-9a-f]{2}:/i, /^fd[0-9a-f]{2}:/i, /^fe[89ab][0-9a-f]:/i];\n if(proto!==\"https\"){securityAllowed=false;securityReason=\"non_https_target\";}\n if(blocked.some(rx=>rx.test(host))){securityAllowed=false;securityReason=\"private_or_link_local_target\";}\n}\n\nlet route;\nif(!child.valid)route=\"validation_reject\";\nelse if(!securityAllowed)route=\"security_review\";\nelse if(Number(p.budget)>=10000)route=\"sales_priority\";\nelse route=\"sales_standard\";\n\nconst manualMonthlyHours=(Number(p.manualMinutes)*Number(p.monthlyVolume))/60;\nconst manualMonthlyCost=manualMonthlyHours*Number(p.hourlyRate);\nconst residualMinutes=2;\nconst automationLabor=((residualMinutes*Number(p.monthlyVolume))/60)*Number(p.hourlyRate);\nconst monthlyAutomationCost=automationLabor+Number(p.platformCost);\nconst monthlySavings=manualMonthlyCost-monthlyAutomationCost;\nconst paybackMonths=monthlySavings>0?Number(p.projectCost)/monthlySavings:null;\nconst routeMatches=route===p.expectedRoute;\n\nconst acceptance={\n contractValid: p.scenario===\"invalid\" ? child.valid===false : child.valid===true,\n securityBehavior: p.scenario===\"security\" ? securityAllowed===false : securityAllowed===true,\n expectedRoute: routeMatches,\n noUnapprovedExternalSideEffect:true,\n evidencePersistable:true\n};\nconst acceptancePassed=Object.values(acceptance).every(Boolean);\nreturn [{json:{\n scenario:p.scenario,runKey:p.runKey,owner:\"BAIS Academy Learner\",\n input:{leadId:p.leadId,source:p.source,budget:p.budget,targetUrl:p.targetUrl},\n normalized:child,\n security:{allowed:securityAllowed,reason:securityReason},\n decision:{route,expectedRoute:p.expectedRoute,routeMatches},\n economics:{\n  manualMinutesPerCase:p.manualMinutes,monthlyVolume:p.monthlyVolume,hourlyRate:p.hourlyRate,\n  manualMonthlyHours:Number(manualMonthlyHours.toFixed(2)),\n  manualMonthlyCost:Number(manualMonthlyCost.toFixed(2)),\n  residualMinutesPerCase:residualMinutes,\n  automationLaborCost:Number(automationLabor.toFixed(2)),\n  platformCost:Number(p.platformCost),\n  monthlyAutomationCost:Number(monthlyAutomationCost.toFixed(2)),\n  monthlySavings:Number(monthlySavings.toFixed(2)),\n  projectCost:Number(p.projectCost),\n  paybackMonths:paybackMonths===null?null:Number(paybackMonths.toFixed(2)),\n  positiveBusinessCase:monthlySavings>0\n },\n acceptance,\n acceptancePassed\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        0
+      ],
+      "id": "m12-analyze",
+      "name": "Evaluate Architecture ROI Acceptance"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "BAIS Academy Modul 12 Project Evidence",
+        "columns": {
+          "column": [
+            {
+              "name": "runKey",
+              "type": "string"
+            },
+            {
+              "name": "scenario",
+              "type": "string"
+            },
+            {
+              "name": "route",
+              "type": "string"
+            },
+            {
+              "name": "acceptancePassed",
+              "type": "boolean"
+            },
+            {
+              "name": "monthlySavings",
+              "type": "number"
+            },
+            {
+              "name": "paybackMonths",
+              "type": "number"
+            },
+            {
+              "name": "owner",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "m12-table",
+      "name": "Ensure Project Evidence Table"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "BAIS Academy Modul 12 Project Evidence"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "runKey",
+              "condition": "eq",
+              "keyValue": "={{ $('Evaluate Architecture ROI Acceptance').item.json.runKey }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "runKey": "={{ $('Evaluate Architecture ROI Acceptance').item.json.runKey }}",
+            "scenario": "={{ $('Evaluate Architecture ROI Acceptance').item.json.scenario }}",
+            "route": "={{ $('Evaluate Architecture ROI Acceptance').item.json.decision.route }}",
+            "acceptancePassed": "={{ $('Evaluate Architecture ROI Acceptance').item.json.acceptancePassed }}",
+            "monthlySavings": "={{ $('Evaluate Architecture ROI Acceptance').item.json.economics.monthlySavings }}",
+            "paybackMonths": "={{ $('Evaluate Architecture ROI Acceptance').item.json.economics.paybackMonths ?? -1 }}",
+            "owner": "={{ $('Evaluate Architecture ROI Acceptance').item.json.owner }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "runKey",
+              "displayName": "runKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scenario",
+              "displayName": "scenario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "route",
+              "displayName": "route",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "acceptancePassed",
+              "displayName": "acceptancePassed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "monthlySavings",
+              "displayName": "monthlySavings",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "paybackMonths",
+              "displayName": "paybackMonths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "owner",
+              "displayName": "owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "m12-upsert",
+      "name": "Persist Project Evidence"
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$input.first().json;\nconst x=$('Evaluate Architecture ROI Acceptance').item.json;\nreturn [{json:{\n ok:true,module:\"12\",case:x.scenario,\n project:{\n  phase:\"acceptance_evidence\",\n  pattern:\"discovery -> contract -> security gate -> routing -> economics -> acceptance -> persisted evidence\",\n  owner:x.owner\n },\n normalized:x.normalized,\n security:x.security,\n decision:x.decision,\n economics:x.economics,\n acceptance:x.acceptance,\n acceptancePassed:x.acceptancePassed,\n evidence:{\n  persistence:\"n8n_data_table\",\n  table:\"BAIS Academy Modul 12 Project Evidence\",\n  rowId:row.id??null,\n  runKey:x.runKey,\n  route:row.route??x.decision.route,\n  updatedAt:row.updatedAt??null\n },\n handover:{\n  productionSideEffectsExecuted:false,\n  requiredBeforeRealGoLive:[\"customer approval\",\"production credentials\",\"security review\",\"monitoring/alerts\",\"rollback plan\",\"runbook\",\"data-processing review\"],\n  status:x.acceptancePassed?\"technical_acceptance_passed\":\"technical_acceptance_failed\"\n },\n lesson:x.scenario===\"weakroi\"\n  ?\"A technically valid automation can still have a weak or negative business case; ROI is a separate acceptance dimension.\"\n  :x.scenario===\"security\"\n   ?\"Security acceptance must block unsafe architecture even if the business data itself is valid.\"\n   :x.scenario===\"invalid\"\n    ?\"Input contract and validation reject bad data before downstream systems.\"\n    :\"The capstone connects reusable components, security, routing, economics and persisted acceptance evidence.\"\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ],
+      "id": "m12-report",
+      "name": "Build Handover Report"
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        420,
+        0
+      ],
+      "id": "m12-respond",
+      "name": "Respond Lab"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Project Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Project Scenario": {
+      "main": [
+        [
+          {
+            "node": "Execute Normalize Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Normalize Contract": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Architecture ROI Acceptance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Architecture ROI Acceptance": {
+      "main": [
+        [
+          {
+            "node": "Ensure Project Evidence Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure Project Evidence Table": {
+      "main": [
+        [
+          {
+            "node": "Persist Project Evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist Project Evidence": {
+      "main": [
+        [
+          {
+            "node": "Build Handover Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Handover Report": {
+      "main": [
+        [
+          {
+            "node": "Respond Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "baisSmoke": {
+    "path": "bais-academy-modul-12",
+    "body": {
+      "scenario": "happy"
+    },
+    "expect": {
+      "filter": ".handover.status",
+      "value": "technical_acceptance_passed"
+    }
+  }
+}
