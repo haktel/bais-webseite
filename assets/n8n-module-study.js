@@ -21,6 +21,8 @@
         button.classList.add("done");
         button.disabled=true;
         button.textContent="✓ Abgeschlossen";
+        lesson.classList.add("done");
+        document.querySelector(`.studyNav a[href="#${lesson.id}"]`)?.classList.add("done");
       }
     });
     const pct=Number(state.modulePercent)||0;
@@ -67,26 +69,46 @@
     const required=estimateReadSeconds(bodyText);
     let accumulated=0,openedAt=null,timer=null;
 
+    // A dedicated, impossible-to-miss reading-progress banner, injected
+    // right below "Vertiefung öffnen" - not just a countdown hidden inside
+    // the completion button's own label.
+    const banner=document.createElement("div");
+    banner.className="readTimer";
+    banner.innerHTML='<div class="readTimerBar"><i></i></div><span class="readTimerText"></span>';
+    summary.after(banner);
+    const bar=banner.querySelector("i"),label=banner.querySelector(".readTimerText");
+
+    const updateBanner=(totalRead)=>{
+      const pct=Math.min(100,Math.round(totalRead/required*100));
+      bar.style.width=pct+"%";
+      if(totalRead>=required){
+        banner.classList.add("ready");
+        label.textContent="✓ Lesezeit erreicht — du kannst diese Lerneinheit jetzt abschließen.";
+      }else{
+        banner.classList.remove("ready");
+        label.textContent=`Lesezeit: ${Math.ceil(totalRead)}s / ${required}s${details.open?"":" · Vertiefung wieder öffnen, um weiterzulesen"}`;
+      }
+    };
+
     const updateButton=()=>{
-      if(button.classList.contains("done"))return;
+      if(button.classList.contains("done")){banner.hidden=true;return;}
       const elapsedOpen=openedAt?(Date.now()-openedAt)/1000:0;
       const totalRead=accumulated+elapsedOpen;
+      updateBanner(totalRead);
       if(totalRead>=required){
         button.dataset.unlocked="true";
         button.disabled=false;
-        button.classList.remove("reading");
         button.textContent="Lerneinheit abschließen";
         if(timer){clearInterval(timer);timer=null;}
       }else{
         button.disabled=true;
-        button.classList.toggle("reading",details.open);
-        button.style.setProperty("--read-pct",Math.min(100,Math.round(totalRead/required*100))+"%");
-        button.textContent=details.open?`Noch ${Math.ceil(required-totalRead)}s lesen …`:"Vertiefung öffnen";
+        button.textContent=details.open?"Lesezeit läuft …":"Vertiefung öffnen";
       }
     };
 
     details.addEventListener("toggle",()=>{
       if(details.open){
+        banner.hidden=button.classList.contains("done");
         openedAt=Date.now();
         if(button.dataset.unlocked!=="true"){
           updateButton();

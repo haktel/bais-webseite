@@ -74,9 +74,11 @@
      if(answered===questions.length){
        const pct=Math.round(correct/questions.length*100);
        const grade=window.percentToNote?window.percentToNote(pct):{note:pct>=50?4:5,label:pct>=50?"ausreichend":"nicht ausreichend",passed:pct>=50};
+       const credited=pct>=81;
+       const message=credited?"Modul-Testat erreicht — ausgezeichnete Leistung. Ein neuer Versuch verbessert deine Note weiter.":grade.passed?"Akademisch bestanden, aber für den BAIS Modul-Nachweis ist mindestens Note 2 („gut“, ≥81%) erforderlich. Wiederhole die Prüfung.":"Noch nicht bestanden (mind. 50% erforderlich). Der nächste Versuch gewichtet deine schwächeren Themen stärker.";
        result.hidden=false;
-       result.innerHTML="<div class=\"gradeRow\"><span class=\"gradeBadge grade-"+grade.note+"\">Note "+grade.note+"</span><div><strong>"+correct+"/"+questions.length+" richtig · "+pct+"%</strong><span class=\"gradeLabel\">"+grade.label+(grade.passed?" · bestanden":" · nicht bestanden")+"</span></div></div><p>"+(grade.passed?"Modul-Testat erreicht (mind. 50% erforderlich). Ein neuer Versuch verbessert deine Note.":"Noch nicht bestanden (mind. 50% erforderlich). Der nächste Versuch gewichtet deine schwächeren Themen stärker.")+"</p>";
-       window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-02",score:pct,grade:grade.note,passed:grade.passed}}));
+       result.innerHTML="<div class=\"gradeRow\"><span class=\"gradeBadge grade-"+grade.note+"\">Note "+grade.note+"</span><div><strong>"+correct+"/"+questions.length+" richtig · "+pct+"%</strong><span class=\"gradeLabel\">"+grade.label+(grade.passed?" · bestanden":" · nicht bestanden")+"</span></div></div><p>"+message+"</p>";
+       window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-02",score:pct,grade:grade.note,passed:grade.passed,credited}}));
        result.scrollIntoView({behavior:"smooth",block:"center"});
      }
    });
