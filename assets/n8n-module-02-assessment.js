@@ -71,7 +71,7 @@
      buttons.forEach(x=>x.disabled=true);const ok=b.dataset.correct==="true";b.classList.add(ok?"correct":"wrong");const good=buttons.find(x=>x.dataset.correct==="true");if(good)good.classList.add("correct");
      const ex=card.querySelector("[data-explain]");ex.hidden=false;ex.innerHTML="<strong>"+(ok?"Richtig":"Nicht ganz")+"</strong><p>"+item.explanation+"</p>";
      answered++;if(ok)correct++;else{const w=weak();w[item.topic]=Number(w[item.topic]||0)+1;saveWeak(w);}
-     if(answered===questions.length){const pct=Math.round(correct/questions.length*100);result.hidden=false;result.innerHTML="<strong>"+correct+"/"+questions.length+" richtig · "+pct+"%</strong><p>"+(pct>=80?"Bestanden. Ein neuer Versuch verwendet wieder andere Fragen und Varianten.":"Noch nicht bestanden. Der nächste Versuch gewichtet deine schwächeren Themen stärker und vermeidet möglichst die zuletzt gesehenen Fragen.")+"</p>";result.scrollIntoView({behavior:"smooth",block:"center"});}
+     if(answered===questions.length){const pct=Math.round(correct/questions.length*100);result.hidden=false;result.innerHTML="<strong>"+correct+"/"+questions.length+" richtig · "+pct+"%</strong><p>"+(pct>=80?"Bestanden. Ein neuer Versuch verwendet wieder andere Fragen und Varianten.":"Noch nicht bestanden. Der nächste Versuch gewichtet deine schwächeren Themen stärker und vermeidet möglichst die zuletzt gesehenen Fragen.")+"</p>";window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-02",score:pct,passed:pct>=80}}));result.scrollIntoView({behavior:"smooth",block:"center"});}
    });
    restart.addEventListener("click",()=>{render();root.scrollIntoView({behavior:"smooth",block:"start"});});render();
  }

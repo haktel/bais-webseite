@@ -2,8 +2,8 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}fro
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 
 const MODULE_COUNT=12;
-const LESSONS_PER_MODULE={"modul-01":12};
-const LAB_CASES={"modul-01":["qualified","standard","invalid"]};
+const LESSONS_PER_MODULE={"modul-01":12,"modul-02":12};
+const LAB_CASES={"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"]};
 
 const parseArray=value=>{
   try{
