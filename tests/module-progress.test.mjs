@@ -9,14 +9,14 @@ const progressRow=(lessons=[],labs=[],best=0)=>({
  assessment_best:best
 });
 
-function makeDb(getProgressRow,aggregate={total:0},priorModules={}){
+function makeDb(getProgressRow,aggregate={total:0},priorModules={},role="student"){
  return{
   prepare(sql){
    return{
     bind:(...args)=>({
      run:async()=>({success:true}),
      first:async()=>{
-      if(sql.startsWith("SELECT s.id AS session_id"))return{session_id:"s1",user_id:"u1",expires_at:future,status:"active"};
+      if(sql.startsWith("SELECT s.id AS session_id"))return{session_id:"s1",user_id:"u1",expires_at:future,status:"active",role};
       if(sql.includes("FROM enrollments e JOIN course_runs"))return{id:"course-1",slug:"n8n-bootcamp"};
       if(sql.startsWith("SELECT module_percent FROM academy_module_progress"))return{module_percent:priorModules[args[2]]??100};
       if(sql.startsWith("SELECT completed_lessons_json,lab_cases_json,assessment_best FROM academy_module_progress"))return getProgressRow();
@@ -254,4 +254,14 @@ test("n8n module progression unlocks when all prior modules are 100%",async()=>{
  const db=makeDb(()=>null,{total:0},{"modul-01":100,"modul-02":100,"modul-03":100}),env={DB:db};
  const res=await onRequestPost({request:makeRequest("modul-04","lesson_complete",{lessonId:"01"}),env});
  assert.equal(res.status,200);
+});
+
+
+test("n8n admin account cannot bypass cross-module learning sequence",async()=>{
+ const db=makeDb(()=>null,{total:0},{"modul-01":100,"modul-02":100,"modul-03":75},"admin"),env={DB:db};
+ const res=await onRequestPost({request:makeRequest("modul-04","lesson_complete",{lessonId:"01"}),env});
+ const body=await res.json();
+ assert.equal(res.status,409);
+ assert.equal(body.error.code,"module_sequence_locked");
+ assert.match(body.error.message,/modul-03/);
 });

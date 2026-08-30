@@ -13,8 +13,6 @@ export const onRequest=async context=>{
   try{
     await ensureAuthSchema(db);
     const user=await requireSession(db,request);
-    if(user.role==="admin")return context.next();
-
     const enrollment=await findN8nEnrollment(db,user.user_id);
     if(!enrollment){
       const target=new URL("/academy/konto/",request.url);
