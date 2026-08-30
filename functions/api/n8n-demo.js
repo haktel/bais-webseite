@@ -32,6 +32,10 @@ const ALLOWED_ORIGINS=new Set([
   "https://bais-webseite.pages.dev"
 ]);
 
+const BURST_WINDOW_MS=60_000;
+const BURST_LIMIT=4;
+const burstBuckets=new Map();
+
 function allowedOrigin(origin){
   return Boolean(origin&&(ALLOWED_ORIGINS.has(origin)||origin.endsWith(".bais-webseite.pages.dev")));
 }
@@ -56,6 +60,22 @@ export async function fingerprint(value){
   return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,"0")).join("").slice(0,20);
 }
 
+export function allowBurst(key,now=Date.now()){
+  const current=burstBuckets.get(key);
+  if(!current||now-current.started>=BURST_WINDOW_MS){
+    burstBuckets.set(key,{started:now,count:1});
+    if(burstBuckets.size>512){
+      for(const [bucketKey,bucket] of burstBuckets){
+        if(now-bucket.started>=BURST_WINDOW_MS)burstBuckets.delete(bucketKey);
+      }
+    }
+    return true;
+  }
+  if(current.count>=BURST_LIMIT)return false;
+  current.count+=1;
+  return true;
+}
+
 function responseHeaders(){
   return{
     "Cache-Control":"no-store",
@@ -69,6 +89,15 @@ export async function onRequestPost({request}){
   const origin=request.headers.get("Origin");
   if(!allowedOrigin(origin)){
     return Response.json({ok:false,requestId,error:"Origin not allowed"},{status:403,headers:responseHeaders()});
+  }
+
+  const clientIp=request.headers.get("cf-connecting-ip")||"unknown";
+  const burstKey=await fingerprint(`n8n-demo|${clientIp}`);
+  if(!allowBurst(burstKey)){
+    return Response.json(
+      {ok:false,requestId,error:"Too many demo executions. Please try again shortly."},
+      {status:429,headers:{...responseHeaders(),"Retry-After":"60"}}
+    );
   }
 
   const type=request.headers.get("Content-Type")||"";
