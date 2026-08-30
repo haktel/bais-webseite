@@ -1,6 +1,6 @@
 import test from"node:test";
 import assert from"node:assert/strict";
-import{DEMO_SCENARIOS,buildDemoPayload}from"../functions/api/n8n-demo.js";
+import{DEMO_SCENARIOS,buildDemoPayload,fingerprint}from"../functions/api/n8n-demo.js";
 
 test("n8n public demo exposes only fixed business scenarios",()=>{
  assert.deepEqual(Object.keys(DEMO_SCENARIOS),["automation","security","academy"]);
@@ -25,4 +25,13 @@ test("n8n demo urgency changes the fixed workflow context",()=>{
 test("n8n demo rejects unsupported scenario or urgency before webhook call",()=>{
  assert.equal(buildDemoPayload("custom","urgent"),null);
  assert.equal(buildDemoPayload("automation","now"),null);
+});
+
+test("n8n demo fingerprint is stable and compact",async()=>{
+ const a=await fingerprint("automation|planned");
+ const b=await fingerprint("automation|planned");
+ const c=await fingerprint("automation|urgent");
+ assert.equal(a,b);
+ assert.notEqual(a,c);
+ assert.match(a,/^[a-f0-9]{20}$/);
 });
