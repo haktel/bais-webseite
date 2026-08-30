@@ -4,7 +4,7 @@
 <meta name="description" content="Privater BAIS Academy Lernbereich zu n8n Items, JSON, Expressions, Edit Fields, Code Node, Split, Aggregate, Merge, Normalisierung und Debugging.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-02/">
-<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-02.css?v=1.1">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-02.css?v=1.2">
 </head><body data-module="modul-02">
 <header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-01/">Modul 01</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
 
@@ -20,13 +20,41 @@
 <div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
 
 <div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE DATENVERARBEITUNG IN PRODUKTION</span><h2>Items und JSON sind kein Anfänger-Kapitel – sie entscheiden über Skalierung und Datenqualität.</h2><p>In diesem Modul beziehen wir reale, öffentlich dokumentierte n8n-Einsätze ein: Stepstone verarbeitet Millionen jobbezogener Dokumente, Formula Bot orchestriert heterogene Datenquellen, Vodafone kombiniert Low-code und Code in modularen Produktionsworkflows.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Stepstone</strong><span>High-volume Data</span><b>2–3 Mio. Dokumente / Monat</b></article>
+    <article><strong>Formula Bot</strong><span>Data Connectors</span><b>1 Woche → ~1,5 Tage</b></article>
+    <article><strong>Vodafone</strong><span>Modular Automation</span><b>33 produktive Workflows</b></article>
+  </div>
+</div>
+
 <article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">ITEM-MODELL</div><h2>Ein Workflow verarbeitet nicht „irgendwie JSON“</h2><p>n8n arbeitet mit Items. Ein Item ist eine einzelne Verarbeitungseinheit mit strukturierten Daten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">Item 1 → { "name": "Mina" }
 Item 2 → { "name": "Jonas" }
-Item 3 → { "name": "Sara" }</div><details><summary>Vertiefung öffnen</summary><p>Wenn ein Node drei Items erhält, kann er drei Datensätze verarbeiten. Das ist etwas anderes als ein einziges Item, das ein Array mit drei Elementen enthält. Genau dieser Unterschied entscheidet später über Split, Loop, Merge und Aggregate.</p></details></article>
+Item 3 → { "name": "Sara" }</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Items bestimmen, wie oft deine Logik wirklich läuft</h3><p>In n8n ist ein Item keine hübsche Anzeige, sondern eine <b>Verarbeitungseinheit</b>. Viele Nodes arbeiten automatisch einmal pro Item. Drei Items können also drei API-Aufrufe, drei E-Mails oder drei Datenbank-Updates bedeuten. Ein einziges Item mit einem Array aus drei Elementen verhält sich dagegen komplett anders.</p></div>
+<div class="itemCompare">
+  <div><span>1 Item mit Array</span><pre>{"customers":[
+ {"id":1},
+ {"id":2},
+ {"id":3}
+]}</pre><b>→ Node läuft zunächst 1×</b></div>
+  <div><span>3 einzelne Items</span><pre>Item 1 {"id":1}
+Item 2 {"id":2}
+Item 3 {"id":3}</pre><b>→ viele Nodes arbeiten 3×</b></div>
+</div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>2–3 Millionen jobbezogene Dokumente pro Monat</h3><p>Stepstone beschreibt, dass n8n monatlich Millionen jobbezogener Datendokumente verarbeitet. Bei dieser Größenordnung ist Item-Denken keine Theorie: Anzahl, Aufteilung und Weiterverarbeitung bestimmen Laufzeit, Last und Zuverlässigkeit.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>2–3 Mio.</strong><span>Dokumente / Monat</span></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Gefahr</strong><p>Du erwartest 1 Item, bekommst aber 5.000. Ein nachfolgender E-Mail- oder HTTP-Node kann plötzlich 5.000 Aktionen auslösen.</p></div><div class="lessonCallout"><strong>Professional Check</strong><p>Vor jedem „teuren“ Node: Item Count prüfen, Filter/Batching planen, API-Limits kennen.</p></div></div>
+</details></article>
 
 <article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">JSON</div><h2>Datentypen sicher lesen</h2><p>Bevor du Expressions oder IF-Regeln baust, musst du erkennen, welcher Typ tatsächlich ankommt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
 <div class="dataTypeGrid"><div><b>String</b><code>"7500"</code></div><div><b>Number</b><code>7500</code></div><div><b>Boolean</b><code>true</code></div><div><b>Array</b><code>["AI","n8n"]</code></div><div><b>Object</b><code>{"name":"Mina"}</code></div></div>
-<details><summary>Vertiefung öffnen</summary><p><code>"7500"</code> und <code>7500</code> sehen ähnlich aus, sind aber nicht dasselbe. Typfehler erzeugen falsche Vergleiche, Berechnungen und Validierungsfehler. Production-Workflows konvertieren Typen bewusst statt auf Zufall zu vertrauen.</p></details></article>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Datentypen sind Business-Logik</h3><p><code>"7500"</code> ist ein String, <code>7500</code> eine Number. Das ist nicht akademisch: Budget-Vergleiche, Summen, Sortierung und Validierung können unterschiedliche Ergebnisse liefern. Gleiches gilt für <code>"false"</code> versus <code>false</code> oder <code>"2026-08-30"</code> versus ein echtes Datumsobjekt in späterer Verarbeitung.</p></div>
+<table class="depthTable"><tr><th>Input</th><th>Typ</th><th>Risiko</th><th>Normalisierung</th></tr><tr><td><code>"7500"</code></td><td>String</td><td>falscher Zahlenvergleich</td><td><code>Number(value)</code></td></tr><tr><td><code>" false "</code></td><td>String</td><td>wird als Text behandelt</td><td>explizite Boolean-Regel</td></tr><tr><td><code>null</code></td><td>Null</td><td>Expression/DB kann scheitern</td><td>Fallback oder Reject</td></tr><tr><td><code>[]</code></td><td>Array</td><td>kein Datensatz vorhanden</td><td>Leerfall behandeln</td></tr></table>
+<div class="caseFlow"><b>Rohwert</b><span>→</span><b>Typ prüfen</b><span>→</span><b>konvertieren</b><span>→</span><b>validieren</b><span>→</span><b>Business-Regel</b></div>
+<div class="lessonCallout"><strong>Grenzwert-Test</strong><p>Wenn die Regel <code>budget &gt;= 5000</code> lautet, teste mindestens 4999, 5000, 5001, <code>"5000"</code>, null und <code>"abc"</code>.</p></div>
+</details></article>
 
 <article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">NESTED DATA</div><h2>Objects und Arrays verschachteln</h2><p>APIs liefern selten flache Daten. Du musst verschachtelte Strukturen lesen können.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{
   "customer": {
@@ -34,14 +62,41 @@ Item 3 → { "name": "Sara" }</div><details><summary>Vertiefung öffnen</summary
     "address": { "city": "Dortmund" }
   },
   "tags": ["AI","Automation"]
-}</div><details><summary>Vertiefung öffnen</summary><p>Bei nested Objects brauchst du den korrekten Pfad. Bei Arrays musst du zusätzlich entscheiden: Willst du das Array als Ganzes behalten oder jedes Element als eigenes Item weiterverarbeiten?</p></details></article>
+}</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>APIs liefern Hierarchien, keine Tabellenzeilen</h3><p>Ein Kunde kann Adresse, Ansprechpartner, Bestellungen und Tags als verschachtelte Objects und Arrays enthalten. Du musst unterscheiden: Welcher Teil beschreibt <b>ein Objekt</b>, welcher Teil eine <b>Liste</b>, und welche Ebene soll der nächste Node erhalten?</p></div>
+<div class="schemaTree"><div><b>customer</b><small>Object</small></div><div class="indent"><b>id</b><small>String</small></div><div class="indent"><b>address</b><small>Object</small></div><div class="indent2"><b>city</b><small>String</small></div><div class="indent"><b>orders</b><small>Array[ ]</small></div><div class="indent2"><b>order</b><small>Object × n</small></div></div>
+<div class="codeCompare"><div><span>Nested Input</span><pre>{
+ "customer":{
+  "address":{"city":"Dortmund"},
+  "orders":[{"id":"A1"},{"id":"A2"}]
+ }
+}</pre></div><div><span>Fragen</span><pre>city?
+→ customer.address.city
+
+orders einzeln?
+→ Array splitten
+
+orders zusammen?
+→ Array behalten</pre></div></div>
+<div class="lessonCallout"><strong>Praxisfehler</strong><p>Ein Developer referenziert <code>$json.city</code>, obwohl die API <code>customer.address.city</code> liefert. Ergebnis: <code>undefined</code>. Nicht n8n ist kaputt – der Datenpfad ist falsch.</p></div>
+</details></article>
 
 <article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">EXPRESSIONS</div><h2>Dynamische Werte mit <code>$json</code></h2><p>Expressions verbinden die Konfiguration eines Nodes mit den Daten des aktuellen Items.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{{$json.email}}
 {{$json.budget}}
-{{$json.customer.address.city}}</div><details><summary>Vertiefung öffnen</summary><p>Wenn eine Expression <code>undefined</code> liefert, ist der erste Verdacht nicht „n8n kaputt“, sondern: Existiert das Feld wirklich im Input dieses Nodes? Ist der Pfad korrekt? Ist das aktuelle Item das erwartete?</p></details></article>
+{{$json.customer.address.city}}</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Expressions sind live gebundene Datenpfade</h3><p>Eine Expression wird zur Laufzeit gegen den aktuellen Datenkontext ausgewertet. Deshalb kann dieselbe Expression in Node A funktionieren und in Node B <code>undefined</code> liefern, wenn Node B einen anderen Input bekommt.</p></div>
+<div class="expressionTrace"><div><b>Input</b><code>{"email":"mina@example.com","budget":7500}</code></div><span>→</span><div><b>Expression</b><code>{{$json.email}}</code></div><span>→</span><div><b>Output</b><code>mina@example.com</code></div></div>
+<table class="depthTable"><tr><th>Symptom</th><th>Prüfung</th></tr><tr><td><code>undefined</code></td><td>Feld/Pfad existiert?</td></tr><tr><td>falscher Datensatz</td><td>Welches Item ist aktuell?</td></tr><tr><td>alter Wert</td><td>Kommt der Wert aus aktuellem oder referenziertem Node?</td></tr><tr><td>Expression funktioniert nur im Test</td><td>Testdaten vs Production Input vergleichen</td></tr></table>
+<div class="lessonCallout"><strong>Professional Rule</strong><p>Nie eine Expression blind kopieren. Öffne zuerst den Input, identifiziere exakt den Pfad und teste mit mindestens zwei unterschiedlichen Datensätzen.</p></div>
+</details></article>
 
 <article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">KONTEXT</div><h2>Daten aus vorherigen Nodes referenzieren</h2><p>Manchmal brauchst du nicht das aktuelle Item, sondern einen Wert aus einem bestimmten vorherigen Node.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">{{ $('Webhook').item.json.body.email }}
-{{ $('Normalize').item.json.fullName }}</div><details><summary>Vertiefung öffnen</summary><p>Node-Referenzen sind mächtig, aber sie koppeln deinen Workflow stärker an konkrete Node-Namen und Item-Zuordnung. Verwende sie bewusst und dokumentiere, warum der direkte Datenfluss nicht genügt.</p></details></article>
+{{ $('Normalize').item.json.fullName }}</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Direkter Datenfluss oder explizite Node-Referenz?</h3><p><code>$json</code> liest den aktuellen Input. Eine Referenz wie <code>{{ $('Webhook').item.json.body.email }}</code> springt gezielt zu einem anderen Node. Das kann sinnvoll sein, erhöht aber die Kopplung: Umbenennen, Branches und Multi-Item-Situationen können die Referenz schwerer verständlich machen.</p></div>
+<div class="referenceMap"><div class="current"><b>Aktueller Pfad</b><span>Normalize → IF → Email</span><code>{{$json.email}}</code></div><div class="direct"><b>Direktreferenz</b><span>Email greift zurück auf Webhook</span><code>{{ $('Webhook').item.json.body.email }}</code></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Bevorzugt</strong><p>Daten so transformieren, dass der direkte Flow alles Benötigte enthält.</p></div><div class="lessonCallout"><strong>Gezielt einsetzen</strong><p>Node-Referenz, wenn ein stabiler, bewusst dokumentierter Wert aus einem früheren Schritt benötigt wird.</p></div></div>
+<div class="incident"><b>Refactoring-Fall:</b> Node <code>Webhook</code> wird in <code>Website Lead Trigger</code> umbenannt. Direkte Referenzen müssen nachvollziehbar angepasst werden; sauberer Datenfluss reduziert solche Abhängigkeiten.</div>
+</details></article>
 
 <article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">EDIT FIELDS</div><h2>Ein internes Schema bauen</h2><p>Edit Fields / Set eignet sich für transparentes Mapping: Felder auswählen, umbenennen, neue Werte erzeugen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">RAW:
 first_name → " Mina "
@@ -49,16 +104,42 @@ mail       → " MINA@EXAMPLE.COM "
 
 INTERN:
 fullName   → "Mina"
-email      → "mina@example.com"</div><details><summary>Vertiefung öffnen</summary><p>Ein Mapping-Node sollte einen klaren Datenvertrag herstellen. Vermeide, dass jede nachfolgende Node erneut wissen muss, wie fünf verschiedene Quellsysteme ihre Felder nennen.</p></details></article>
+email      → "mina@example.com"</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Mapping entkoppelt Quellsysteme von deiner Business-Logik</h3><p>CRM A nennt das Feld <code>mail</code>, Formular B nennt es <code>emailAddress</code>, API C liefert <code>contact.email</code>. Wenn jede spätere Node alle Varianten kennen muss, wird der Workflow fragil. Ein früher Mapping-Schritt erzeugt ein internes kanonisches Schema.</p></div>
+<div class="mappingDiagram"><div><span>Website</span><code>emailAddress</code></div><div><span>CRM</span><code>mail</code></div><div><span>Partner API</span><code>contact.email</code></div><b>→ NORMALIZE →</b><div class="canonical"><span>Intern</span><code>email</code></div></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · FORMULA BOT</span><h3>Viele Datenquellen, ein Backend-Orchestrator</h3><p>Formula Bot verbindet Dateien, Analytics-Plattformen, Cloud Storage und Datenbanken wie BigQuery. Die offizielle Case Study beschreibt n8n als Kern der Backend-Orchestrierung für unterschiedliche Datenquellen und komplexe Transformationen.</p><a href="https://n8n.io/case-studies/formula-bot/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>20–30 h</strong><span>Backend-/Integrationsarbeit pro Monat gespart</span></div></div>
+<div class="lessonCallout"><strong>Datenvertrag</strong><p>Definiere für dein internes Schema Pflichtfelder, Datentypen, Bedeutung und erlaubte Null-Werte. Dann können spätere Nodes unabhängig vom Quellsystem arbeiten.</p></div>
+</details></article>
 
 <article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">CODE NODE</div><h2>Code nur dort, wo er wirklich hilft</h2><p>Ein Code Node ist sinnvoll, wenn Transformationen mit Standard-Nodes unnötig kompliziert werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">const email = String($json.email).trim().toLowerCase();
-const budget = Number($json.budget);</div><details><summary>Vertiefung öffnen</summary><p>Code ist kein Qualitätsbeweis. Standard-Nodes sind oft leichter auditierbar und wartbarer. Code sollte klein, deterministisch, testbar und auf eine klare Aufgabe begrenzt bleiben.</p></details></article>
+const budget = Number($json.budget);</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Low-code bedeutet nicht „kein Code“ – sondern Code mit Absicht</h3><p>Ein Code Node ist stark, wenn du mehrere zusammenhängende Transformationen sauber in einer kleinen Funktion ausdrücken kannst. Er wird problematisch, wenn darin API-Aufrufe, Business-Regeln, Logging und zehn Seiteneffekte gleichzeitig versteckt werden.</p></div>
+<div class="codeCompare"><div><span>Gut begrenzt</span><pre>const email =
+ String($json.email)
+ .trim()
+ .toLowerCase();
+
+return {json:{...$json,email}};</pre></div><div><span>Riskant</span><pre>// 180 Zeilen
+// API call
+// DB write
+// retry
+// parsing
+// business rules
+// secrets ...</pre></div></div>
+<div class="realCase"><div><span class="caseTag">REALER FALL · VODAFONE</span><h3>Low-code plus Code für komplexe Fälle</h3><p>Vodafone nennt explizit die Kombination aus Low-code Workflows und der Möglichkeit, für komplexere Integrationen Code einzusetzen. Gleichzeitig wurden wiederverwendbare Module aufgebaut, um Logik kontrolliert und skalierbar zu halten.</p><a href="https://n8n.io/case-studies/vodafone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>33</strong><span>produktive Workflows im beschriebenen Zeitraum</span></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Standard Node zuerst</strong><p>Wenn Mapping, Filter oder Merge transparent mit Standard-Nodes lösbar ist, bleibt der Workflow leichter lesbar.</p></div><div class="lessonCallout"><strong>Code Node dann</strong><p>Wenn die Transformation sonst aus vielen schwer wartbaren Hilfsnodes besteht.</p></div></div>
+</details></article>
 
 <article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">MULTI-ITEM</div><h2>Ein Node, viele Datensätze</h2><p>Viele Nodes verarbeiten automatisch jedes eingehende Item. Das ist bequem – und gefährlich, wenn du die Item-Anzahl nicht beachtest.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">3 Items
 ↓
 Normalize Each Item
 ↓
-3 normalisierte Items</div><details><summary>Vertiefung öffnen</summary><p>Wenn ein E-Mail-Node 100 Items erhält, kann er potenziell 100 E-Mails senden. Item-Anzahl ist deshalb nicht nur Datenmodellierung, sondern auch Kosten-, Rate-Limit- und Sicherheitsfrage.</p></details></article>
+3 normalisierte Items</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Multi-Item-Verarbeitung multipliziert Seiteneffekte</h3><p>100 eingehende Items können 100 HTTP-Requests, 100 E-Mails oder 100 Datensätze erzeugen. Deshalb musst du vor Nodes mit externem Seiteneffekt wissen, wie viele Items ankommen und ob das Zielsystem diese Last erlaubt.</p></div>
+<div class="fanOut"><div class="source">100 Items</div><span>→</span><div class="actions"><i>API ×100</i><i>E-Mail ×100</i><i>DB INSERT ×100</i></div></div>
+<table class="depthTable"><tr><th>Risiko</th><th>Beispiel</th><th>Gegenmaßnahme</th></tr><tr><td>Rate Limit</td><td>API erlaubt 60 Requests/min</td><td>Batching + Wait + Retry</td></tr><tr><td>Kosten</td><td>AI/API wird pro Call berechnet</td><td>vorher filtern/aggregieren</td></tr><tr><td>Duplikate</td><td>Workflow wird erneut gestartet</td><td>Idempotency/Dedupe</td></tr><tr><td>Spam</td><td>1000 E-Mails versehentlich</td><td>Count-Guard + Approval</td></tr></table>
+<div class="realCase"><div><span class="caseTag">REALER FALL · STEPSTONE</span><h3>Große Batch-Prozesse brauchen kontrollierte Item-Flows</h3><p>Stepstone beschreibt tägliche Batch-Aufgaben und großvolumige Datenverarbeitung. Ein vollständiger täglicher Batch konnte in einem beschriebenen Fall auf rund 20 Sekunden reduziert werden. Solche Prozesse funktionieren nur, wenn Datenmengen und Verarbeitungsschritte bewusst modelliert sind.</p><a href="https://n8n.io/case-studies/stepstone/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>≈20 s</strong><span>für einen beschriebenen täglichen Batch</span></div></div>
+</details></article>
 
 <article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">SPLIT & AGGREGATE</div><h2>Array auseinandernehmen – Items wieder sammeln</h2><p>Split verwandelt Elemente in einzelne Items. Aggregate fasst mehrere Items wieder zusammen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">records[3]
    ↓ SPLIT
@@ -66,15 +147,30 @@ Item · Item · Item
    ↓ TRANSFORM
 Item · Item · Item
    ↓ AGGREGATE
-records[3]</div><details><summary>Vertiefung öffnen</summary><p>Das Muster ist extrem häufig bei API-Pagination, CSV/Excel-Importen, CRM-Listen und Batch-Verarbeitung. Entscheidend ist, wann du einzeln handeln und wann du gemeinsam antworten willst.</p></details></article>
+records[3]</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Split und Aggregate verändern die Granularität</h3><p>Split macht aus einer Liste einzelne Verarbeitungseinheiten. Aggregate sammelt Ergebnisse wieder ein. Das Muster erscheint bei CSV-Import, API-Pagination, Produktlisten, Bestellungen und Reporting ständig.</p></div>
+<div class="splitAggDiagram"><div class="bundle">records[3]</div><span>→ SPLIT →</span><div class="items"><i>Item A</i><i>Item B</i><i>Item C</i></div><span>→ PROCESS →</span><div class="bundle">results[3]</div></div>
+<div class="scenarioSteps"><div><b>1</b><span>API liefert 100 Produkte als Array.</span></div><div><b>2</b><span>Split: jedes Produkt wird ein Item.</span></div><div><b>3</b><span>Filter/Transform pro Produkt.</span></div><div><b>4</b><span>Aggregate: ein Report mit allen Ergebnissen.</span></div></div>
+<div class="lessonCallout"><strong>Entscheidungsfrage</strong><p>Muss die nächste Aktion pro Datensatz ausgeführt werden? Dann splitten. Braucht die nächste Aktion die Gesamtheit, z. B. eine Zusammenfassung? Dann aggregieren.</p></div>
+</details></article>
 
 <article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">MERGE</div><h2>Zwei Datenströme kontrolliert zusammenführen</h2><p>Merge kombiniert Pfade nach einer definierten Logik – nicht einfach „irgendwie wieder zusammen“.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">CRM Customer ─┐
               ├→ Merge by ID → Combined Record
-Billing Data ─┘</div><details><summary>Vertiefung öffnen</summary><p>Du musst wissen, ob du nach Position, Schlüssel oder einer anderen Bedingung zusammenführst. Falsches Matching kann Daten verschiedener Kunden vermischen – ein echter Production-Risikofall.</p></details></article>
+Billing Data ─┘</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Merge ist ein Join – und damit eine Datenintegritätsfrage</h3><p>Wenn CRM-Daten und Billing-Daten zusammengeführt werden, brauchst du einen stabilen Schlüssel wie <code>customerId</code>. Merge nach Position ist nur sicher, wenn die Reihenfolge garantiert identisch bleibt. Sonst verknüpfst du möglicherweise Rechnung von Kunde A mit Stammdaten von Kunde B.</p></div>
+<div class="mergeVisual"><div><b>CRM</b><code>C-100 · Mina</code><code>C-200 · Jonas</code></div><span>customerId</span><div class="mergeCore">MERGE</div><span>customerId</span><div><b>Billing</b><code>C-200 · 89 €</code><code>C-100 · 129 €</code></div></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Falsch: Position</strong><p>Zeile 1 mit Zeile 1 verbinden, obwohl die Reihenfolge unterschiedlich ist.</p></div><div class="lessonCallout"><strong>Richtig: stabiler Key</strong><p><code>customerId</code>, <code>orderId</code> oder ein anderer eindeutiger fachlicher Schlüssel.</p></div></div>
+<div class="incident"><b>Production-Risiko:</b> Falscher Merge kann nicht nur einen technischen Fehler erzeugen, sondern vertrauliche Kundendaten falsch zuordnen. Deshalb gehören Matching-Regeln und Testfälle in die Dokumentation.</div>
+</details></article>
 
 <article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">DATA QUALITY</div><h2>Normalisieren, bevor Business-Logik entscheidet</h2><p>Whitespace, Groß-/Kleinschreibung, Strings statt Numbers und Duplikate werden früh kontrolliert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">" MINA@EXAMPLE.COM " → "mina@example.com"
 "7500" → 7500
-["AI"," AI ","AI"] → ["AI"]</div><details><summary>Vertiefung öffnen</summary><p>Normalisierung ist kein Kosmetik-Schritt. Sie sorgt dafür, dass nachfolgende IF-Regeln, Datenbank-Queries und Deduplizierung zuverlässig arbeiten.</p></details></article>
+["AI"," AI ","AI"] → ["AI"]</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Normalisierung reduziert Varianten, bevor sie Fehler werden</h3><p><code>" MINA@EXAMPLE.COM "</code>, <code>"mina@example.com"</code> und <code>"Mina@Example.com"</code> sollen in vielen Geschäftsprozessen dieselbe E-Mail-Adresse repräsentieren. Ähnlich müssen IDs, Telefonnummern, Länderkennungen, Datumsformate und Zahlen kontrolliert vereinheitlicht werden.</p></div>
+<div class="normalizationPipeline"><div>Raw<br><code>" 7500 "</code></div><span>→</span><div>Trim<br><code>"7500"</code></div><span>→</span><div>Convert<br><code>7500</code></div><span>→</span><div>Validate<br><code>valid=true</code></div></div>
+<table class="depthTable"><tr><th>Feld</th><th>Raw</th><th>Intern</th></tr><tr><td>E-Mail</td><td><code>" MINA@EXAMPLE.COM "</code></td><td><code>"mina@example.com"</code></td></tr><tr><td>Budget</td><td><code>"7500"</code></td><td><code>7500</code></td></tr><tr><td>Tags</td><td><code>["AI"," AI ","AI"]</code></td><td><code>["AI"]</code></td></tr><tr><td>Source</td><td><code>" Website "</code></td><td><code>"website"</code></td></tr></table>
+<div class="realCase"><div><span class="caseTag">REALER FALL · FORMULA BOT</span><h3>Viele Connectoren bedeuten viele Datenformen</h3><p>Formula Bot verbindet sehr unterschiedliche Quellen wie Excel, PDFs, Google Analytics, BigQuery und Cloud Storage. Je mehr Quellen ein System integriert, desto wichtiger werden konsistente interne Schemas und kontrollierte Transformationen.</p><a href="https://n8n.io/case-studies/formula-bot/" target="_blank" rel="noopener">Quelle: n8n Case Study →</a></div><div class="miniStat"><strong>~1,5 Tage</strong><span>statt 1 Woche für einen neuen Connector</span></div></div>
+</details></article>
 
 <article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">DEBUGGING</div><h2>Input und Output gegeneinander halten</h2><p>Bei Datenfehlern suchst du den ersten Node, an dem sich die Struktur unerwartet verändert.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div><div class="miniArchitecture">Node Input
    ↓
@@ -82,7 +178,13 @@ Konfiguration / Expression / Code
    ↓
 Node Output
    ↓
-Erwarteter Datenvertrag?</div><details><summary>Vertiefung öffnen</summary><p>Prüfe Item-Anzahl, Feldnamen, Datentypen, nested Pfade, Null/undefined, Array-Inhalt und Output-Schema. Erst danach gehst du zum nächsten Node. Das spart Stunden planloses Herumklicken.</p></details></article>
+Erwarteter Datenvertrag?</div><details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Debugging heißt: den ersten falschen Zustand finden</h3><p>Vergleiche bei jeder verdächtigen Node <b>Input → Konfiguration → Output</b>. Suche nicht den letzten sichtbaren Fehler, sondern den ersten Punkt, an dem der tatsächliche Zustand vom Datenvertrag abweicht.</p></div>
+<table class="depthTable"><tr><th>Check</th><th>Frage</th><th>Beispiel</th></tr><tr><td>Item Count</td><td>Wie viele Datensätze?</td><td>1 erwartet, 500 erhalten</td></tr><tr><td>Feldname</td><td>Existiert der Key?</td><td><code>email</code> vs <code>contact.email</code></td></tr><tr><td>Typ</td><td>String/Number/Array?</td><td><code>"5000"</code> statt <code>5000</code></td></tr><tr><td>Nullability</td><td>Darf Wert fehlen?</td><td><code>company=null</code></td></tr><tr><td>Schema</td><td>Output wie dokumentiert?</td><td><code>fullName</code> fehlt</td></tr></table>
+<div class="debugTimeline"><div class="ok">Webhook<br><small>3 Items</small></div><span>→</span><div class="ok">Create Items<br><small>3 Items</small></div><span>→</span><div class="bad">Normalize<br><small>budget=null</small></div><span>→</span><div>IF<br><small>Folgefehler</small></div></div>
+<div class="incident"><b>Praxisfall:</b> Ein Datensatz enthält <code>budget:"abc"</code>. Der Normalizer erzeugt <code>budget:null</code> und <code>valid:false</code>. Der Fehler ist damit früh sichtbar und kontrolliert – statt später in einer Preisberechnung oder Datenbank zu explodieren.</div>
+<div class="lessonCallout"><strong>Datenvertrag</strong><p>Dokumentiere pro kritischem Node: erwartete Felder, Typen, Pflicht/optional, Beispiel-Input und Beispiel-Output. Das macht Debugging und Handover erheblich schneller.</p></div>
+</details></article>
 
 <section class="liveLab" id="lab"><div class="ey">ECHTER REPOCLOUD-N8N WORKFLOW</div><h2>JSON → Items → Normalize → Aggregate</h2><p class="muted">Du editierst hier echte JSON-Eingaben. Der Button ruft den produktiven Modul-02-Workflow auf.</p>
 <div class="jsonToolbar"><button type="button" data-json-preset="single" aria-pressed="false">A · 1 messy record</button><button type="button" data-json-preset="batch" aria-pressed="false">B · 3 records</button><button type="button" data-json-preset="invalid" aria-pressed="false">C · Leeres Array</button></div>
@@ -99,7 +201,12 @@ Erwarteter Datenvertrag?</div><details><summary>Vertiefung öffnen</summary><p>P
   ]
 }</textarea><button class="jsonRun" type="button" data-json-run>Live Workflow starten</button></div>
 <div class="jsonResult"><div class="module2Flow"><div data-m02-node>Webhook</div><div data-m02-node>Create Items</div><div data-m02-node>IF</div><div data-m02-node>Normalize</div><div data-m02-node>Aggregate</div><div data-m02-node>Respond</div></div><pre class="jsonOutput" data-json-output>Bereit. Sage vor dem Start voraus, was sich im Output ändern wird.</pre></div></div>
-<details><summary>Lab-Auftrag öffnen</summary><ol><li>Starte A und erkläre jede Normalisierung.</li><li>Starte B und prüfe <code>itemCount</code> sowie <code>validCount</code>.</li><li>Starte C und erkläre den kontrollierten 422-Pfad.</li><li>Ändere ein Budget in <code>"abc"</code>. Was erwartest du bei <code>valid</code>?</li><li>Füge einen doppelten Tag hinzu. Prüfe die Deduplizierung.</li><li>Erkläre am Ende den Unterschied zwischen <code>records[]</code> und mehreren n8n Items.</li></ol></details></section>
+<details><summary>Lab-Auftrag &amp; Break/Fix öffnen</summary>
+<div class="labMission"><h3>Teil A · Verstehen</h3><ol><li>Starte <b>1 messy record</b>. Nenne vor dem Klick die erwarteten Änderungen an E-Mail, Budget, Tags und Source.</li><li>Vergleiche Roh-JSON und normalisierten Output Feld für Feld.</li><li>Erkläre, wann aus dem <code>records[]</code>-Array einzelne n8n Items werden.</li></ol></div>
+<div class="labMission"><h3>Teil B · Skalieren</h3><ol><li>Starte <b>3 records</b>. Prüfe <code>itemCount</code> und <code>validCount</code>.</li><li>Erkläre, wie oft der Node <code>Normalize Each Item</code> arbeitet.</li><li>Beschreibe, was passieren würde, wenn hinter Normalize ein E-Mail-Node stünde.</li></ol></div>
+<div class="labMission break"><h3>Teil C · BREAK IT</h3><ol><li>Setze ein Budget auf <code>"abc"</code>. Prognostiziere <code>budget</code> und <code>valid</code>.</li><li>Entferne bei einem Record die E-Mail-Adresse.</li><li>Füge Tags <code>["AI"," AI ","AI",""]</code> ein und prüfe Deduplizierung.</li><li>Setze <code>records</code> auf <code>[]</code> und erkläre den 422-Pfad.</li></ol></div>
+<div class="labMission fix"><h3>Teil D · FIX &amp; TEACH</h3><ol><li>Repariere jeden kaputten Input ohne die Workflow-Logik zu ändern.</li><li>Erkläre einem fiktiven Kunden, warum frühe Normalisierung die nachfolgenden Systeme schützt.</li><li>Zeichne aus dem Kopf: <code>Webhook → Items → Validate → Normalize → Aggregate → Response</code>.</li></ol></div>
+</details></section>
 
 <section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 02</div><h2>Jeder Versuch verändert sich</h2><p>12 Fragen werden aus einem größeren Pool gezogen. Reihenfolge und Antwortpositionen ändern sich; zusätzliche Aufgaben erzeugen variable Datenwerte. Falsch beantwortete Themen werden beim nächsten Versuch stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
 
@@ -111,5 +218,5 @@ Erwarteter Datenvertrag?</div><details><summary>Vertiefung öffnen</summary><p>P
 </div></div></section></main>
 
 <footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-01/">← Modul 01</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
-<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-02.js?v=1.2" defer></script><script src="../../../assets/n8n-module-02-assessment.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-02.js?v=1.3" defer></script><script src="../../../assets/n8n-module-02-assessment.js?v=1.4" defer></script>
 </body></html>
