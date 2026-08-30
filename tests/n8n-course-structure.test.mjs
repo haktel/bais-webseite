@@ -7,7 +7,8 @@ test("n8n bootcamp ships all 12 protected modules, assets and workflows",async()
   const n=String(i).padStart(2,"0"),base="academy/n8n-bootcamp/modul-"+n;
   await access(base+"/index.html");
   await access("functions/academy/n8n-bootcamp/modul-"+n+"/_middleware.js");
-  await access("assets/n8n-module-"+n+".js");
+  if(i===1)await access("assets/n8n-module-study.js");
+  else await access("assets/n8n-module-"+n+".js");
   await access("assets/n8n-module-"+n+"-assessment.js");
   await access("automation/n8n/bais-academy-modul-"+n+".json");
   const html=await readFile(base+"/index.html","utf8");
