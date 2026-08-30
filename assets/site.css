@@ -62,3 +62,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);border-
 .faqItem p{margin:0 0 20px;color:var(--muted);font-size:14px}
 .faqItem p a{color:var(--teal);font-weight:750}
 @media(max-width:620px){.faqItem{padding:2px 16px}}
+.pageBreadcrumb{display:flex;align-items:center;gap:8px;padding:16px 0 0;font-size:13px;color:var(--muted)}
+.pageBreadcrumb a{color:var(--teal);font-weight:750;text-decoration:none}
+.pageBreadcrumb a:hover{text-decoration:underline}
+.pageBreadcrumb span{color:var(--muted)}
