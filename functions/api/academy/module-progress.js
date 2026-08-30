@@ -22,6 +22,7 @@ const parseArray=value=>{
 };
 
 const unique=value=>[...new Set(value.map(String))];
+const N8N_MIN_LESSON_SECONDS=45;
 
 async function courseForUser(db,userId,slug){
   return db.prepare(
@@ -80,6 +81,11 @@ function sequenceState(courseSlug,moduleSlug,lessons,labs){
 function assertN8nSequence({courseSlug,moduleSlug,event,lessonId,caseId,lessons,labs}){
   if(courseSlug!=="n8n-bootcamp")return;
   const seq=sequenceState(courseSlug,moduleSlug,lessons,labs);
+  if(event==="lesson_open"){
+    if(lessons.includes(lessonId))return;
+    if(seq.nextLesson!==lessonId)throw new ApiError(409,"learning_sequence_locked",`Bitte zuerst Lerneinheit ${seq.nextLesson||"01"} abschließen.`);
+    return;
+  }
   if(event==="lesson_complete"){
     if(lessons.includes(lessonId))return;
     if(seq.nextLesson!==lessonId)throw new ApiError(409,"learning_sequence_locked",`Bitte zuerst Lerneinheit ${seq.nextLesson||"01"} abschließen.`);
@@ -155,7 +161,7 @@ export const onRequestPost=async({request,env})=>{
       moduleSlug=cleanText(body.moduleSlug,40),
       event=cleanText(body.event,40);
 
-    if(!courseSlug||!/^modul-(0[1-9]|1[0-2])$/.test(moduleSlug)||!["lesson_complete","lab_case","assessment_result"].includes(event))
+    if(!courseSlug||!/^modul-(0[1-9]|1[0-2])$/.test(moduleSlug)||!["lesson_open","lesson_complete","lab_case","assessment_result"].includes(event))
       throw new ApiError(422,"validation_failed","Ungültiger Lernfortschritt.");
 
     const course=await courseForUser(db,user.user_id,courseSlug);
@@ -173,11 +179,25 @@ export const onRequestPost=async({request,env})=>{
       labs=unique(parseArray(current?.lab_cases_json)),
       best=Number(current?.assessment_best||0);
 
+    if(event==="lesson_open"){
+      const lessonId=cleanText(body.lessonId,8);
+      const max=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
+      if(courseSlug!=="n8n-bootcamp"||!/^\d{2}$/.test(lessonId)||Number(lessonId)<1||Number(lessonId)>max)throw new ApiError(422,"lesson_invalid","Ungültige Lerneinheit.");
+      assertN8nSequence({courseSlug,moduleSlug,event,lessonId,lessons,labs});
+      const now=new Date().toISOString();
+      await db.prepare("INSERT INTO academy_lesson_sessions(user_id,course_id,module_slug,lesson_id,started_at,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id,course_id,module_slug,lesson_id) DO UPDATE SET updated_at=excluded.updated_at").bind(user.user_id,course.id,moduleSlug,lessonId,now,now).run();
+    }
+
     if(event==="lesson_complete"){
       const lessonId=cleanText(body.lessonId,8);
       const max=LESSONS_PER_MODULE[courseSlug]?.[moduleSlug]||0;
       if(!/^\d{2}$/.test(lessonId)||Number(lessonId)<1||Number(lessonId)>max)throw new ApiError(422,"lesson_invalid","Ungültige Lerneinheit.");
       assertN8nSequence({courseSlug,moduleSlug,event,lessonId,lessons,labs});
+      if(courseSlug==="n8n-bootcamp"&&!lessons.includes(lessonId)){
+        const evidence=await db.prepare("SELECT started_at FROM academy_lesson_sessions WHERE user_id=? AND course_id=? AND module_slug=? AND lesson_id=? LIMIT 1").bind(user.user_id,course.id,moduleSlug,lessonId).first();
+        const elapsed=evidence?.started_at?(Date.now()-Date.parse(evidence.started_at))/1000:0;
+        if(!evidence||!Number.isFinite(elapsed)||elapsed<N8N_MIN_LESSON_SECONDS)throw new ApiError(409,"lesson_evidence_too_short",`Die Vertiefung muss mindestens ${N8N_MIN_LESSON_SECONDS} Sekunden geöffnet sein, bevor die Lerneinheit abgeschlossen werden kann.`);
+      }
       lessons=unique([...lessons,lessonId]);
     }
 
