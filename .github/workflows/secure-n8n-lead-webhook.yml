@@ -1,0 +1,201 @@
+name: Secure Lead Qualification Webhook
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/secure-n8n-lead-webhook.yml"
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  secure:
+    runs-on: ubuntu-latest
+    env:
+      N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Wait for signed BAIS runtime, patch n8n guard, verify both paths
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          post_status() {
+            local state="$1" desc="$2"
+            jq -nc --arg state "$state" --arg context "bais/n8n-webhook-guard" --arg description "$desc"               '{state:$state,context:$context,description:$description}'               | curl -fsS -X POST                   -H "Authorization: Bearer ${GH_TOKEN}"                   -H "Accept: application/vnd.github+json"                   -H "X-GitHub-Api-Version: 2022-11-28"                   "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"                   --data @- >/dev/null || true
+          }
+
+          trap 'post_status failure "n8n webhook guard deployment failed"' ERR
+
+          test -n "${N8N_BASE_URL:-}"
+          test -n "${N8N_API_KEY:-}"
+
+          # Wait until Cloudflare has deployed the HMAC runtime.
+          READY=0
+          for attempt in $(seq 1 24); do
+            VERIFY="$(curl -sS --max-time 15               -X POST               -H "Content-Type: application/json"               "https://bais-solutions.de/api/n8n-signature-verify"               --data '{"timestamp":"0","nonce":"00000000-0000-4000-8000-000000000000","signature":"invalidinvalidinvalidinvalidinvalidinvalidinv","body":{"probe":true}}' || true)"
+            if echo "${VERIFY}" | jq -e '.scheme=="hmac-sha256"' >/dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            sleep 10
+          done
+          test "${READY}" = "1"
+
+          # Prove the deployed BAIS caller is already signing while the n8n workflow is still open.
+          PRE_SIGNED=0
+          for attempt in $(seq 1 12); do
+            PRE_HTTP="$(curl -sS --max-time 20               -o /tmp/pre-signed.json               -w "%{http_code}"               -X POST               -H "Origin: https://bais-solutions.de"               -H "Content-Type: application/json"               "https://bais-solutions.de/api/n8n-demo"               --data '{"scenario":"automation","urgency":"planned"}' || true)"
+            if [ "${PRE_HTTP}" = "200" ] && jq -e '.ok==true and .requestAuth=="hmac-sha256"' /tmp/pre-signed.json >/dev/null 2>&1; then
+              PRE_SIGNED=1
+              break
+            fi
+            sleep 10
+          done
+          test "${PRE_SIGNED}" = "1"
+
+          BASE="${N8N_BASE_URL%/}"
+          LIST="$(curl -fsS             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/workflows?limit=250")"
+
+          FOUND=""
+          while read -r ID; do
+            WF="$(curl -fsS               -H "X-N8N-API-KEY: ${N8N_API_KEY}"               -H "Accept: application/json"               "${BASE}/api/v1/workflows/${ID}")"
+            if echo "${WF}" | jq -e '.nodes[]? | select((.type|ascii_downcase|contains("webhook")) and .parameters.path=="bais-lead-qualification")' >/dev/null; then
+              FOUND="${WF}"
+              break
+            fi
+          done < <(echo "${LIST}" | jq -r '.data[]?.id')
+
+          test -n "${FOUND}"
+          echo "${FOUND}" >/tmp/lead-workflow.json
+
+          node <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const wf=JSON.parse(fs.readFileSync('/tmp/lead-workflow.json','utf8'));
+
+          const webhook=wf.nodes.find(n=>String(n.type).toLowerCase().includes('webhook')&&n.parameters?.path==='bais-lead-qualification');
+          if(!webhook)throw new Error('lead webhook node not found');
+
+          const names={
+            verify:'Verify BAIS Signature',
+            decide:'Signature Valid?',
+            restore:'Restore Webhook Payload',
+            reject:'Reject Unsigned Request'
+          };
+
+          const previousGuardTargets=wf.connections?.[names.restore]?.main?.[0];
+          const currentWebhookTargets=wf.connections?.[webhook.name]?.main?.[0];
+          const originalTargets=previousGuardTargets?.length?previousGuardTargets:currentWebhookTargets;
+          if(!originalTargets?.length)throw new Error('original webhook target not found');
+
+          wf.nodes=wf.nodes.filter(n=>!Object.values(names).includes(n.name));
+          for(const name of Object.values(names))delete wf.connections[name];
+
+          const x=Array.isArray(webhook.position)?webhook.position[0]:0;
+          const y=Array.isArray(webhook.position)?webhook.position[1]:0;
+
+          wf.nodes.push(
+            {
+              parameters:{
+                method:'POST',
+                url:'https://bais-solutions.de/api/n8n-signature-verify',
+                sendHeaders:true,
+                headerParameters:{parameters:[{name:'Accept',value:'application/json'}]},
+                sendBody:true,
+                contentType:'json',
+                specifyBody:'json',
+                jsonBody:"={{ JSON.stringify({timestamp: $('BAIS Demo Webhook').item.json.headers['x-bais-timestamp'] || '', nonce: $('BAIS Demo Webhook').item.json.headers['x-bais-nonce'] || '', signature: $('BAIS Demo Webhook').item.json.headers['x-bais-signature'] || '', body: $('BAIS Demo Webhook').item.json.body || {}}) }}",
+                options:{}
+              },
+              type:'n8n-nodes-base.httpRequest',
+              typeVersion:4.2,
+              position:[x+220,y-180],
+              id:crypto.randomUUID(),
+              name:names.verify
+            },
+            {
+              parameters:{
+                conditions:{
+                  options:{caseSensitive:true,leftValue:'',typeValidation:'strict',version:2},
+                  conditions:[{
+                    id:crypto.randomUUID(),
+                    leftValue:'={{ $json.ok }}',
+                    rightValue:'',
+                    operator:{type:'boolean',operation:'true',singleValue:true}
+                  }],
+                  combinator:'and'
+                },
+                options:{}
+              },
+              type:'n8n-nodes-base.if',
+              typeVersion:2.2,
+              position:[x+460,y-180],
+              id:crypto.randomUUID(),
+              name:names.decide
+            },
+            {
+              parameters:{jsCode:"return $('BAIS Demo Webhook').all();"},
+              type:'n8n-nodes-base.code',
+              typeVersion:2,
+              position:[x+700,y-120],
+              id:crypto.randomUUID(),
+              name:names.restore
+            },
+            {
+              parameters:{
+                respondWith:'json',
+                responseBody:'{"ok":false,"error":"UNAUTHORIZED_WEBHOOK"}',
+                options:{responseCode:401}
+              },
+              type:'n8n-nodes-base.respondToWebhook',
+              typeVersion:1.4,
+              position:[x+700,y+100],
+              id:crypto.randomUUID(),
+              name:names.reject
+            }
+          );
+
+          wf.connections[webhook.name]={main:[[{node:names.verify,type:'main',index:0}]]};
+          wf.connections[names.verify]={main:[[{node:names.decide,type:'main',index:0}]]};
+          wf.connections[names.decide]={main:[
+            [{node:names.restore,type:'main',index:0}],
+            [{node:names.reject,type:'main',index:0}]
+          ]};
+          wf.connections[names.restore]={main:[originalTargets]};
+
+          const payload={name:wf.name,nodes:wf.nodes,connections:wf.connections,settings:wf.settings||{}};
+          fs.writeFileSync('/tmp/lead-patched.json',JSON.stringify(payload));
+          fs.writeFileSync('/tmp/lead-id.txt',String(wf.id));
+          NODE
+
+          WF_ID="$(cat /tmp/lead-id.txt)"
+          curl -fsS -X PUT             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Content-Type: application/json"             "${BASE}/api/v1/workflows/${WF_ID}"             --data @/tmp/lead-patched.json >/tmp/lead-update.json
+
+          curl -fsS -X POST             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Content-Type: application/json"             "${BASE}/api/v1/workflows/${WF_ID}/activate"             --data '{}' >/tmp/lead-activate.json
+
+          # Unsigned direct calls must now be rejected.
+          UNSIGNED_HTTP="$(curl -sS --max-time 20             -o /tmp/unsigned.json             -w "%{http_code}"             -X POST             -H "Content-Type: application/json"             "${BASE}/webhook/bais-lead-qualification"             --data '{"name":"Direct Bypass","email":"direct@example.com","company":"Bypass GmbH","topic":"Automation / n8n","message":"This direct request must be rejected by the signature guard.","consent":true}' || true)"
+
+          test "${UNSIGNED_HTTP}" = "401"
+          jq -e '.ok==false and .error=="UNAUTHORIZED_WEBHOOK"' /tmp/unsigned.json >/dev/null
+
+          # Signed BAIS path must continue to work.
+          SIGNED_HTTP="$(curl -sS --max-time 25             -o /tmp/signed.json             -w "%{http_code}"             -X POST             -H "Origin: https://bais-solutions.de"             -H "Content-Type: application/json"             "https://bais-solutions.de/api/n8n-demo"             --data '{"scenario":"security","urgency":"urgent"}' || true)"
+
+          test "${SIGNED_HTTP}" = "200"
+          jq -e '.ok==true and .requestAuth=="hmac-sha256" and .source=="live-n8n"' /tmp/signed.json >/dev/null
+          EXECUTION_ID="$(jq -r '.executionId // empty' /tmp/signed.json)"
+          test -n "${EXECUTION_ID}"
+
+          VERIFY_HTTP="$(curl -sS --max-time 20             -o /tmp/execution.json             -w "%{http_code}"             -H "X-N8N-API-KEY: ${N8N_API_KEY}"             -H "Accept: application/json"             "${BASE}/api/v1/executions/${EXECUTION_ID}" || true)"
+          test "${VERIFY_HTTP}" = "200"
+          test "$(jq -r '.id // empty' /tmp/execution.json)" = "${EXECUTION_ID}"
+
+          echo "Unsigned direct webhook: rejected (401)"
+          echo "Signed BAIS path: verified execution ${EXECUTION_ID}"
+          post_status success "HMAC guard active; direct bypass rejected"
