@@ -5,11 +5,11 @@ import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js"
 // courses can each have their own "modul-01" without one course's lesson
 // count or lab case ids leaking into the other's validation.
 const LESSONS_PER_MODULE={
-  "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12},
+  "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12,"modul-06":12,"modul-07":12,"modul-08":12,"modul-09":12,"modul-10":12,"modul-11":12,"modul-12":12},
   "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12}
 };
 const LAB_CASES={
-  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"]},
+  "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"],"modul-04":["api-key","bearer","forbidden","expired"],"modul-05":["mixed","high","fallback","invalid"],"modul-06":["success","client","rate","server"],"modul-07":["create","update","event-first","event-repeat"],"modul-08":["csv","unicode","json","unsafe","invalid"],"modul-09":["grounded","unknown","injection","cost"],"modul-10":["standard","messy","extra","invalid"],"modul-11":["trusted","tampered","pii","ssrf","destructive"],"modul-12":["happy","high","invalid","security","weakroi"]},
   "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"],"modul-05":["belegt","vage","unbelegt"]}
 };
 
