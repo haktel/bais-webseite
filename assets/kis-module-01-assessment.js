@@ -66,6 +66,8 @@
     }
   ];
 
+  const esc=value=>String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
   const shuffle=array=>{
     const copy=[...array];
     for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
@@ -123,10 +125,10 @@
       result.hidden=true;result.innerHTML="";
       list.innerHTML=questions.map((item,index)=>{
         const options=shuffle(item.options);
-        return `<article class="assessmentItem" data-q="${item.id}" data-topic="${item.topic}">
-          <div class="assessmentMeta"><span>FRAGE ${index+1}/${questions.length}</span><span>${item.topic.toUpperCase()}</span></div>
-          <h3>${item.prompt}</h3>
-          <div class="assessmentOptions">${options.map(option=>`<button type="button" data-answer data-correct="${option.correct}">${option.text}</button>`).join("")}</div>
+        return `<article class="assessmentItem" data-q="${esc(item.id)}" data-topic="${esc(item.topic)}">
+          <div class="assessmentMeta"><span>FRAGE ${index+1}/${questions.length}</span><span>${esc(item.topic.toUpperCase())}</span></div>
+          <h3>${esc(item.prompt)}</h3>
+          <div class="assessmentOptions">${options.map(option=>`<button type="button" data-answer data-correct="${option.correct}">${esc(option.text)}</button>`).join("")}</div>
           <div class="assessmentExplain" data-explain hidden></div>
         </article>`;
       }).join("");
@@ -145,7 +147,7 @@
       if(correctButton)correctButton.classList.add("correct");
       const explain=card.querySelector("[data-explain]");
       explain.hidden=false;
-      explain.innerHTML=`<strong>${ok?"Richtig":"Nicht ganz"}</strong><p>${item.explanation}</p>`;
+      explain.innerHTML=`<strong>${ok?"Richtig":"Nicht ganz"}</strong><p>${esc(item.explanation)}</p>`;
       answered++;
       if(ok)correctCount++;
       else{
@@ -160,8 +162,8 @@
         else if(grade.passed)message="Akademisch bestanden, aber für den BAIS Modul-Nachweis ist mindestens Note 2 („gut“, ≥81%) erforderlich. Wiederhole die Prüfung — der nächste Versuch verwendet andere Fragen.";
         else message="Noch nicht bestanden (mind. 50% erforderlich). Der nächste Versuch priorisiert zusätzlich deine schwächeren Themen und verwendet möglichst andere Fragen.";
         result.hidden=false;
-        result.innerHTML=`<div class="gradeRow"><span class="gradeBadge grade-${grade.note}">Note ${grade.note}</span><div><strong>${correctCount}/${questions.length} richtig · ${percent}%</strong><span class="gradeLabel">${grade.label}${grade.passed?" · bestanden":" · nicht bestanden"}</span></div></div>
-          <p>${message}</p>`;
+        result.innerHTML=`<div class="gradeRow"><span class="gradeBadge grade-${esc(grade.note)}">Note ${esc(grade.note)}</span><div><strong>${correctCount}/${questions.length} richtig · ${percent}%</strong><span class="gradeLabel">${esc(grade.label)}${grade.passed?" · bestanden":" · nicht bestanden"}</span></div></div>
+          <p>${esc(message)}</p>`;
         window.dispatchEvent(new CustomEvent("bais:assessment-result",{detail:{moduleSlug:"modul-01",score:percent,grade:grade.note,passed:grade.passed,credited}}));
         result.scrollIntoView({behavior:"smooth",block:"center"});
       }
