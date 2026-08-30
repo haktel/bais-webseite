@@ -199,7 +199,7 @@ export async function onRequestPost({request}){
         {step:"n8n-webhook",status:timedOut?"timeout":"unavailable"}
       ],
       error:timedOut?"Live workflow timeout after 12 seconds":"Live workflow temporarily unavailable"
-    },{status:504,headers:responseHeaders()});
+    },{status:timedOut?504:502,headers:responseHeaders()});
   }finally{
     clearTimeout(timeout);
   }
