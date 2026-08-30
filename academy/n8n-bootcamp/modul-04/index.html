@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 04 – Authentication, Credentials & OAuth2 | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich zu Authentication, Authorization, API Keys, Bearer Tokens, Basic Auth, n8n Credentials, OAuth2, Scopes, Access/Refresh Tokens, Rotation und Least Privilege.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/n8n-bootcamp/modul-04/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/n8n-module-04.css?v=1.0">
+</head><body data-module="modul-04">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">n8n Bootcamp</a><a href="../modul-03/">Modul 03</a><a href="../../konto/">Mein Konto</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 04 · PRIVATER LERNBEREICH</span><h1>Authentication, Credentials &amp; OAuth2</h1><p class="lead">Hier lernst du den Unterschied zwischen „Wer bist du?“ und „Was darfst du?“. Du verstehst API Keys, Bearer Tokens, Basic Auth, Scopes, OAuth2, Access-/Refresh-Token, n8n Credentials, Rotation und 401/403 nicht nur theoretisch, sondern an einem echten geschützten HTTP-Lab.</p></div>
+<div class="heroDiagram"><div class="courseMap"><div><b>IDENTITÄT</b><span>Authentication</span></div><div><b>RECHTE</b><span>Authorization &amp; Scopes</span></div><div><b>TOKENS</b><span>Access · Refresh · Expiry</span></div><div><b>BETRIEB</b><span>Storage · Rotation · Audit</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 04 · Lernpfad</strong>
+<a href="#l1">01 · AuthN vs AuthZ</a><a href="#l2">02 · API Keys</a><a href="#l3">03 · Bearer Tokens</a><a href="#l4">04 · Basic Auth</a><a href="#l5">05 · n8n Credentials</a><a href="#l6">06 · Least Privilege & Scopes</a><a href="#l7">07 · OAuth2 Mental Model</a><a href="#l8">08 · Authorization Code Flow</a><a href="#l9">09 · Access & Refresh Token</a><a href="#l10">10 · Secret Storage & Rotation</a><a href="#l11">11 · 401 vs 403 Debugging</a><a href="#l12">12 · Production Credential Lifecycle</a><a href="#lab">13 · Live Auth Lab</a><a href="#assessment">14 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+ <div><span class="ey">REALE AUTH-MUSTER</span><h2>Produktions-APIs arbeiten mit echten Vertrauensgrenzen.</h2><p>GitHub verwendet fein granulierte Token-Berechtigungen, Stripe trennt Test- und Live-API-Keys und Google OAuth delegiert Zugriff über Scopes und zeitlich begrenzte Tokens. Genau diese Muster begegnen dir später in Kundenintegrationen.</p></div>
+ <div class="realWorldGrid">
+  <article><strong>GitHub</strong><span>Fine-grained Tokens</span><b>Repository-/Permission-Scope</b></article>
+  <article><strong>Stripe</strong><span>Test vs Live Keys</span><b>Umgebungstrennung</b></article>
+  <article><strong>Google OAuth</strong><span>Delegated Access</span><b>Consent · Access · Refresh</b></article>
+ </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">AUTHN / AUTHZ</div><h2>Wer bist du – und was darfst du?</h2><p>Authentication und Authorization sind zwei getrennte Entscheidungen. Wer sie vermischt, debuggt 401 und 403 falsch und vergibt oft zu viele Rechte.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="authVsAuthz"><div><b>Authentication</b><span>„Wer oder was bist du?“ Credential prüfen.</span></div><span>→</span><div><b>Authorization</b><span>„Welche Resource/Action darfst du?“ Scope/Role/Policy prüfen.</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Zwei Entscheidungen, zwei Fehlerklassen</h3><p>Ein gültiger Token kann eine Identität erfolgreich authentisieren und trotzdem für eine bestimmte Resource nicht autorisiert sein. Deshalb kann derselbe Client bei Endpoint A 200 und bei Endpoint B 403 bekommen.</p></div>
+<div class="statusAuthGrid"><div class="unauth"><b>401</b><span>Identität nicht erfolgreich authentisiert: Credential fehlt, falsch oder abgelaufen.</span></div><div class="forbid"><b>403</b><span>Identität bekannt, aber Scope, Rolle oder Policy erlaubt die Operation nicht.</span></div></div>
+<div class="caseFlow"><b>Credential</b><span>→</span><b>Identity</b><span>→</span><b>Scopes / Roles</b><span>→</span><b>Protected Resource</b></div>
+<div class="lessonCallout"><strong>Praxis</strong><p>Wenn du einen 403-Fehler mit „neuen Token erzeugen“ bekämpfst, obwohl dem Token nur ein Scope fehlt, behebst du nicht die Ursache.</p></div>
+</details></article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">API KEY</div><h2>Einfach – aber deshalb nicht harmlos</h2><p>API Keys sind häufig statische Credentials für Services oder Integrationen. Sie müssen wie Passwörter behandelt, eingeschränkt und rotierbar sein.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">X-API-Key: ********
+Client ─────────────→ API
+        HTTPS/TLS</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>API Key ≠ Benutzerpasswort, aber ähnlich schützenswert</h3><p>Viele APIs verwenden Header wie <code>X-API-Key</code>. Ein Key kann Client oder Projekt identifizieren und Rechte tragen. Er ist oft langlebig und deshalb besonders kritisch, wenn er in Git, Logs oder Screenshots landet.</p></div>
+<div class="secretZones"><div class="bad"><b>URL / Git / Chat</b><br><small>hohe Leak-Fläche</small></div><span>→ NICHT →</span><div class="good"><b>Credential Store</b><br><small>kontrollierter Zugriff</small></div><span>→</span><div class="good"><b>API Header</b><br><small>nur zur Laufzeit</small></div></div>
+<div class="realCase"><div><span class="caseTag">REALE PRAXIS · STRIPE</span><h3>Test- und Live-Schlüssel bewusst trennen</h3><p>Stripe unterscheidet Test- und Live-API-Keys. Dieses Muster zeigt, warum Development nicht mit denselben produktiven Secrets arbeiten sollte. Ein Testworkflow darf nicht versehentlich echte Zahlungen oder Produktionsdaten berühren.</p><a href="https://docs.stripe.com/keys" target="_blank" rel="noopener">Stripe API Keys →</a></div><div class="miniStat"><strong>TEST ≠ LIVE</strong><span>Umgebungstrennung</span></div></div>
+<div class="lessonCallout"><strong>Nie in Query</strong><p>Secrets in URLs können in History, Proxy-, CDN-, Analytics- und Access-Logs auftauchen. Nutze den vorgesehenen Credential/Header-Mechanismus.</p></div>
+</details></article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BEARER TOKEN</div><h2>Wer das Token besitzt, kann es verwenden</h2><p>Bearer Tokens werden typischerweise im Authorization Header übertragen und sind oft zeitlich begrenzt und scopegebunden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Authorization: Bearer eyJ...
+                 └── niemals loggen ──┘</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Bearer bedeutet Besitznachweis</h3><p>Bei einem klassischen Bearer Token gibt es keinen zusätzlichen Besitzbeweis pro Request. Wird das Token gestohlen, kann der Angreifer es bis Ablauf oder Widerruf verwenden. Deshalb sind kurze Laufzeiten, TLS, sichere Speicherung und minimale Scopes wichtig.</p></div>
+<table class="depthTable"><tr><th>Eigenschaft</th><th>API Key</th><th>Access Token</th></tr><tr><td>Laufzeit</td><td>oft länger</td><td>oft kurz</td></tr><tr><td>Scopes</td><td>anbieterabhängig</td><td>häufig explizit</td></tr><tr><td>Erneuerung</td><td>Rotation</td><td>Refresh / Re-Auth</td></tr><tr><td>Leak-Risiko</td><td>hoch</td><td>hoch bis Ablauf/Widerruf</td></tr></table>
+<div class="lessonCallout"><strong>Debugging</strong><p>401 bei einem Bearer Token: Header korrekt? Prefix <code>Bearer </code>? Token abgelaufen? Falsche Audience/Issuer? Credential wirklich für diese Umgebung?</p></div>
+</details></article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">BASIC AUTH</div><h2>Einfaches Username/Passwort-Schema</h2><p>HTTP Basic Auth überträgt Benutzername und Passwort Base64-kodiert im Authorization Header. Base64 ist keine Verschlüsselung.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">academy:demo-only
+      ↓ Base64
+Authorization: Basic YWNhZGVteTpkZW1vLW9ubHk=</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>TLS ist Pflicht</h3><p>Base64 kann problemlos dekodiert werden. Vertraulichkeit entsteht nur durch HTTPS/TLS. Basic Auth ist für manche interne oder Legacy-APIs weiterhin real, sollte aber mit dediziertem Service Account, begrenzten Rechten und sicherer Credential-Speicherung eingesetzt werden.</p></div>
+<div class="caseFlow"><b>Username + Password</b><span>→</span><b>Base64 Encoding</b><span>→</span><b>Authorization Header</b><span>→</span><b>HTTPS API</b></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Falsch</strong><p>„Base64 sieht unlesbar aus, also ist das Passwort verschlüsselt.“</p></div><div class="lessonCallout"><strong>Richtig</strong><p>Base64 ist Encoding. Schutz kommt von TLS und Secret-Management.</p></div></div>
+</details></article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">N8N CREDENTIALS</div><h2>Secret und Workflow-Logik trennen</h2><p>Produktionscredentials gehören in den n8n Credential-Mechanismus oder einen geeigneten externen Secret Store, nicht als Klartext in Workflow-Nodes.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Workflow Logic ─┐
+                ├→ n8n Credential → API
+Environment ────┘</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Warum diese Trennung wichtig ist</h3><p>Workflow-JSON wird versioniert, exportiert, reviewed und kopiert. Credentials sollen diese Wege nicht mitgehen. Ein Credential-Eintrag kann zentral ersetzt werden, während Workflow-Logik unverändert bleibt.</p></div>
+<div class="credentialCards"><div><b>Header Auth</b><code>X-API-Key</code><span>API-Key-Schema</span></div><div><b>Bearer</b><code>Authorization</code><span>Token-Schema</span></div><div><b>Basic</b><code>User + Pass</code><span>Legacy/Service</span></div><div><b>OAuth2</b><code>Access/Refresh</code><span>delegierter Zugriff</span></div></div>
+<div class="lessonCallout"><strong>Review-Frage</strong><p>Wenn jemand deinen Workflow exportiert: Sieht er echte Secrets? Wenn ja, ist die Architektur falsch.</p></div>
+</details></article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">LEAST PRIVILEGE</div><h2>Nur die Rechte, die wirklich gebraucht werden</h2><p>Scopes und Rollen begrenzen, welche Ressourcen und Aktionen ein Credential ausführen darf.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="scopeMatrix"><tr><th>Scope</th><th>Lead Reader</th><th>Lead Writer</th><th>Admin</th></tr><tr><td>customer:read</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr><tr><td>customer:write</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr><tr><td>user:delete</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr></table>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>„Alle Scopes“ ist kein Komfort, sondern Risiko</h3><p>Wenn ein Workflow nur Kontakte lesen muss, braucht er keine Rechte zum Löschen von Benutzern oder Ändern von Billing-Daten. Least Privilege reduziert den möglichen Schaden bei Leak, Bug oder falsch gebauter Automation.</p></div>
+<div class="realCase"><div><span class="caseTag">REALE PRAXIS · GITHUB</span><h3>Fine-grained Personal Access Tokens</h3><p>GitHub erlaubt fein granulierte Tokens mit gezielten Repository- und Permission-Grenzen. Das ist das gleiche Denkmodell, das du bei Service Accounts und OAuth-Scopes anwenden musst: nur notwendige Ressourcen und Aktionen.</p><a href="https://docs.github.com/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank" rel="noopener">GitHub Token-Dokumentation →</a></div><div class="miniStat"><strong>MINIMAL</strong><span>statt „alles erlauben“</span></div></div>
+<div class="incident"><b>Exploit Radius:</b> Hat ein kompromittierter Workflow nur <code>customer:read</code>, kann er weniger Schaden anrichten als mit globalen Admin-Rechten.</div>
+</details></article>
+
+<article class="lesson" id="l7" data-lesson="07"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">07</span><div><div class="ey">OAUTH2</div><h2>Delegierter Zugriff ohne Passwortweitergabe</h2><p>OAuth2 erlaubt einer Anwendung Zugriff auf Ressourcen, ohne dass der Benutzer sein Passwort direkt an diese Anwendung weitergibt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="oauthFlow"><div>User</div><span>→</span><div>Client App</div><span>→</span><div>Authorization Server</div><span>→</span><div class="token">Access Token</div><span>→</span><div>Resource API</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Vier Rollen mental trennen</h3><p><b>Resource Owner</b> ist häufig der User. <b>Client</b> ist die Anwendung/n8n-Integration. <b>Authorization Server</b> authentisiert und stellt Tokens aus. <b>Resource Server</b> ist die eigentliche API.</p></div>
+<div class="oauthCase"><h3>Reales Beispiel: Google Calendar</h3><ol><li>Du klickst „Google verbinden“.</li><li>Google zeigt Consent: welche Calendar-Berechtigungen werden angefordert?</li><li>Nach Zustimmung erhält die Anwendung einen Authorization Code.</li><li>Der Code wird serverseitig gegen Access/Refresh Token getauscht.</li><li>Der Workflow ruft Calendar API mit Access Token auf.</li></ol></div>
+<div class="lessonCallout"><strong>Kein Passwort-Sharing</strong><p>Dein n8n Workflow braucht nicht das Google-Passwort des Users. Er arbeitet mit begrenzten, widerrufbaren Tokens.</p></div>
+</details></article>
+
+<article class="lesson" id="l8" data-lesson="08"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">08</span><div><div class="ey">AUTHORIZATION CODE FLOW</div><h2>Redirect, Code, Token Exchange</h2><p>Beim Authorization Code Flow geht der User zum Provider, stimmt Scopes zu und die Anwendung tauscht einen kurzlebigen Code serverseitig gegen Tokens.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="oauthFlow"><div>1 · Authorize</div><span>→</span><div>2 · Login/Consent</div><span>→</span><div>3 · Redirect + Code</div><span>→</span><div>4 · Code Exchange</div><span>→</span><div class="token">5 · Tokens</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Redirect URI ist Teil der Vertrauensbeziehung</h3><p>Der Provider akzeptiert nur registrierte Redirect URIs. So soll verhindert werden, dass Authorization Codes an beliebige Ziele geschickt werden. Zusätzlich wird heute bei vielen Public Clients PKCE verwendet, um Code-Interception zu erschweren.</p></div>
+<div class="codeCompare"><div><span>Authorization Request</span><pre>response_type=code
+client_id=...
+redirect_uri=...
+scope=calendar.readonly
+state=...</pre></div><div><span>Token Exchange</span><pre>grant_type=authorization_code
+code=...
+redirect_uri=...
+client_id=...
+client_secret=***</pre></div></div>
+<div class="lessonCallout"><strong>State</strong><p>Der <code>state</code>-Wert hilft, Request und Callback zu korrelieren und schützt gegen bestimmte CSRF-/Login-Confusion-Angriffe.</p></div>
+</details></article>
+
+<article class="lesson" id="l9" data-lesson="09"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">09</span><div><div class="ey">TOKEN LIFECYCLE</div><h2>Access Token läuft ab – Refresh Token lebt länger</h2><p>Kurze Access-Token-Laufzeiten begrenzen das Missbrauchsfenster. Refresh Tokens ermöglichen kontrollierte Erneuerung ohne permanente Benutzerinteraktion.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="tokenTimeline"><div class="active"><b>t0</b><br>Access Token gültig</div><div class="active"><b>t+30m</b><br>API Calls</div><div class="expired"><b>Expiry</b><br>401</div><div class="refresh"><b>Refresh</b><br>neues Access Token</div><div class="active"><b>weiter</b><br>API Calls</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Refresh Token ist oft wertvoller als Access Token</h3><p>Ein Access Token läuft vielleicht nach Minuten oder einer Stunde ab. Ein Refresh Token kann deutlich länger gültig sein und wiederholt neue Access Tokens erzeugen. Deshalb gehört es besonders streng geschützt und bei Logout/Widerruf entsprechend behandelt.</p></div>
+<table class="depthTable"><tr><th></th><th>Access Token</th><th>Refresh Token</th></tr><tr><td>Zweck</td><td>API-Zugriff</td><td>neues Access Token</td></tr><tr><td>Laufzeit</td><td>kurz</td><td>häufig länger</td></tr><tr><td>An API senden?</td><td>ja</td><td>normalerweise nur an Token Endpoint</td></tr><tr><td>Leak-Auswirkung</td><td>bis Ablauf/Widerruf</td><td>potenziell langfristiger</td></tr></table>
+<div class="lessonCallout"><strong>n8n Vorteil</strong><p>Bei korrekt konfigurierten OAuth2 Credentials kann n8n Token-Erneuerung kapseln, statt dass du Refresh-Logik manuell in Code Nodes nachbaust.</p></div>
+</details></article>
+
+<article class="lesson" id="l10" data-lesson="10"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">10</span><div><div class="ey">SECRET STORAGE & ROTATION</div><h2>Secrets haben einen Lebenszyklus</h2><p>Ein Credential wird erstellt, verteilt, genutzt, überwacht, rotiert und irgendwann widerrufen. „Einmal Key erzeugt“ reicht nicht.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="rotationFlow"><div>Create New</div><span>→</span><div>Store Securely</div><span>→</span><div>Deploy</div><span>→</span><div>Verify</div><span>→</span><div>Revoke Old</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Rotation ohne Ausfall planen</h3><p>Viele Systeme erlauben kurzzeitig zwei gültige Keys. Dann erzeugst du Key B, rollst ihn aus, testest, widerrufst Key A und prüfst Logs. Bei einem Leak wird Rotation nicht irgendwann, sondern sofort durchgeführt.</p></div>
+<div class="incident"><b>Credential Leak:</b> Ein API Key landet versehentlich in Git, Screenshot, Ticket oder Chat. Nur den Text zu löschen reicht nicht. Das Secret gilt als kompromittiert → widerrufen/rotieren → Zugriffe auditieren → Ursache beheben.</div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Owner</strong><p>Wer darf rotieren und wer weiß, welche Workflows betroffen sind?</p></div><div class="lessonCallout"><strong>Inventory</strong><p>Welche Umgebung, Scopes, Ablaufzeit und abhängigen Workflows gehören zum Credential?</p></div></div>
+</details></article>
+
+<article class="lesson" id="l11" data-lesson="11"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">11</span><div><div class="ey">AUTH DEBUGGING</div><h2>401 und 403 sauber auseinanderhalten</h2><p>Auth-Fehler werden nicht durch Trial-and-Error gelöst, sondern über Credential-Typ, Tokenzustand und Berechtigungen eingegrenzt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="statusAuthGrid"><div class="unauth"><b>401</b><span>Credential fehlt · falsch · abgelaufen · falscher Token-Kontext</span></div><div class="forbid"><b>403</b><span>Scope fehlt · Rolle fehlt · Resource Policy verweigert</span></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<table class="depthTable"><tr><th>Symptom</th><th>Check 1</th><th>Check 2</th></tr><tr><td>401 API Key</td><td>Header-Name</td><td>Key aktiv / richtige Umgebung</td></tr><tr><td>401 Bearer</td><td><code>Bearer </code> Prefix</td><td>Expiry / Audience / Issuer</td></tr><tr><td>403 Bearer</td><td>Scopes</td><td>Resource-/Org-Policy</td></tr><tr><td>OAuth Redirect Error</td><td>Redirect URI</td><td>Client ID / Environment</td></tr><tr><td>Refresh schlägt fehl</td><td>Refresh Token gültig?</td><td>Client Secret / Grant-Konfiguration</td></tr></table>
+<div class="caseFlow lifecycle"><b>Status</b><span>→</span><b>Credential Type</b><span>→</span><b>Token State</b><span>→</span><b>Scope / Role</b><span>→</span><b>Provider Logs</b></div>
+<div class="lessonCallout"><strong>Keine Secret-Ausgabe</strong><p>Beim Debugging nie den vollständigen Token in Logs ausgeben. Fingerprint/letzte Zeichen oder Credential-ID reichen für Korrelation.</p></div>
+</details></article>
+
+<article class="lesson" id="l12" data-lesson="12"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">12</span><div><div class="ey">PRODUCTION LIFECYCLE</div><h2>Service Accounts, Ownership und Audit</h2><p>Ein produktiver Workflow sollte nicht am persönlichen Token eines Mitarbeiters hängen. Credentials brauchen technische und organisatorische Eigentümer.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Service Account
+├─ Zweck: CRM Lead Sync
+├─ Scope: customer:read/write
+├─ Owner: Automation Team
+├─ Env: Production
+├─ Rotation: 90d / on incident
+└─ Workflows: Lead-01, CRM-02</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Personen verlassen Firmen – Workflows sollen weiterlaufen</h3><p>Persönliche Tokens brechen, wenn Accounts deaktiviert werden, Rollen wechseln oder MFA/Policies angepasst werden. Dedizierte Service Accounts mit klarer Ownership sind für dauerhafte Integrationen stabiler.</p></div>
+<div class="lessonGrid"><div class="lessonCallout"><strong>Inventory</strong><p>Credential-ID, Anbieter, Umgebung, Scope, Owner, Ablauf/Rotation, abhängige Workflows.</p></div><div class="lessonCallout"><strong>Audit</strong><p>Wer hat Credential geändert? Welche API-Aufrufe wurden gemacht? Gab es ungewöhnliche Nutzung?</p></div></div>
+<div class="productionPyramid"><div>OWNER &amp; APPROVAL</div><div>SCOPES · SERVICE ACCOUNT · ENV</div><div>SECURE STORAGE · ROTATION · REVOCATION</div><div>LOGGING WITHOUT SECRETS · ALERTS</div><div>WORKFLOW AUTH CONFIGURATION</div></div>
+<div class="lessonCallout"><strong>Ready for Production</strong><p>Du kannst erklären, wie ein Credential erzeugt, begrenzt, gespeichert, deployed, überwacht, rotiert und widerrufen wird – nicht nur, wie man es in ein Feld kopiert.</p></div>
+</details></article>
+
+<section class="liveLab" id="lab"><div class="ey">ECHTER N8N AUTHENTICATION WORKFLOW</div><h2>200 vs 401 vs 403 an einer geschützten Resource</h2><p class="muted">Der Lab ruft über einen echten n8n HTTP Request eine geschützte BAIS-Demo-Resource auf. Die verwendeten Werte sind absichtlich wertlose Demo-Credentials – niemals echte Secrets.</p>
+<div class="authPresetBar"><button type="button" data-auth-preset="api-key">A · API Key 200</button><button type="button" data-auth-preset="bearer">B · Bearer 200</button><button type="button" data-auth-preset="forbidden">C · Scope fehlt 403</button><button type="button" data-auth-preset="expired">D · Token expired 401</button></div>
+<div class="authLab"><div class="authControls"><label>Szenario<select data-auth-scenario><option value="api-key">API Key · gültig</option><option value="bearer">Bearer · gültig</option><option value="forbidden">Bearer · fehlender Scope</option><option value="expired">Bearer · abgelaufen</option></select></label><div class="demoSecretWarning"><strong>DEMO ONLY</strong><p>Kein Feld für echte Secrets. Du sollst Verhalten lernen, nicht Credentials in den Browser kopieren.</p></div><button class="authRun" type="button" data-auth-run>Live Auth Workflow starten</button></div>
+<div><div class="module4Flow"><div data-m04-node>Webhook</div><div data-m04-node>Prepare</div><div data-m04-node>Auth Header</div><div data-m04-node>Protected API</div><div data-m04-node>401/403/200</div><div data-m04-node>Explain</div></div><pre class="authOutput" data-auth-output>Bereit.</pre></div></div>
+<div class="authBreakdown" data-auth-breakdown hidden></div>
+<details><summary>Lab-Auftrag &amp; Break/Fix öffnen</summary>
+<div class="labMission"><h3>A · API Key</h3><ol><li>Prognostiziere HTTP 200.</li><li>Erkläre, welcher Header das Credential transportiert.</li><li>Erkläre, warum der Key nicht in Query/String/HTML gehört.</li></ol></div>
+<div class="labMission"><h3>B · Bearer</h3><ol><li>Prognostiziere HTTP 200.</li><li>Erkläre <code>Authorization: Bearer ***</code>.</li><li>Unterscheide Tokenbesitz von Scope-Berechtigung.</li></ol></div>
+<div class="labMission break"><h3>C · 403</h3><ol><li>Starte „Scope fehlt“.</li><li>Erkläre, warum dies <b>nicht</b> 401 ist.</li><li>Nenne die kleinste sinnvolle Reparatur: benötigten Scope genehmigen – nicht „Admin für alles“.</li></ol></div>
+<div class="labMission break"><h3>D · 401</h3><ol><li>Starte „Token expired“.</li><li>Erkläre, warum Scope-Prüfung hier zweitrangig ist.</li><li>Bei OAuth2: Refresh oder Re-Authentication erklären.</li></ol></div>
+<div class="labMission fix"><h3>E · Incident Drill</h3><ol><li>Ein API Key wurde in Git committed. Beschreibe die Sofortmaßnahmen.</li><li>Ein Mitarbeiter verlässt die Firma und sein persönlicher Token hängt an 8 Workflows. Wie migrierst du?</li><li>Zeichne den OAuth2 Authorization Code Flow aus dem Kopf.</li></ol></div>
+</details></section>
+
+<section class="assessment" id="assessment" data-assessment><div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 04</div><h2>Auth-Verständnis statt Token-Begriffe auswendig lernen</h2><p>12 Fragen aus großem Pool. Scopes, Statuscodes, Token-Laufzeiten und Leak-Szenarien variieren. Schwache Themen werden beim nächsten Versuch stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div><div class="assessmentList" data-assessment-list></div><div class="assessmentResult" data-assessment-result hidden></div><div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div></section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 04 ist erst fertig, wenn du das ohne Vorlage kannst</h2><div class="teachList">
+<label><input type="checkbox"> Authentication vs Authorization erklären</label><label><input type="checkbox"> API Key sicher einsetzen</label><label><input type="checkbox"> Bearer Token erklären</label><label><input type="checkbox"> Basic Auth + Base64/TLS erklären</label><label><input type="checkbox"> n8n Credential statt Hardcode konfigurieren</label><label><input type="checkbox"> Least Privilege und Scopes anwenden</label><label><input type="checkbox"> OAuth2 Rollen erklären</label><label><input type="checkbox"> Authorization Code Flow zeichnen</label><label><input type="checkbox"> Access vs Refresh Token erklären</label><label><input type="checkbox"> Credential rotieren</label><label><input type="checkbox"> 401 vs 403 diagnostizieren</label><label><input type="checkbox"> Production Credential Lifecycle beschreiben</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 05 · Flow Control, IF, Switch, Merge &amp; Loops</strong><span>Business-Regeln, Branching, Schleifen, Batch-Verarbeitung, Entscheidungslogik und kontrollierte Pfade.</span></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · n8n Automation Bootcamp</span><span><a href="../modul-03/">← Modul 03</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script><script src="../../../assets/n8n-module-study.js?v=1.6" defer></script><script src="../../../assets/n8n-module-04.js?v=1.0" defer></script><script src="../../../assets/n8n-module-04-assessment.js?v=1.0" defer></script>
+</body></html>
