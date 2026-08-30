@@ -1,24 +1,4 @@
 import{assertDatabase}from"../../../_lib/api.js";
 import{ensureAuthSchema,requireSession}from"../../../_lib/auth.js";
-
-export const onRequest=async context=>{
-  const{request,env}=context;
-  const db=assertDatabase(env);
-  try{
-    await ensureAuthSchema(db);
-    const user=await requireSession(db,request);
-    if(user.role==="admin")return context.next();
-    const enrollment=await db.prepare(
-      "SELECT e.status FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug='n8n-bootcamp' AND e.status IN('active','completed') LIMIT 1"
-    ).bind(user.user_id).first();
-    if(!enrollment){
-      return Response.redirect(new URL("/academy/konto/?course=n8n-bootcamp&reason=enrollment_required",request.url),302);
-    }
-    return context.next();
-  }catch{
-    const target=new URL("/academy/konto/",request.url);
-    target.searchParams.set("continue","/academy/n8n-bootcamp/modul-03/");
-    target.searchParams.set("course","n8n-bootcamp");
-    return Response.redirect(target,302);
-  }
-};
+const enhance=response=>{const type=response.headers.get("content-type")||"";if(!type.includes("text/html")||typeof HTMLRewriter==="undefined")return response;return new HTMLRewriter().on(".studyHero .lead",{element(element){element.after('<div style="margin-top:14px;padding:14px 16px;border:1px solid #9bcdbd;border-radius:12px;background:#f0faf6"><strong style="display:block;margin-bottom:5px">Praxiswerkstatt · Webhooks & REST unter Production-Bedingungen</strong><span style="display:block;margin-bottom:9px">GitHub Signature, Stripe Replay/Idempotency, Statuscodes, Pagination und Rate Limits.</span><a href="./praxiswerkstatt/" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#173f52;color:#fff;font-weight:900;text-decoration:none">Praxiswerkstatt öffnen →</a></div>',{html:true});}}).transform(response);};
+export const onRequest=async context=>{const{request,env}=context,db=assertDatabase(env);try{await ensureAuthSchema(db);const user=await requireSession(db,request);if(user.role!=="admin"){const enrollment=await db.prepare("SELECT e.status FROM enrollments e JOIN course_runs r ON r.id=e.course_run_id JOIN courses c ON c.id=r.course_id WHERE e.user_id=? AND c.slug='n8n-bootcamp' AND e.status IN('active','completed') LIMIT 1").bind(user.user_id).first();if(!enrollment)return Response.redirect(new URL("/academy/konto/?course=n8n-bootcamp&reason=enrollment_required",request.url),302);}return enhance(await context.next());}catch{const target=new URL("/academy/konto/",request.url);target.searchParams.set("continue","/academy/n8n-bootcamp/modul-03/");target.searchParams.set("course","n8n-bootcamp");return Response.redirect(target,302);}};
