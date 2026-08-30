@@ -70,3 +70,14 @@ test("dynamic scenario questions still expose exactly four options and server-si
   assert.ok(answer>=0&&answer<4);
  }
 });
+
+
+test("final exam UI explains the dynamic production-scenario design",async()=>{
+ const {readFile}=await import("node:fs/promises");
+ const exam=await readFile("academy/n8n-bootcamp/abschlusspruefung/index.html","utf8");
+ const landing=await readFile("academy/n8n-bootcamp/index.html","utf8");
+ assert.match(exam,/12 \+ 12 Fragen/);
+ assert.match(exam,/dynamisch erzeugtes Production-Szenario/);
+ assert.match(exam,/Pagination, Batch, Backoff, RAG, SSRF, ROI/);
+ assert.match(landing,/12 dynamische Production-Szenarien/);
+});
