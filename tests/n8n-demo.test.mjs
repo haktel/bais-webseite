@@ -1,6 +1,6 @@
 import test from"node:test";
 import assert from"node:assert/strict";
-import{DEMO_SCENARIOS,buildDemoPayload,fingerprint}from"../functions/api/n8n-demo.js";
+import{DEMO_SCENARIOS,allowBurst,buildDemoPayload,fingerprint}from"../functions/api/n8n-demo.js";
 
 test("n8n public demo exposes only fixed business scenarios",()=>{
  assert.deepEqual(Object.keys(DEMO_SCENARIOS),["automation","security","academy"]);
@@ -34,4 +34,16 @@ test("n8n demo fingerprint is stable and compact",async()=>{
  assert.equal(a,b);
  assert.notEqual(a,c);
  assert.match(a,/^[a-f0-9]{20}$/);
+});
+
+
+test("n8n demo server burst guard limits repeated runs",()=>{
+ const key="unit-test-bucket-"+Math.random();
+ const start=1_000_000;
+ assert.equal(allowBurst(key,start),true);
+ assert.equal(allowBurst(key,start+1),true);
+ assert.equal(allowBurst(key,start+2),true);
+ assert.equal(allowBurst(key,start+3),true);
+ assert.equal(allowBurst(key,start+4),false);
+ assert.equal(allowBurst(key,start+60_001),true);
 });
