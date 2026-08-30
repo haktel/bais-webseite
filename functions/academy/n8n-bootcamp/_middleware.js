@@ -2,6 +2,17 @@ import{assertDatabase}from"../../_lib/api.js";
 import{ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 import{findN8nEnrollment,firstIncompleteN8nModule,firstIncompletePriorN8nModule}from"../../_lib/n8n-course-access.js";
 
+const withGuidedSequence=response=>{
+  if(typeof HTMLRewriter!=="function")return response;
+  const type=response.headers.get("content-type")||"";
+  if(!type.includes("text/html"))return response;
+  return new HTMLRewriter()
+    .on("head",{element(element){
+      element.append('<link rel="stylesheet" href="/assets/n8n-guided-sequence.css?v=1.0">',{html:true});
+    }})
+    .transform(response);
+};
+
 export const onRequest=async context=>{
   const{request,env}=context;
   const url=new URL(request.url);
@@ -41,7 +52,7 @@ export const onRequest=async context=>{
       return Response.redirect(target,302);
     }
 
-    return context.next();
+    return withGuidedSequence(await context.next());
   }catch{
     const target=new URL("/academy/konto/",request.url);
     target.searchParams.set("continue",url.pathname);
