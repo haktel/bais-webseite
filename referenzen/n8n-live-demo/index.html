@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live n8n Demo | BAIS</title>
+<meta name="description" content="Echte n8n Workflow-Ausführung bei BAIS: synthetisches Szenario wählen, Live-Webhook auslösen und Score, Route, Execution-ID sowie Laufzeit nachvollziehen.">
+<link rel="canonical" href="https://bais-solutions.de/referenzen/n8n-live-demo/">
+<link rel="stylesheet" href="/assets/site.css?v=49.9">
+<link rel="stylesheet" href="/assets/bais-design-system.css?v=1.0">
+<link rel="stylesheet" href="/assets/n8n-live-demo.css?v=1.0">
+<script src="/assets/n8n-live-demo.js?v=1.0" defer></script>
+</head>
+<body>
+<a class="skipLink" href="#main">Zum Inhalt springen</a>
+<header><div class="c"><nav>
+<a class="brand" href="/" aria-label="BAIS Startseite"><img class="brandLogo" src="/assets/bais-wordmark.svg" alt="BAIS"></a>
+<div class="links"><a href="/loesungen/">Lösungen</a><a href="/academy/">Academy</a><a href="/referenzen/" aria-current="page">Demos</a><a href="/project-portal/">Project Portal</a><a href="/ai-governance/">AI Governance</a><a href="/ueber-bais/">Über BAIS</a><a class="cta" href="/kontakt/">Projekt einordnen</a></div>
+<span class="menu">BAIS</span>
+</nav></div></header>
+
+<main id="main">
+<section class="hero n8nDemoHero"><div class="c n8nDemoHeroGrid">
+<div>
+<div class="ey">LIVE N8N AUTOMATION DEMO</div>
+<h1>Ein Klick. Eine echte n8n Execution.</h1>
+<p class="lead">Keine Show-Animation: Diese Seite ruft über die BAIS Cloudflare Function den produktiven n8n-Webhook auf. n8n verarbeitet ein synthetisches Geschäftsszenario und liefert den echten Routing-Output zurück.</p>
+<div class="liveFacts" aria-label="Live-Demo Eigenschaften"><span><i></i>LIVE WEBHOOK</span><span>RepoCloud n8n</span><span>Nur synthetische Daten</span></div>
+</div>
+<aside class="truthBox"><strong>Was ist hier wirklich?</strong><p>Score, Route, Execution-ID, Audit-Status und Laufzeit stammen aus der aktuellen n8n-Ausführung. Es werden keine Kundendaten und keine frei definierbaren URLs oder Credentials an n8n übergeben.</p></aside>
+</div></section>
+
+<section class="n8nDemoStage"><div class="c">
+<div class="sectionHead"><div><div class="ey">LIVE WORKFLOW</div><h2>Service-Anfrage automatisch qualifizieren.</h2></div><p>Wählen Sie ein realistisches Szenario. Die Eingabe wird serverseitig auf eine feste, sichere Payload abgebildet und an n8n gesendet.</p></div>
+
+<div class="demoConsole">
+<form id="n8nDemoForm" class="scenarioPanel">
+<fieldset>
+<legend>1. Geschäftsszenario wählen</legend>
+<label class="scenarioChoice"><input type="radio" name="scenario" value="automation" checked><span><b>Automation Discovery</b><small>180 manuelle Vorgänge/Tag → n8n + API + Monitoring</small></span></label>
+<label class="scenarioChoice"><input type="radio" name="scenario" value="security"><span><b>Security Incident Routing</b><small>Auffällige Logins → Einordnung + Eskalation + Controls</small></span></label>
+<label class="scenarioChoice"><input type="radio" name="scenario" value="academy"><span><b>Academy Qualification</b><small>24 Mitarbeitende → Lernpfad + Labs + Assessment</small></span></label>
+</fieldset>
+<div class="urgencyRow">
+<label for="urgency"><b>2. Zeithorizont</b></label>
+<select id="urgency" name="urgency"><option value="planned">Planbar · 8–12 Wochen</option><option value="urgent">Zeitkritisch · 24–48 Stunden</option></select>
+</div>
+<button class="runButton" id="runN8nDemo" type="submit"><span>Live Workflow ausführen</span><b aria-hidden="true">→</b></button>
+<p class="privacyNote">Öffentliche Demo mit fest definierten synthetischen Daten. Keine personenbezogenen Eingaben erforderlich.</p>
+</form>
+
+<div class="executionPanel">
+<div class="execHead"><div><span>EXECUTION EVIDENCE</span><h3>n8n Ergebnis</h3></div><span class="execState ready" id="execState">READY</span></div>
+
+<div class="pipeline" aria-label="Workflow-Pipeline">
+<div class="pipeNode" data-stage="browser"><span>01</span><b>Browser</b><small>Szenario</small></div>
+<i></i>
+<div class="pipeNode" data-stage="edge"><span>02</span><b>BAIS API</b><small>Validation</small></div>
+<i></i>
+<div class="pipeNode" data-stage="n8n"><span>03</span><b>n8n Webhook</b><small>Execution</small></div>
+<i></i>
+<div class="pipeNode" data-stage="route"><span>04</span><b>Route</b><small>Decision</small></div>
+</div>
+
+<div class="evidenceGrid">
+<div><span>LEAD SCORE</span><strong id="resultScore">—</strong></div>
+<div><span>ROUTE</span><strong id="resultRoute">—</strong></div>
+<div><span>EXECUTION ID</span><strong id="resultExecution">—</strong></div>
+<div><span>LATENCY</span><strong id="resultLatency">—</strong></div>
+</div>
+<div class="nextAction"><span>NEXT ACTION</span><p id="resultNext">Workflow noch nicht ausgeführt.</p></div>
+<div class="auditLine"><span>Audit status</span><b id="resultAudit">—</b><span>Workflow</span><b id="resultWorkflow">bais-lead-qualification</b></div>
+<details class="rawResult"><summary>Sanitisierten JSON-Output anzeigen</summary><pre id="rawOutput">{ "status": "ready" }</pre></details>
+<p class="srStatus" id="demoStatus" role="status" aria-live="polite"></p>
+</div>
+</div>
+</div></section>
+
+<section class="sec"><div class="c"><div class="sectionHead"><div><div class="ey">ARCHITEKTUR</div><h2>Was beim Klick tatsächlich passiert.</h2></div><p>Der Browser spricht n8n nicht direkt an. Die BAIS Function validiert die öffentliche Demo-Eingabe und hält den n8n-Endpunkt aus der UI heraus.</p></div>
+<div class="architectureCards">
+<article><span>01 · CLIENT</span><h3>Szenario statt freier Payload</h3><p>Nur drei vordefinierte Business-Szenarien und zwei Dringlichkeitsstufen sind erlaubt. Keine frei eingebbaren Webhook-Ziele oder Credentials.</p></article>
+<article><span>02 · EDGE</span><h3>Cloudflare Function</h3><p><code>/api/n8n-demo</code> validiert Origin, Content-Type, Payload-Größe und Whitelist, bevor ein synthetischer Datensatz erzeugt wird.</p></article>
+<article><span>03 · AUTOMATION</span><h3>Produktiver n8n Webhook</h3><p>Der gleiche Lead-Qualification-Workflow wird auch hinter echten BAIS Kontakt- und Academy-Prozessen verwendet.</p></article>
+<article><span>04 · EVIDENCE</span><h3>Nur verifizierbarer Output</h3><p>Die Seite zeigt ausschließlich den vom Live-Run zurückgegebenen Score, Route, Execution-ID, Next Action, Audit-Status und die gemessene End-to-End-Laufzeit.</p></article>
+</div></div></section>
+
+<section class="demoBoundary"><div class="c"><div><div class="ey">EVIDENCE BOUNDARY</div><h2>Demo heißt nicht Kundenreferenz.</h2></div><p>Die Ausführung ist technisch echt, die Geschäftsdaten sind absichtlich synthetisch. So kann die Automation öffentlich geprüft werden, ohne reale Kunden, Leads oder vertrauliche Systeme offenzulegen.</p></div></section>
+</main>
+
+<section class="contact"><div class="c contactgrid"><div><div class="ey">AUTOMATION PROJEKT</div><h2>Diesen Workflow auf einen echten Prozess übertragen?</h2></div><div><p>Systeme, Daten, Fehlerpfade, Security und Betriebsgrenzen gemeinsam einordnen.</p><a href="/kontakt/">Automation besprechen</a></div></div></section>
+<footer class="footer"><div class="c legalbar"><span>BAIT Solution · Inhaber: Bünyamin Atik · Dortmund</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div></footer>
+</body></html>
