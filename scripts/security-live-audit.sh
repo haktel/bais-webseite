@@ -21,7 +21,7 @@ code="$(status "${BASE}/api/admin/mfa" || true)"
 [ "$code" = "401" ] && pass "admin MFA API blocks anonymous access" || fail "admin MFA API expected 401, got ${code}"
 
 code="$(status -X POST -H 'Origin: https://bais-solutions.de' -H 'Content-Type: application/json' --data '{"displayName":"Probe","company":"Probe GmbH","email":"probe@example.invalid","password":"not-a-real-password-123"}' "${BASE}/api/customer/auth/register" || true)"
-if [ "$code" = "400" ] && grep -qi '^x-bais-customer-register: identity-only-v3-atomic-number' /tmp/headers; then pass "customer registration identity-only v3 atomic-number is live and Turnstile protected"; else fail "customer registration v3 expected 400 + build marker, got HTTP ${code}"; fi
+if [ "$code" = "400" ] && grep -qi '^x-bais-customer-register: identity-only-v4-pbkdf2-100k' /tmp/headers; then pass "customer registration identity-only v4 PBKDF2-100k is live and Turnstile protected"; else fail "customer registration v4 expected 400 + build marker, got HTTP ${code}"; fi
 
 code="$(status "${BASE}/api/customer/portal" || true)"
 [ "$code" = "401" ] && pass "customer portal API blocks anonymous access" || fail "customer portal API expected 401, got ${code}"
