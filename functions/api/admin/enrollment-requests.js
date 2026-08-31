@@ -1,6 +1,7 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{requireAdmin,validAdminStatus}from"../../_lib/admin.js";
 import{assertSameOrigin}from"../../_lib/auth.js";
+import{clearRetention,privacyPolicy,scheduleRetention}from"../../_lib/privacy.js";
 
 const load=async db=>{
  const result=await db.prepare("SELECT r.id,r.name,r.email,r.company,r.note,r.status,r.score,r.route,r.n8n_execution_id,r.created_at,c.title AS course_title,c.slug AS course_slug FROM enrollment_requests r JOIN courses c ON c.id=r.course_id ORDER BY r.created_at DESC LIMIT 200").all();
@@ -69,6 +70,11 @@ export const onRequestPatch=async({request,env})=>{
   );
 
   await db.batch(statements);
+  if(status==="approved")await clearRetention(db,"enrollment_request",id,now);
+  else{
+   const policy=privacyPolicy(env);
+   await scheduleRetention(db,{entityType:"enrollment_request",entityId:id,days:["closed","rejected"].includes(status)?policy.closedLeadDays:policy.openLeadDays,reason:["closed","rejected"].includes(status)?"closed_enrollment_retention":"active_enrollment_retention",now});
+  }
   return json({ok:true,accessGranted,requests:await load(db),requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
