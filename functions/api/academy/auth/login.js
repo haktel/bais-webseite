@@ -1,5 +1,5 @@
 import{ApiError,assertDatabase,handleError,json,readJson,requestId,validEmail}from"../../../_lib/api.js";
-import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,createSession,normalizeEmail,validPassword,verifyPassword}from"../../../_lib/auth.js";
+import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,createSession,hashPassword,normalizeEmail,PASSWORD_HASH_ITERATIONS,validPassword,verifyPassword}from"../../../_lib/auth.js";
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{
@@ -9,6 +9,11 @@ export const onRequestPost=async({request,env})=>{
   if(!account||account.status!=="active")throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
   const valid=await verifyPassword(password,account);
   if(!valid)throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
+  if(Number(account.password_iterations||0)<PASSWORD_HASH_ITERATIONS){
+   const upgraded=await hashPassword(password);
+   await db.prepare("UPDATE user_credentials SET password_hash=?,password_salt=?,password_iterations=?,updated_at=? WHERE user_id=?")
+    .bind(upgraded.hash,upgraded.salt,upgraded.iterations,new Date().toISOString(),account.id).run();
+  }
   const session=await createSession(db,account.id,request);await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
   return json({ok:true,user:{displayName:account.display_name,email:account.email,role:account.role},requestId:traceId},200,{"set-cookie":session.cookie});
  }catch(error){return handleError(error,traceId);}
