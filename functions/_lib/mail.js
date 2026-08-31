@@ -2,7 +2,7 @@ import{ApiError}from"./api.js";
 
 const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 export async function sendAcademyInviteEmail({env,to,name,courseTitle,inviteUrl,expiresAt,idempotencyKey}){
- const apiKey=String(env?.RESEND_API_KEY||""),from=String(env?.TRANSACTIONAL_EMAIL_FROM||"").trim();
+ const apiKey=String(env?.RESEND_API_KEY||""),from=String(env?.TRANSACTIONAL_EMAIL_FROM||"BAIS <info@bais-solutions.de>").trim();
  if(!apiKey||!from)throw new ApiError(503,"transactional_email_not_configured","Transaktionaler E-Mail-Versand ist noch nicht konfiguriert.");
  const base=String(env?.PUBLIC_BASE_URL||"https://bais-solutions.de").replace(/\/+$/,""),url=new URL(inviteUrl,base).toString();
  const subject="Ihre BAIS Academy Einladung";
