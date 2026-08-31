@@ -105,6 +105,15 @@ grep -qi 'MÄNGELLISTE / OFFENE PUNKTE' /tmp/abnahme && pass "Abnahme defect lis
 grep -qi 'Drucken / als PDF speichern' /tmp/abnahme && pass "Abnahme print/PDF action live" || fail "Abnahme print/PDF action missing"
 if grep -Eq '\[[A-ZÄÖÜ0-9_]{3,}\]' /tmp/abnahme; then fail "Abnahme exposes placeholder codes"; else pass "Abnahme has no placeholder codes"; fi
 
+commercial_http="$(curl -LsS --max-time 20 -o /tmp/commercial.json -w '%{http_code}' "${BASE_URL}/api/commercial/context" || true)"
+if [ "$commercial_http" = "200" ] && jq -e '.ok==true and .provider.legalName and .authenticated==false' /tmp/commercial.json >/dev/null 2>&1; then
+  pass "commercial context provider available without customer data"
+else
+  fail "commercial context provider check failed (HTTP ${commercial_http})"
+fi
+grep -qi 'id="customerNumber"' /tmp/angebot && grep -qi 'id="projectNo"' /tmp/angebot && grep -qi 'commercial-document-context.js' /tmp/angebot && pass "Angebot DB identity fields live" || fail "Angebot DB identity integration missing"
+grep -qi 'id="customerNumber"' /tmp/abnahme && grep -qi 'id="projectNo"' /tmp/abnahme && grep -qi 'commercial-document-context.js' /tmp/abnahme && pass "Abnahme DB identity fields live" || fail "Abnahme DB identity integration missing"
+
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
 python3 scripts/market-link-audit.py
