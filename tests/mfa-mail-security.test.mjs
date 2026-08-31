@@ -20,12 +20,15 @@ test("TOTP replay of an already accepted counter is rejected",async()=>{
  assert.equal(replay.ok,false);
 });
 
-test("admin MFA uses a dedicated encryption root and time-limited step-up",()=>{
+test("admin MFA prefers a dedicated encryption root, supports a domain-separated fallback and time-limited step-up",()=>{
  const mfa=read("functions/_lib/mfa.js");
  assert.match(mfa,/AES-GCM/);
  assert.match(mfa,/MFA_ENCRYPTION_KEY/);
+ assert.match(mfa,/TURNSTILE_SECRET/);
+ assert.match(mfa,/BAIS-MFA-AES-GCM-v1/);
  assert.match(mfa,/mfa_key_not_configured/);
- assert.doesNotMatch(mfa,/TURNSTILE_SECRET/);
+ assert.match(mfa,/rootSecrets/);
+ assert.match(mfa,/for\(const key of keys\)/);
  assert.match(mfa,/MFA_VERIFICATION_TTL_MS=4\*60\*60\*1000/);
  assert.match(mfa,/verified_at/);
  assert.match(mfa,/DELETE FROM admin_mfa_sessions/);
@@ -37,7 +40,6 @@ test("admin MFA uses a dedicated encryption root and time-limited step-up",()=>{
  assert.match(middleware,/mfa_setup_required/);
  assert.match(middleware,/mfa_required/);
 });
-
 test("transactional invite delivery fails closed without a provider secret",async()=>{
  await assert.rejects(
   ()=>sendAcademyInviteEmail({env:{},to:"user@example.com",name:"Test",courseTitle:"Testkurs",inviteUrl:"/academy/konto/#invite=secret",expiresAt:new Date(Date.now()+60000).toISOString(),idempotencyKey:"test/1"}),
