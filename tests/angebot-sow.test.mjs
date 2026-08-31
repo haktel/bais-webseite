@@ -45,10 +45,10 @@ test("Angebot contains the contractual sales sections",()=>{
  ])assert.equal(html.includes(needle),true,"missing SOW section: "+needle);
 });
 
-test("Angebot is noindex, print-to-PDF ready and local-only",()=>{
+test("Angebot is noindex, print-to-PDF ready and session-scoped",()=>{
  assert.match(html,/name="robots" content="noindex,nofollow"/i);
  assert.match(html,/window\.print\(\)/);
- assert.match(html,/localStorage/);
+ assert.match(html,/sessionStorage/);
  assert.match(html,/printHideUnchecked/);
  assert.doesNotMatch(html,/fetch\s*\(/i);
  assert.doesNotMatch(html,/action\s*=/i);
