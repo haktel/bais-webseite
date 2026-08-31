@@ -40,11 +40,17 @@ export const onRequestPost=async({request,env})=>{
   const existing=await db.prepare("SELECT id FROM users WHERE lower(email)=lower(?) LIMIT 1").bind(email).first();
   if(existing)throw new ApiError(409,"account_exists","Für diese E-Mail besteht bereits ein Konto.");
 
+  const now=new Date().toISOString();
+  stage="password_hash";
+  const credential=await hashPassword(password);
+
+  stage="customer_number";
+  const customerNumber=await allocateCustomerNumber(db,now);
+
   stage="identity_prepare";
-  const now=new Date().toISOString(),credential=await hashPassword(password);
   userId=crypto.randomUUID();
   organizationId=crypto.randomUUID();
-  const customerNumber=await allocateCustomerNumber(db,now),slug=customerSlug(company,organizationId);
+  const slug=customerSlug(company,organizationId);
 
   stage="identity_insert";
   await db.batch([
