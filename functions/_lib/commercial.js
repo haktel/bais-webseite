@@ -89,27 +89,37 @@ export async function ensureCommercialIdentityForUser(db,{userId,displayName,ema
  }
 }
 
+export async function createProjectForOrganization(db,{organizationId,name,actorUserId=null,now=new Date().toISOString()}){
+ await ensureCommercialSchema(db);
+ const customer=await db.prepare("SELECT ca.organization_id FROM customer_accounts ca JOIN organizations o ON o.id=ca.organization_id WHERE ca.organization_id=? AND ca.account_status='active' LIMIT 1").bind(organizationId).first();
+ if(!customer)throw new ApiError(404,"customer_not_found","Kundenkonto nicht gefunden.");
+ const projectName=String(name||"").trim().slice(0,180);
+ if(projectName.length<2)throw new ApiError(422,"validation_failed","Ein Projektname ist erforderlich.");
+
+ const intake=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? AND p.name='Erstprojekt / Intake' AND p.status='planned' ORDER BY p.created_at ASC LIMIT 1")
+  .bind(organizationId).first();
+ if(intake){
+  await db.prepare("UPDATE projects SET name=? WHERE id=?").bind(projectName,intake.id).run();
+  await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) SELECT ?,id,'customer' FROM users WHERE organization_id=? AND status='active' AND role IN('student','customer')").bind(intake.id,organizationId).run();
+  if(actorUserId)await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(intake.id,actorUserId,"admin").run();
+  return{id:intake.id,projectNumber:intake.project_number,name:projectName,status:"planned",reusedIntake:true,organizationId};
+ }
+
+ const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
+ const statements=[
+  db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,organizationId,projectName,"planned",now),
+  db.prepare("INSERT INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(projectId,projectNumber,now),
+  db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) SELECT ?,id,'customer' FROM users WHERE organization_id=? AND status='active' AND role IN('student','customer')").bind(projectId,organizationId)
+ ];
+ if(actorUserId)statements.push(db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,actorUserId,"admin"));
+ await db.batch(statements);
+ return{id:projectId,projectNumber,name:projectName,status:"planned",reusedIntake:false,organizationId};
+}
+
 export async function createProjectForUser(db,{userId,name,now=new Date().toISOString()}){
  await ensureCommercialSchema(db);
  const user=await db.prepare("SELECT id,organization_id,display_name,email FROM users WHERE id=? LIMIT 1").bind(userId).first();
  if(!user)throw new ApiError(404,"user_not_found","Benutzerkonto nicht gefunden.");
  const identity=await ensureCommercialIdentityForUser(db,{userId,displayName:user.display_name,email:user.email,now});
- const projectName=String(name||"").trim().slice(0,180);
- if(projectName.length<2)throw new ApiError(422,"validation_failed","Ein Projektname ist erforderlich.");
-
- const intake=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? AND p.name='Erstprojekt / Intake' AND p.status='planned' ORDER BY p.created_at ASC LIMIT 1")
-  .bind(identity.organizationId).first();
- if(intake){
-  await db.prepare("UPDATE projects SET name=? WHERE id=?").bind(projectName,intake.id).run();
-  await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(intake.id,userId,"customer").run();
-  return{id:intake.id,projectNumber:intake.project_number,name:projectName,status:"planned",reusedIntake:true};
- }
-
- const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
- await db.batch([
-  db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,identity.organizationId,projectName,"planned",now),
-  db.prepare("INSERT INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(projectId,projectNumber,now),
-  db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer")
- ]);
- return{id:projectId,projectNumber,name:projectName,status:"planned",reusedIntake:false};
+ return createProjectForOrganization(db,{organizationId:identity.organizationId,name,actorUserId:userId,now});
 }
