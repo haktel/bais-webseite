@@ -42,9 +42,9 @@ test("admin MFA prefers a dedicated encryption root, supports a domain-separated
 });
 test("admin MFA setup renders the otpauth URI as a local QR code without third-party secret disclosure",()=>{
  const account=read("assets/academy-account.js"),html=read("academy/konto/index.html"),qr=read("assets/vendor/qrcode.mjs"),license=read("assets/vendor/qrcode.LICENSE.txt");
- assert.match(account,/from"\.\/vendor\/qrcode\.mjs"/);
+ assert.match(account,/import\("\.\/vendor\/qrcode\.mjs"\)/);
  assert.match(account,/data\.setup\.otpauthUri/);
- assert.match(account,/qrcode\(0,"M"\)/);
+ assert.match(account,/qrcode\(0,"M"\)/);\n assert.match(account,/qrFactoryPromise/);
  assert.doesNotMatch(account,/quickchart|api\.qrserver|chart\.google|googleapis/i);
  assert.match(html,/data-mfa-qr/);
  assert.match(html,/Manuellen Schlüssel anzeigen/);
