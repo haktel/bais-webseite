@@ -1,0 +1,34 @@
+name: BAIS Live Security Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "functions/api/**"
+      - "functions/admin/**"
+      - "functions/angebot/**"
+      - "functions/abnahme/**"
+      - "functions/_lib/admin.js"
+      - "functions/_lib/mfa.js"
+      - "functions/_lib/api-access-policy.js"
+      - "scripts/security-live-audit.sh"
+      - ".github/workflows/security-live-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for matching deployment and run live security audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..12}; do
+            if bash scripts/security-live-audit.sh; then exit 0; fi
+            sleep 5
+          done
+          exit 1
