@@ -74,7 +74,7 @@ export async function beginAdminMfaSetup(db,user,env){
   .bind(user.user_id,enc.ciphertext,enc.iv,expires,now.toISOString()).run();
  return{secret,expiresAt:expires,otpauthUri:"otpauth://totp/BAIS:"+encodeURIComponent(user.email)+"?secret="+secret+"&issuer=BAIS&algorithm=SHA1&digits=6&period=30"};
 }
-const recoveryPlain=()=>randomToken(9).replace(/[-_]/g,"").slice(0,10).toUpperCase();
+const recoveryPlain=()=>{const bytes=new Uint8Array(8);crypto.getRandomValues(bytes);return base32Encode(bytes).slice(0,10);};
 export async function confirmAdminMfaSetup(db,user,code,env){
  await ensureMfaSchema(db);
  const setup=await db.prepare("SELECT secret_ciphertext,secret_iv,expires_at FROM admin_mfa_setup WHERE user_id=? LIMIT 1").bind(user.user_id).first();
