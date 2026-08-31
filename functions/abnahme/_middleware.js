@@ -6,6 +6,7 @@ export const onRequest=async context=>{
   return privatePageResponse(await context.next());
  }catch(error){
   if(Number(error?.status)===401)return customerLoginRedirect(context.request,"/abnahme/");
-  throw error;
+  const status=Number(error?.status)===403?403:500;
+  return new Response(status===403?"Dieser Inhalt ist für Ihr Kundenkonto nicht freigeschaltet.":"Zugriff konnte nicht geprüft werden.",{status,headers:{"cache-control":"private, no-store","content-type":"text/plain; charset=utf-8","x-robots-tag":"noindex, nofollow"}});
  }
 };
