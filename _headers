@@ -11,3 +11,12 @@
 
 /robots.txt
   Cache-Control: public, max-age=14400, must-revalidate
+
+
+/zertifikat/*
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+
+/api/certificates/*
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
