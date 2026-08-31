@@ -1,5 +1,5 @@
-import{assertDatabase,handleError,json,requestId}from"../../_lib/api.js";import{requireAdmin}from"../../_lib/admin.js";
-export const onRequestGet=async({request,env})=>{const traceId=requestId(request);try{const db=assertDatabase(env);await requireAdmin(db,request);const results=await db.batch([
+import{assertDatabase,handleError,json,requestId}from"../../_lib/api.js";import{requireAdmin}from"../../_lib/admin.js";import{runPrivacyCleanup}from"../../_lib/privacy.js";
+export const onRequestGet=async({request,env})=>{const traceId=requestId(request);try{const db=assertDatabase(env);await requireAdmin(db,request);await runPrivacyCleanup(db,{limit:100});const results=await db.batch([
  db.prepare("SELECT COUNT(*) AS value FROM users WHERE role='student'"),
  db.prepare("SELECT COUNT(*) AS value FROM enrollment_requests WHERE status='new'"),
  db.prepare("SELECT COUNT(*) AS value FROM enrollments WHERE status='active'"),
