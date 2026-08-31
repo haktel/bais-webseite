@@ -87,7 +87,7 @@ export const onRequestPost=async({request,env})=>{
   }catch{}
   if(!(error instanceof ApiError))console.error(JSON.stringify({level:"error",area:"customer.register",stage,requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
   if(error instanceof ApiError)return withRegistrationVersion(handleError(error,traceId));
-  return withRegistrationVersion(json({ok:false,error:{code:"customer_registration_failed",message:"Das Kundenkonto konnte nicht erstellt werden. Referenz: "+traceId},requestId:traceId},500));
+  return withRegistrationVersion(json({ok:false,error:{code:"customer_registration_failed",message:"Das Kundenkonto konnte nicht erstellt werden. Technische Stufe: "+stage+". Referenz: "+traceId},requestId:traceId},500));
  }
 };
 export const onRequest=()=>withRegistrationVersion(json({ok:false,error:{code:"method_not_allowed",message:"Methode nicht erlaubt."}},405,{allow:"POST"}));
