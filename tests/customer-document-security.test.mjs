@@ -45,9 +45,8 @@ test("customer document drafts are session scoped and cleared at auth boundaries
   assert.doesNotMatch(html,/localStorage/);
  }
  const account=read("assets/academy-account.js");
- assert.match(account,/clearCustomerDocumentDrafts/);
- assert.match(account,/bais-offer-draft-/);
- assert.match(account,/bais-acceptance-draft-/);
+ assert.match(account,/clearPrivateBrowserState/);
+ assert.match(account,/key\.startsWith\("bais-"\)/);
  assert.match(account,/value==="\/angebot\/"/);
  assert.match(account,/value==="\/abnahme\/"/);
 });
