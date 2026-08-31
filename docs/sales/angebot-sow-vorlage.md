@@ -4,6 +4,21 @@
 
 ---
 
+# Verbindliche Basismodul-Nomenklatur
+
+Diese Modulnamen werden in Angebot / SOW, Kunden-Onboarding und Abnahmeprotokoll identisch verwendet:
+
+| Modul-ID | Modulname |
+|---|---|
+| MOD-01 | **Website-Entwicklung** |
+| MOD-02 | **Project Portal** |
+| MOD-03 | **Wartung/Hosting-Setup** |
+| MOD-04 | **Content-Pflege** |
+
+Weitere Leistungen wie Automation/n8n, AI/RAG, Cybersecurity/Governance oder Schulung/Handover sind Zusatzleistungen und werden nur bei ausdrücklicher Beauftragung in den Scope aufgenommen.
+
+---
+
 # 1. Deckblatt / Kopfzeile
 
 **[LOGO_ANBIETER]**
@@ -38,7 +53,7 @@
 
 > **Anweisung:** Nur tatsächlich gewünschte Leistungen markieren. Nicht markierte Leistungen sind nicht automatisch Bestandteil des Angebots.
 
-## 2.1 Website & UX
+## 2.1 MOD-01 – Website-Entwicklung
 - [ ] Discovery / Kick-off
 - [ ] Anforderungsanalyse
 - [ ] Informationsarchitektur
@@ -55,7 +70,7 @@
 - [ ] Performance-Optimierung
 - [ ] Sonstiges: [WEBSITE_SONSTIGES]
 
-## 2.2 Project Portal
+## 2.2 MOD-02 – Project Portal
 - [ ] Kundenlogin
 - [ ] Benutzer-/Rollenverwaltung
 - [ ] Projektübersicht / Dashboard
@@ -68,7 +83,7 @@
 - [ ] Reporting
 - [ ] Sonstiges: [PORTAL_SONSTIGES]
 
-## 2.3 Automation / n8n / Integration
+## 2.3 Zusatzleistung – Automation / n8n / Integration
 - [ ] Prozessanalyse
 - [ ] n8n Workflow
 - [ ] Webhooks
@@ -81,7 +96,7 @@
 - [ ] Logging / Execution Evidence
 - [ ] Sonstiges: [AUTOMATION_SONSTIGES]
 
-## 2.4 AI / RAG / Agents
+## 2.4 Zusatzleistung – AI / RAG / Agents
 - [ ] AI Use-Case Discovery
 - [ ] RAG / Wissensassistent
 - [ ] Dokumentenverarbeitung
@@ -93,7 +108,7 @@
 - [ ] Evaluation / Qualitätsmessung
 - [ ] Sonstiges: [AI_SONSTIGES]
 
-## 2.5 Cybersecurity & Governance
+## 2.5 Zusatzleistung – Cybersecurity & Governance
 - [ ] Security Architecture Review
 - [ ] Rollen-/Berechtigungskonzept
 - [ ] Secrets / Credential Handling
@@ -106,7 +121,7 @@
 - [ ] AVV / Datenschutz-technische Umsetzung
 - [ ] Sonstiges: [SECURITY_SONSTIGES]
 
-## 2.6 Hosting, Betrieb & Support
+## 2.6 MOD-03 – Wartung/Hosting-Setup
 - [ ] Domain / DNS
 - [ ] Hosting / Cloud
 - [ ] Deployment / Go-Live
@@ -120,7 +135,18 @@
 - [ ] 24/7-Bereitschaft (nur bei gesonderter Vereinbarung)
 - [ ] Sonstiges: [BETRIEB_SONSTIGES]
 
-## 2.7 Schulung & Handover
+## 2.7 MOD-04 – Content-Pflege
+- [ ] Texte einpflegen / aktualisieren
+- [ ] Bilder / Medien einpflegen
+- [ ] Downloads / Dokumente pflegen
+- [ ] bestehende Inhalte migrieren
+- [ ] Meta-Daten pflegen
+- [ ] Alt-Texte pflegen – soweit vereinbart
+- [ ] Mehrsprachige Inhalte pflegen
+- [ ] definierte laufende Inhaltsänderungen
+- [ ] Sonstiges: [CONTENT_SONSTIGES]
+
+## 2.8 Zusatzleistung – Schulung & Handover
 - [ ] Admin-Schulung
 - [ ] Benutzer-Schulung
 - [ ] Technische Dokumentation
