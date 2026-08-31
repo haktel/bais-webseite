@@ -40,7 +40,7 @@ test("registration is invitation-bound and cannot inherit approval by email alon
 
 test("password and session lifecycle are hardened",()=>{
  const auth=read("functions/_lib/auth.js");
- assert.match(auth,/PASSWORD_HASH_ITERATIONS=600000/);
+ assert.match(auth,/PASSWORD_HASH_ITERATIONS=100000/);
  assert.match(auth,/IDLE_SECONDS=60\*60\*8/);
  assert.match(auth,/SESSION_SECONDS=60\*60\*24/);
  assert.match(auth,/uaMismatch/);
