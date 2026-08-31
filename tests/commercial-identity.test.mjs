@@ -62,7 +62,7 @@ test("Angebot and Abnahme use readonly DB identifiers and shared autofill",()=>{
   assert.match(html,/id="customerPicker"/);
   assert.match(html,/id="projectPicker"/);
   assert.match(html,/id="createProject"/);
-  assert.match(html,/commercial-document-context\.js\?v=1\.0/);
+  assert.match(html,/commercial-document-context\.js\?v=1\.1/);
   assert.match(html,/id="providerCompany"[^>]*readonly/);
   assert.match(html,/id="providerContact"[^>]*readonly/);
  }
