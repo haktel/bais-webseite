@@ -69,6 +69,9 @@ test("customer self-registration creates identity but grants no protected conten
  assert.match(source,/contentAccess:\[\]/);
  assert.match(source,/defaultAccess:"deny"/);
  assert.doesNotMatch(source,/customer_access_grants/);
+ assert.match(source,/DELETE FROM audit_events/);
+ assert.match(source,/DELETE FROM project_registry/);
+ assert.match(source,/DELETE FROM customer_accounts/);
 });
 
 test("customer account renders only effective entitlements and project creation stays portal-gated",()=>{
