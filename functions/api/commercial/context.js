@@ -32,6 +32,8 @@ export const onRequestGet=async({request,env})=>{
   const organization=await db.prepare("SELECT id,name,billing_email FROM organizations WHERE id=? LIMIT 1").bind(identity.organizationId).first();
   const projects=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at FROM projects p JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at DESC").bind(identity.organizationId).all();
   const contentAccess=(await listCustomerContentAccess(db,identity.organizationId)).filter(item=>item.effective).map(item=>({key:item.content_key,projectId:item.project_id,expiresAt:item.expires_at||null}));
+  const canSeeProjects=contentAccess.some(item=>["angebot","abnahme","project_portal"].includes(item.key));
+  const visibleProjects=canSeeProjects?(projects.results||[]):[];
 
   return json({
    ok:true,
@@ -45,8 +47,8 @@ export const onRequestGet=async({request,env})=>{
     email:session.email,
     billingEmail:organization?.billing_email||session.email
    },
-   currentProject:(projects.results||[])[0]||identity.project,
-   projects:projects.results||[],
+   currentProject:visibleProjects[0]||null,
+   projects:visibleProjects,
    contentAccess,
    provider:{
     legalName:provider?.legal_name||"",
