@@ -8,13 +8,13 @@ const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 const fakeSequenceDb=value=>({
  prepare(sql){
   assert.match(sql,/business_sequences/);
-  return{bind(key,now){
-   return{first:async()=>{
-    assert.match(key,/^(customer|project):2026$/);
-    assert.match(now,/^2026-/);
-    return{next_value:value};
-   }};
-  }};
+  return{bind(...args){return{sql,args}}};
+ },
+ async batch(statements){
+  assert.equal(statements.length,3);
+  const keys=statements.flatMap(s=>s.args).filter(v=>typeof v==="string"&&/^(customer|project):2026$/.test(v));
+  assert.ok(keys.length>=2);
+  return[{success:true,results:[]},{success:true,results:[]},{success:true,results:[{next_value:value}]}];
  }
 });
 
