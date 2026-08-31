@@ -14,10 +14,23 @@ export const onRequestGet=async({request,env})=>{
     legalName:provider?.legal_name||"",
     brandName:provider?.brand_name||"",
     ownerName:provider?.owner_name||"",
+    role:"Inhaber",
     address:[provider?.street_address,[provider?.postal_code,provider?.city].filter(Boolean).join(" "),provider?.country_code].filter(Boolean).join(", "),
     email:provider?.email||"",
     vatId:provider?.vat_id||""
    },requestId:traceId});
+  }
+
+  if(session.role==="admin"||session.role==="trainer"){
+   return json({
+    ok:true,authenticated:true,user:{displayName:session.display_name,email:session.email,role:session.role},
+    customer:null,currentProject:null,projects:[],
+    provider:{
+     legalName:provider?.legal_name||"",brandName:provider?.brand_name||"",ownerName:provider?.owner_name||"",role:"Inhaber",
+     address:[provider?.street_address,[provider?.postal_code,provider?.city].filter(Boolean).join(" "),provider?.country_code].filter(Boolean).join(", "),
+     email:provider?.email||"",vatId:provider?.vat_id||""
+    },requestId:traceId
+   });
   }
 
   const identity=await ensureCommercialIdentityForUser(db,{
@@ -32,6 +45,7 @@ export const onRequestGet=async({request,env})=>{
   return json({
    ok:true,
    authenticated:true,
+   user:{displayName:session.display_name,email:session.email,role:session.role},
    customer:{
     customerNumber:identity.customerNumber,
     organizationId:identity.organizationId,
