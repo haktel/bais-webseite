@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Abnahmeprotokoll | BAIS</title>
+<meta name="description" content="Ausfüllbares BAIS Abnahmeprotokoll für Web-, Portal-, Automation-, AI-, Security- und Managed-Service-Projekte.">
+<link rel="canonical" href="https://bais-solutions.de/abnahme/">
+<link rel="stylesheet" href="../assets/site.css?v=49.9">
+<link rel="stylesheet" href="/assets/bais-design-system.css?v=1.0">
+<style>
+:root{--ap-border:#d7e2e5;--ap-soft:#f5f8f9;--ap-ink:#153d45;--ap-muted:#61757b;--ap-accent:#0b8f83;--ap-warn:#a46b00;--ap-danger:#9b2c2c}
+.apWrap{max-width:1180px}.apTools{position:sticky;top:10px;z-index:60;display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:18px 0;padding:10px;border:1px solid var(--ap-border);border-radius:14px;background:rgba(255,255,255,.95);box-shadow:0 8px 28px rgba(8,35,42,.09);backdrop-filter:blur(10px)}
+.apTools button{border:1px solid #bfd0d5;background:#fff;color:var(--ap-ink);border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer}.apTools button.primary{background:var(--ap-accent);border-color:var(--ap-accent);color:#fff}.apTools .toolCheck{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ap-muted)}.saveState{font-size:11px;color:var(--ap-muted);margin-left:auto}
+.apHeader,.apSection,.apNote{background:#fff;border:1px solid var(--ap-border);border-radius:16px;padding:25px;margin-bottom:16px}.apHeader{background:linear-gradient(135deg,#f6fbfa 0,#fff 65%)}.apSection h2,.apHeader h2{margin-top:5px}.apSection h3{font-size:16px;margin:24px 0 10px}.intro{color:var(--ap-muted);line-height:1.65}.sectionHint{margin:-3px 0 16px;color:var(--ap-muted);font-size:13px}
+.fieldGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.partyGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.party{border:1px solid var(--ap-border);border-radius:13px;padding:17px}.party h3{margin:0 0 12px}.formField{display:grid;gap:6px;margin-bottom:9px}.formField label{font-size:11px;line-height:1.2;font-weight:800;letter-spacing:.06em;color:#61777d;text-transform:uppercase}.formField input,.formField select,.formField textarea,.tableInput{width:100%;box-sizing:border-box;border:1px solid #c9d8dc;border-radius:9px;background:#fff;padding:10px 11px;color:var(--ap-ink);font:inherit}.formField textarea{resize:vertical;min-height:100px;line-height:1.5}.formField input:focus,.formField select:focus,.formField textarea:focus,.tableInput:focus{outline:3px solid rgba(11,143,131,.14);border-color:var(--ap-accent)}.formField input[type="date"]{min-height:42px}.help{font-size:11px;color:#7b8c91}
+.checkGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 12px}.checkItem{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid #e1e8ea;border-radius:10px;background:#fbfcfc}.checkItem input{width:17px;height:17px;margin-top:1px;accent-color:var(--ap-accent);flex:0 0 auto}.checkItem label{font-size:13px;line-height:1.35;cursor:pointer}.checkItem:has(input:checked){border-color:#9fd4ce;background:#f2fbf9}
+.choiceGrid{display:grid;grid-template-columns:1fr;gap:10px}.resultChoice{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:14px;border:1px solid var(--ap-border);border-radius:12px;background:#fbfcfc}.resultChoice input{width:18px;height:18px;margin-top:2px;accent-color:var(--ap-accent)}.resultChoice strong{display:block;margin-bottom:3px}.resultChoice span{color:var(--ap-muted);font-size:13px;line-height:1.45}.resultChoice:has(input[value="vorbehalt"]:checked){border-color:#d8bd7d;background:#fffaf0}.resultChoice:has(input[value="verweigert"]:checked){border-color:#d7a5a5;background:#fff7f7}
+.refDocs{display:flex;flex-wrap:wrap;gap:9px}.refDoc{display:flex;gap:7px;align-items:center;border:1px solid var(--ap-border);border-radius:999px;padding:8px 11px;background:#fbfcfc;font-size:13px}.refDoc input{accent-color:var(--ap-accent)}
+.defectTable{width:100%;border-collapse:collapse}.defectTable th,.defectTable td{border:1px solid var(--ap-border);padding:7px;vertical-align:top;text-align:left}.defectTable th{background:#f1f6f6;font-size:11px;color:#516b72}.defectTable .no{width:40px;text-align:center;font-weight:800}.defectTable input,.defectTable select{width:100%;box-sizing:border-box;border:1px solid #c9d8dc;border-radius:7px;padding:8px;background:#fff}.defectTable .removeDefect{border:0;background:transparent;color:var(--ap-danger);font-weight:900;cursor:pointer;padding:6px}.defectActions{display:flex;gap:8px;margin-top:10px}.defectActions button{border:1px solid #bfd0d5;background:#fff;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer}
+.twoCol{display:grid;grid-template-columns:1fr 1fr;gap:14px}.impactBox{border:1px solid var(--ap-border);border-radius:12px;padding:15px;background:#fbfcfc}.impactBox h3{margin:0 0 10px}.legalLine{padding:11px 13px;border-left:3px solid var(--ap-accent);background:#f5faf9;color:var(--ap-muted);line-height:1.55}
+.signGrid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.signBox{border:1px solid var(--ap-border);border-radius:12px;padding:15px}.signature{padding-top:52px;border-bottom:1px solid #84999f}.signMeta{display:flex;justify-content:space-between;font-size:11px;color:var(--ap-muted);margin-top:5px}
+@media(max-width:900px){.fieldGrid,.checkGrid{grid-template-columns:repeat(2,1fr)}.partyGrid,.twoCol,.signGrid{grid-template-columns:1fr}.saveState{margin-left:0;width:100%}}
+@media(max-width:560px){.fieldGrid,.checkGrid{grid-template-columns:1fr}.apHeader,.apSection{padding:17px}.apTools{position:static}.defectTable{font-size:11px}.defectTable th,.defectTable td{padding:4px}}
+@media print{
+ @page{size:A4;margin:12mm}
+ header,.footer,.hero,.apTools{display:none!important}
+ .sec{padding:0}.c,.apWrap{max-width:none;width:auto}
+ .apHeader,.apSection,.apNote{border:0;border-radius:0;padding:0;margin:0 0 9mm;box-shadow:none}
+ .apHeader{border-bottom:2px solid #193f47;padding-bottom:5mm}
+ .formField input,.formField select,.formField textarea,.tableInput,.defectTable input,.defectTable select{border:0!important;background:transparent!important;padding:1px 0!important;appearance:none;-webkit-appearance:none}
+ .formField textarea{min-height:0;resize:none;overflow:visible}
+ .formField label{font-size:9px}.checkItem{border:0;background:transparent;padding:2px 0}.checkItem input{width:14px;height:14px}.refDoc{border:0;background:transparent;padding:2px 0}.resultChoice{padding:8px;border:1px solid #d9e1e3}.defectActions,.removeDefect{display:none!important}.defectTable th,.defectTable td{font-size:9px;padding:4px}
+ body.printHideUnchecked .checkItem:not(:has(input:checked)),body.printHideUnchecked .refDoc:not(:has(input:checked)){display:none!important}
+ body.printHideEmptyDefects .defectRow[data-empty="true"]{display:none!important}
+ .apSection,.party,.impactBox,.signBox,.resultChoice,.defectTable tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header><div class="c"><nav><a class="brand" href="../" aria-label="BAIS Startseite"><img class="brandLogo" src="../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../angebot/">Angebot / SOW</a><a href="../projektablauf/">Projektablauf</a><a href="../sla/">SLA</a><a href="../kontakt/">Kontakt</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="hero"><div class="c heroGrid"><div><div class="ey">AUSFÜLLBARES PROJEKTDOKUMENT · INTERN · NOINDEX</div><h1>Abnahmeprotokoll.</h1><p class="lead">Der im Angebot / SOW definierte Leistungsumfang wird hier formal geschlossen: Leistungen markieren, Abnahmestatus festlegen, Mängel dokumentieren und anschließend drucken oder als PDF speichern.</p></div></div></section>
+
+<section class="sec"><div class="c apWrap">
+<div class="apTools">
+<button class="primary" type="button" id="printProtocol">Drucken / als PDF speichern</button>
+<button type="button" id="clearProtocol">Formular leeren</button>
+<label class="toolCheck"><input id="hideUnchecked" type="checkbox" checked> Nicht ausgewählte Leistungen im PDF ausblenden</label>
+<label class="toolCheck"><input id="hideEmptyDefects" type="checkbox" checked> Leere Mängelzeilen im PDF ausblenden</label>
+<span class="saveState" id="saveState">Lokal gespeichert</span>
+</div>
+
+<form id="acceptanceForm" autocomplete="off">
+<article class="apHeader">
+<div class="ey">ABNAHMEPROTOKOLL</div>
+<div class="fieldGrid" style="margin-top:12px">
+<div class="formField"><label for="projectName">Projektname</label><input id="projectName" name="projectName" type="text"></div>
+<div class="formField"><label for="offerNo">Angebots-/SOW-Nummer</label><input id="offerNo" name="offerNo" type="text"></div>
+<div class="formField"><label for="projectNo">Projekt-/Auftragsnummer</label><input id="projectNo" name="projectNo" type="text"></div>
+<div class="formField"><label for="acceptanceDate">Datum der Abnahme</label><input id="acceptanceDate" name="acceptanceDate" type="date"></div>
+</div>
+<div class="fieldGrid">
+<div class="formField"><label for="offerDate">Datum des Angebots / SOW</label><input id="offerDate" name="offerDate" type="date"></div>
+<div class="formField"><label for="acceptancePlace">Abnahmeort / Format</label><input id="acceptancePlace" name="acceptancePlace" type="text" placeholder="z. B. Dortmund / Remote"></div>
+<div class="formField"><label for="projectPhase">Projekt / Phase</label><input id="projectPhase" name="projectPhase" type="text"></div>
+<div class="formField"><label for="handoverDate">Handover-Datum</label><input id="handoverDate" name="handoverDate" type="date"></div>
+</div>
+
+<div class="partyGrid">
+<section class="party"><h3>Auftraggeber</h3>
+<div class="formField"><label for="clientCompany">Unternehmen</label><input id="clientCompany" name="clientCompany" type="text"></div>
+<div class="formField"><label for="clientContact">Ansprechpartner</label><input id="clientContact" name="clientContact" type="text"></div>
+<div class="formField"><label for="clientRole">Funktion</label><input id="clientRole" name="clientRole" type="text"></div>
+</section>
+<section class="party"><h3>Auftragnehmer</h3>
+<div class="formField"><label for="providerCompany">Unternehmen</label><input id="providerCompany" name="providerCompany" type="text"></div>
+<div class="formField"><label for="providerContact">Ansprechpartner</label><input id="providerContact" name="providerContact" type="text"></div>
+<div class="formField"><label for="providerRole">Funktion</label><input id="providerRole" name="providerRole" type="text"></div>
+</section>
+</div>
+</article>
+
+<article class="apSection">
+<div class="ey">01 · GEGENSTAND DER ABNAHME</div><h2>Was wird mit diesem Protokoll abgenommen?</h2>
+<div class="formField"><label for="acceptanceSubject">Abnahmegegenstand / Kurzbeschreibung</label><textarea id="acceptanceSubject" name="acceptanceSubject" placeholder="Projekt, Teilprojekt oder konkrete Phase kurz beschreiben."></textarea></div>
+<h3>Referenzierte Vertragsunterlagen</h3>
+<div class="refDocs">
+<label class="refDoc"><input name="refSow" type="checkbox"> Angebot / SOW</label>
+<label class="refDoc"><input name="refScope" type="checkbox"> Leistungsbeschreibung / Scope</label>
+<label class="refDoc"><input name="refChanges" type="checkbox"> Change Request(s)</label>
+<label class="refDoc"><input name="refCriteria" type="checkbox"> Test-/Abnahmekriterien</label>
+<label class="refDoc"><input name="refHandover" type="checkbox"> Handover-Dokumentation</label>
+<label class="refDoc"><input name="refOther" type="checkbox"> Sonstige Unterlagen</label>
+</div>
+<div class="formField" style="margin-top:10px"><label for="otherDocs">Sonstige / ergänzende Referenzen</label><input id="otherDocs" name="otherDocs" type="text"></div>
+</article>
+
+<article class="apSection">
+<div class="ey">02 · LEISTUNGSÜBERSICHT</div><h2>Welche SOW-Leistungen werden abgenommen?</h2>
+<p class="sectionHint">Die Bezeichnungen entsprechen der Leistungsauswahl im BAIS Angebot / SOW. Nur tatsächlich beauftragte Leistungen markieren.</p>
+
+<h3>Website & UX</h3><div class="checkGrid">
+<div class="checkItem"><input id="w1" name="w1" type="checkbox"><label for="w1">Discovery / Kick-off</label></div><div class="checkItem"><input id="w2" name="w2" type="checkbox"><label for="w2">Anforderungsanalyse</label></div><div class="checkItem"><input id="w3" name="w3" type="checkbox"><label for="w3">Informationsarchitektur</label></div><div class="checkItem"><input id="w4" name="w4" type="checkbox"><label for="w4">UX-Konzept / Wireframes</label></div><div class="checkItem"><input id="w5" name="w5" type="checkbox"><label for="w5">UI-Design</label></div><div class="checkItem"><input id="w6" name="w6" type="checkbox"><label for="w6">Responsive Webdesign</label></div><div class="checkItem"><input id="w7" name="w7" type="checkbox"><label for="w7">Frontend-Entwicklung</label></div><div class="checkItem"><input id="w8" name="w8" type="checkbox"><label for="w8">Backend-Entwicklung</label></div><div class="checkItem"><input id="w9" name="w9" type="checkbox"><label for="w9">CMS / Content-Verwaltung</label></div><div class="checkItem"><input id="w10" name="w10" type="checkbox"><label for="w10">Mehrsprachigkeit</label></div><div class="checkItem"><input id="w11" name="w11" type="checkbox"><label for="w11">Content-Migration</label></div><div class="checkItem"><input id="w12" name="w12" type="checkbox"><label for="w12">Technisches SEO</label></div><div class="checkItem"><input id="w13" name="w13" type="checkbox"><label for="w13">Accessibility / Barrierearmut</label></div><div class="checkItem"><input id="w14" name="w14" type="checkbox"><label for="w14">Performance-Optimierung</label></div>
+</div>
+
+<h3>Project Portal</h3><div class="checkGrid">
+<div class="checkItem"><input id="p1" name="p1" type="checkbox"><label for="p1">Kundenlogin</label></div><div class="checkItem"><input id="p2" name="p2" type="checkbox"><label for="p2">Rollen & Berechtigungen</label></div><div class="checkItem"><input id="p3" name="p3" type="checkbox"><label for="p3">Projekt-Dashboard</label></div><div class="checkItem"><input id="p4" name="p4" type="checkbox"><label for="p4">Meilensteine / Status</label></div><div class="checkItem"><input id="p5" name="p5" type="checkbox"><label for="p5">Tickets / Aufgaben</label></div><div class="checkItem"><input id="p6" name="p6" type="checkbox"><label for="p6">Dokumente / Downloads</label></div><div class="checkItem"><input id="p7" name="p7" type="checkbox"><label for="p7">Freigaben / Approval Gates</label></div><div class="checkItem"><input id="p8" name="p8" type="checkbox"><label for="p8">Projektnachrichten</label></div><div class="checkItem"><input id="p9" name="p9" type="checkbox"><label for="p9">Audit-/Aktivitätsverlauf</label></div><div class="checkItem"><input id="p10" name="p10" type="checkbox"><label for="p10">Reporting</label></div>
+</div>
+
+<h3>Automation / n8n / Integration</h3><div class="checkGrid">
+<div class="checkItem"><input id="a1" name="a1" type="checkbox"><label for="a1">Prozessanalyse</label></div><div class="checkItem"><input id="a2" name="a2" type="checkbox"><label for="a2">n8n Workflow</label></div><div class="checkItem"><input id="a3" name="a3" type="checkbox"><label for="a3">Webhooks</label></div><div class="checkItem"><input id="a4" name="a4" type="checkbox"><label for="a4">API-Integration</label></div><div class="checkItem"><input id="a5" name="a5" type="checkbox"><label for="a5">CRM-/ERP-Anbindung</label></div><div class="checkItem"><input id="a6" name="a6" type="checkbox"><label for="a6">Datenbankintegration</label></div><div class="checkItem"><input id="a7" name="a7" type="checkbox"><label for="a7">Datenmapping</label></div><div class="checkItem"><input id="a8" name="a8" type="checkbox"><label for="a8">Fehlerhandling / Retry</label></div><div class="checkItem"><input id="a9" name="a9" type="checkbox"><label for="a9">Logging / Execution Evidence</label></div>
+</div>
+
+<h3>AI / RAG / Agents</h3><div class="checkGrid">
+<div class="checkItem"><input id="ai1" name="ai1" type="checkbox"><label for="ai1">AI Use-Case Discovery</label></div><div class="checkItem"><input id="ai2" name="ai2" type="checkbox"><label for="ai2">RAG / Wissensassistent</label></div><div class="checkItem"><input id="ai3" name="ai3" type="checkbox"><label for="ai3">Dokumentenverarbeitung</label></div><div class="checkItem"><input id="ai4" name="ai4" type="checkbox"><label for="ai4">AI Agent / Tool Calling</label></div><div class="checkItem"><input id="ai5" name="ai5" type="checkbox"><label for="ai5">Prompt-/Systemdesign</label></div><div class="checkItem"><input id="ai6" name="ai6" type="checkbox"><label for="ai6">Human Review / Approval</label></div><div class="checkItem"><input id="ai7" name="ai7" type="checkbox"><label for="ai7">Guardrails / Safety Controls</label></div><div class="checkItem"><input id="ai8" name="ai8" type="checkbox"><label for="ai8">Evaluation / Qualitätsmessung</label></div>
+</div>
+
+<h3>Cybersecurity & Governance</h3><div class="checkGrid">
+<div class="checkItem"><input id="s1" name="s1" type="checkbox"><label for="s1">Security Architecture Review</label></div><div class="checkItem"><input id="s2" name="s2" type="checkbox"><label for="s2">Rollen-/Berechtigungskonzept</label></div><div class="checkItem"><input id="s3" name="s3" type="checkbox"><label for="s3">Secrets / Credential Handling</label></div><div class="checkItem"><input id="s4" name="s4" type="checkbox"><label for="s4">Hardening</label></div><div class="checkItem"><input id="s5" name="s5" type="checkbox"><label for="s5">Logging / Monitoring</label></div><div class="checkItem"><input id="s6" name="s6" type="checkbox"><label for="s6">Backup / Recovery</label></div><div class="checkItem"><input id="s7" name="s7" type="checkbox"><label for="s7">Incident-Prozess</label></div><div class="checkItem"><input id="s8" name="s8" type="checkbox"><label for="s8">AI Governance</label></div><div class="checkItem"><input id="s9" name="s9" type="checkbox"><label for="s9">Risiko-/Control-Mapping</label></div>
+</div>
+
+<h3>Hosting, Betrieb & Support</h3><div class="checkGrid">
+<div class="checkItem"><input id="o1" name="o1" type="checkbox"><label for="o1">Domain / DNS</label></div><div class="checkItem"><input id="o2" name="o2" type="checkbox"><label for="o2">Hosting / Cloud</label></div><div class="checkItem"><input id="o3" name="o3" type="checkbox"><label for="o3">Deployment / Go-Live</label></div><div class="checkItem"><input id="o4" name="o4" type="checkbox"><label for="o4">Monitoring</label></div><div class="checkItem"><input id="o5" name="o5" type="checkbox"><label for="o5">Backup</label></div><div class="checkItem"><input id="o6" name="o6" type="checkbox"><label for="o6">Wartung</label></div><div class="checkItem"><input id="o7" name="o7" type="checkbox"><label for="o7">Patch-/Update-Service</label></div><div class="checkItem"><input id="o8" name="o8" type="checkbox"><label for="o8">BAIS Care</label></div><div class="checkItem"><input id="o9" name="o9" type="checkbox"><label for="o9">BAIS Care Plus</label></div><div class="checkItem"><input id="o10" name="o10" type="checkbox"><label for="o10">BAIS Critical / individuelles SLA</label></div><div class="checkItem"><input id="o11" name="o11" type="checkbox"><label for="o11">24/7-Bereitschaft – nur soweit gesondert vereinbart</label></div>
+</div>
+
+<h3>Schulung & Handover</h3><div class="checkGrid">
+<div class="checkItem"><input id="h1" name="h1" type="checkbox"><label for="h1">Admin-Schulung</label></div><div class="checkItem"><input id="h2" name="h2" type="checkbox"><label for="h2">Benutzer-Schulung</label></div><div class="checkItem"><input id="h3" name="h3" type="checkbox"><label for="h3">Technische Dokumentation</label></div><div class="checkItem"><input id="h4" name="h4" type="checkbox"><label for="h4">Betriebs-Runbook</label></div><div class="checkItem"><input id="h5" name="h5" type="checkbox"><label for="h5">Übergabe-Workshop</label></div>
+</div>
+</article>
+
+<article class="apSection">
+<div class="ey">03 · ABNAHMEERGEBNIS</div><h2>Ergebnis eindeutig festhalten.</h2>
+<div class="choiceGrid">
+<label class="resultChoice"><input name="acceptanceResult" type="radio" value="vollstaendig"><span><strong>A · Vollständige Abnahme ohne Mängel</strong><span>Die bezeichneten Leistungen werden ohne dokumentierte Mängel abgenommen.</span></span></label>
+<label class="resultChoice"><input name="acceptanceResult" type="radio" value="vorbehalt"><span><strong>B · Abnahme unter Vorbehalt</strong><span>Die Leistungen werden abgenommen; dokumentierte Mängel / offene Punkte bleiben vorbehalten und werden nach der Mängelliste bearbeitet.</span></span></label>
+<label class="resultChoice"><input name="acceptanceResult" type="radio" value="verweigert"><span><strong>C · Abnahme verweigert</strong><span>Die Abnahme wird aus den in der Mängelliste bzw. Begründung dokumentierten Gründen verweigert.</span></span></label>
+</div>
+<div class="formField" style="margin-top:12px"><label for="acceptanceStatement">Begründung / ergänzende Erklärung</label><textarea id="acceptanceStatement" name="acceptanceStatement"></textarea></div>
+</article>
+
+<article class="apSection">
+<div class="ey">04 · MÄNGELLISTE / OFFENE PUNKTE</div><h2>Konkrete Punkte mit Verantwortlichkeit und Frist.</h2>
+<table class="defectTable">
+<thead><tr><th class="no">Nr.</th><th>Beschreibung</th><th style="width:15%">Priorität</th><th style="width:17%">Verantwortlich</th><th style="width:16%">Frist</th><th style="width:12%">Status</th><th class="screenOnly" style="width:36px"></th></tr></thead>
+<tbody id="defectBody"></tbody>
+</table>
+<div class="defectActions"><button type="button" id="addDefect">+ Mangel / Punkt hinzufügen</button></div>
+</article>
+
+<article class="apSection">
+<div class="ey">05 · AUSWIRKUNG AUF ZAHLUNG</div><h2>Zahlungsfolge aus dem SOW übernehmen.</h2>
+<div class="legalLine">Dieses Protokoll erfindet keine Zahlungsfolge. Es dokumentiert nur, ob die konkrete Abnahme nach dem zugrunde liegenden Angebot / SOW bzw. Vertrag eine Schluss- oder Meilensteinzahlung auslöst.</div>
+<div class="fieldGrid" style="margin-top:13px">
+<div class="formField"><label for="paymentEffect">Zahlungsfolge</label><select id="paymentEffect" name="paymentEffect"><option value=""></option><option>Abnahme löst Zahlung gemäß SOW aus</option><option>Keine unmittelbare Zahlungsfolge</option><option>Teil-/Meilensteinzahlung</option><option>Individuelle Regelung</option></select></div>
+<div class="formField"><label for="affectedInvoice">Betroffene Rate / Rechnung</label><input id="affectedInvoice" name="affectedInvoice" type="text"></div>
+<div class="formField"><label for="paymentDueDays">Zahlungsziel Kalendertage</label><input id="paymentDueDays" name="paymentDueDays" type="number" min="0" step="1"></div>
+<div class="formField"><label for="paymentDueDate">Konkretes Fälligkeitsdatum</label><input id="paymentDueDate" name="paymentDueDate" type="date"></div>
+</div>
+<div class="formField"><label for="paymentReservation">Regelung bei Vorbehaltsmängeln / Besonderheiten</label><textarea id="paymentReservation" name="paymentReservation"></textarea></div>
+</article>
+
+<article class="apSection">
+<div class="ey">06 · BEGINN DER MÄNGEL-/GEWÄHRLEISTUNGSFRIST</div><h2>Beginn dokumentieren, Dauer nicht erfinden.</h2>
+<p class="intro">Soweit für die abgenommenen werkvertraglichen Leistungen vertraglich oder gesetzlich anwendbar, wird hier der maßgebliche Beginn der Mängel-/Verjährungsfrist dokumentiert. Die konkrete Dauer ist aus Vertrag, AGB oder der anwendbaren gesetzlichen Regelung zu übernehmen.</p>
+<div class="fieldGrid">
+<div class="formField"><label for="warrantyStart">Maßgeblicher Beginn</label><input id="warrantyStart" name="warrantyStart" type="date"></div>
+<div class="formField"><label for="warrantyDuration">Dauer / Regelung</label><input id="warrantyDuration" name="warrantyDuration" type="text" placeholder="Vertragliche oder gesetzliche Regelung"></div>
+<div class="formField"><label for="warrantyReference">Vertragsreferenz</label><input id="warrantyReference" name="warrantyReference" type="text" placeholder="z. B. SOW / AGB Abschnitt"></div>
+<div class="formField"><label>&nbsp;</label><button type="button" id="copyAcceptanceDate" style="padding:10px;border:1px solid #bfd0d5;border-radius:9px;background:#fff;font-weight:800;cursor:pointer">Abnahmedatum übernehmen</button></div>
+</div>
+</article>
+
+<article class="apSection">
+<div class="ey">07 · FOLGEN DER ABNAHME</div><h2>Übergang in Handover, Support oder Betrieb.</h2>
+<div class="twoCol">
+<div class="impactBox"><h3>Projektstatus</h3><p class="intro">Mit der Abnahme wird – soweit vertraglich vorgesehen – der abgeschlossene Leistungsstand dokumentiert. Bekannte Mängel und Vorbehalte bleiben entsprechend diesem Protokoll nachvollziehbar.</p></div>
+<div class="impactBox"><h3>Betriebsübergang</h3><div class="formField"><label for="supportStart">Support-/Betriebsbeginn</label><input id="supportStart" name="supportStart" type="date"></div><div class="formField"><label for="supportModel">Supportmodell / SLA</label><select id="supportModel" name="supportModel"><option value=""></option><option>Kein laufender Support</option><option>BAIS Care</option><option>BAIS Care Plus</option><option>BAIS Critical</option><option>Individuelles SLA</option></select></div></div>
+</div>
+<p class="intro">Bei Verträgen nach deutschem Recht kann die Abnahme insbesondere für Vergütungsfälligkeit, Gefahrtragung und den Beginn bestimmter Mängel-Verjährungsfristen relevant sein. Maßgeblich bleiben der konkrete Vertrag und das anwendbare Recht.</p>
+</article>
+
+<article class="apSection">
+<div class="ey">08 · UNTERSCHRIFTEN</div><h2>Bestätigung durch beide Vertragsparteien.</h2>
+<div class="signGrid">
+<section class="signBox"><strong>Auftraggeber</strong><div class="formField" style="margin-top:10px"><label for="clientSignName">Name</label><input id="clientSignName" name="clientSignName" type="text"></div><div class="formField"><label for="clientSignRole">Funktion</label><input id="clientSignRole" name="clientSignRole" type="text"></div><div class="formField"><label for="clientSignDate">Datum</label><input id="clientSignDate" name="clientSignDate" type="date"></div><div class="signature"></div><div class="signMeta"><span>Ort</span><span>Unterschrift</span></div></section>
+<section class="signBox"><strong>Auftragnehmer</strong><div class="formField" style="margin-top:10px"><label for="providerSignName">Name</label><input id="providerSignName" name="providerSignName" type="text"></div><div class="formField"><label for="providerSignRole">Funktion</label><input id="providerSignRole" name="providerSignRole" type="text"></div><div class="formField"><label for="providerSignDate">Datum</label><input id="providerSignDate" name="providerSignDate" type="date"></div><div class="signature"></div><div class="signMeta"><span>Ort</span><span>Unterschrift</span></div></section>
+</div>
+</article>
+
+<article class="apNote">
+<strong>Nutzungshinweise</strong>
+<ol class="intro">
+<li>Nur SOW-Leistungen markieren, die tatsächlich beauftragt und zur Abnahme gestellt wurden.</li>
+<li>Bei „Abnahme unter Vorbehalt“ bekannte Mängel konkret mit Priorität, Verantwortlichem und Frist dokumentieren.</li>
+<li>Bei „Abnahme verweigert“ die Gründe konkret und prüfbar beschreiben.</li>
+<li>Zahlungsziel und Gewährleistungs-/Verjährungsdauer nicht schätzen; aus SOW, Vertrag, AGB bzw. anwendbarem Recht übernehmen.</li>
+<li>Das Protokoll sollte zusammen mit SOW, Testnachweisen, Change Requests und Handover-Dokumentation in der Projektakte gespeichert werden.</li>
+</ol>
+</article>
+</form>
+</div></section>
+</main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS · Abnahmeprotokoll</span><span><a href="../angebot/">Angebot / SOW</a> · <a href="../agb/">AGB</a> · <a href="../avv/">AVV / DPA</a> · <a href="../sla/">SLA</a></span></div></footer>
+
+<script>
+(()=>{"use strict";
+const form=document.getElementById("acceptanceForm");
+const body=document.getElementById("defectBody");
+const KEY="bais-acceptance-draft-v1";
+const saveState=document.getElementById("saveState");
+const hideUnchecked=document.getElementById("hideUnchecked");
+const hideEmptyDefects=document.getElementById("hideEmptyDefects");
+
+function defectRow(data={}){
+ const tr=document.createElement("tr");tr.className="defectRow";
+ tr.innerHTML='<td class="no"></td><td><input name="defectDescription" type="text" aria-label="Mangel Beschreibung"></td><td><select name="defectPriority" aria-label="Priorität"><option value=""></option><option>P1 · Kritisch</option><option>P2 · Hoch</option><option>P3 · Mittel</option><option>P4 · Niedrig</option></select></td><td><select name="defectOwner" aria-label="Verantwortliche Partei"><option value=""></option><option>Auftragnehmer</option><option>Auftraggeber</option><option>Drittanbieter</option><option>Gemeinsam</option></select></td><td><input name="defectDue" type="date" aria-label="Frist zur Behebung"></td><td><select name="defectStatus" aria-label="Status"><option value=""></option><option>Offen</option><option>In Bearbeitung</option><option>Erledigt</option><option>Akzeptiertes Restrisiko</option></select></td><td class="screenOnly"><button class="removeDefect" type="button" aria-label="Zeile entfernen">×</button></td>';
+ const els=tr.querySelectorAll("input,select");
+ ["description","priority","owner","due","status"].forEach((k,i)=>{if(data[k]!=null)els[i].value=data[k]});
+ tr.querySelector(".removeDefect").addEventListener("click",()=>{tr.remove();renumber();save()});
+ els.forEach(el=>el.addEventListener("input",()=>{markEmpty(tr);scheduleSave()}));
+ els.forEach(el=>el.addEventListener("change",()=>{markEmpty(tr);save()}));
+ markEmpty(tr);return tr;
+}
+function markEmpty(tr){
+ const vals=[...tr.querySelectorAll("input,select")].map(e=>String(e.value||"").trim());
+ tr.dataset.empty=vals.every(v=>!v)?"true":"false";
+}
+function renumber(){[...body.children].forEach((tr,i)=>tr.querySelector(".no").textContent=String(i+1))}
+function collectDefects(){return [...body.querySelectorAll(".defectRow")].map(tr=>{const e=tr.querySelectorAll("input,select");return{description:e[0].value,priority:e[1].value,owner:e[2].value,due:e[3].value,status:e[4].value}})}
+function serialize(){
+ const data={fields:{},defects:collectDefects(),hideUnchecked:hideUnchecked.checked,hideEmptyDefects:hideEmptyDefects.checked};
+ for(const el of form.elements){
+   if(!el.name||el.name.startsWith("defect"))continue;
+   if(el.type==="checkbox")data.fields[el.name]=el.checked;
+   else if(el.type==="radio"){if(el.checked)data.fields[el.name]=el.value}
+   else data.fields[el.name]=el.value;
+ }
+ return data;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(serialize()));saveState.textContent="Lokal gespeichert"}catch{saveState.textContent="Speichern nicht verfügbar"}}
+let timer;function scheduleSave(){saveState.textContent="Speichert …";clearTimeout(timer);timer=setTimeout(save,250)}
+function restore(){
+ try{
+  const data=JSON.parse(localStorage.getItem(KEY)||"null");
+  if(!data){body.append(defectRow(),defectRow(),defectRow());renumber();return}
+  for(const el of form.elements){
+   if(!el.name||el.name.startsWith("defect"))continue;
+   const v=data.fields?.[el.name];if(v===undefined)continue;
+   if(el.type==="checkbox")el.checked=Boolean(v);
+   else if(el.type==="radio")el.checked=v===el.value;
+   else el.value=v??"";
+  }
+  hideUnchecked.checked=data.hideUnchecked!==false;
+  hideEmptyDefects.checked=data.hideEmptyDefects!==false;
+  const rows=Array.isArray(data.defects)&&data.defects.length?data.defects:[{},{},{}];
+  rows.forEach(d=>body.append(defectRow(d)));renumber();
+ }catch{body.append(defectRow(),defectRow(),defectRow());renumber()}
+}
+form.addEventListener("input",scheduleSave);form.addEventListener("change",save);
+hideUnchecked.addEventListener("change",save);hideEmptyDefects.addEventListener("change",save);
+document.getElementById("addDefect").addEventListener("click",()=>{body.append(defectRow());renumber();save()});
+document.getElementById("copyAcceptanceDate").addEventListener("click",()=>{document.getElementById("warrantyStart").value=document.getElementById("acceptanceDate").value;save()});
+document.getElementById("clearProtocol").addEventListener("click",()=>{if(!confirm("Alle Eingaben dieses Abnahmeprotokolls löschen?"))return;form.reset();body.innerHTML="";body.append(defectRow(),defectRow(),defectRow());renumber();localStorage.removeItem(KEY);saveState.textContent="Formular geleert"});
+function applyPrint(){document.body.classList.toggle("printHideUnchecked",hideUnchecked.checked);document.body.classList.toggle("printHideEmptyDefects",hideEmptyDefects.checked);[...body.children].forEach(markEmpty)}
+document.getElementById("printProtocol").addEventListener("click",()=>{applyPrint();window.print()});
+window.addEventListener("beforeprint",applyPrint);window.addEventListener("afterprint",()=>{document.body.classList.remove("printHideUnchecked","printHideEmptyDefects")});
+restore();
+})();
+</script>
+</body>
+</html>
