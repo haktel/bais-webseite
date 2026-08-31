@@ -7,14 +7,14 @@ const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 
 const fakeSequenceDb=value=>({
  prepare(sql){
-  assert.match(sql,/business_sequences/);
-  return{bind(...args){return{sql,args}}};
- },
- async batch(statements){
-  assert.equal(statements.length,3);
-  const keys=statements.flatMap(s=>s.args).filter(v=>typeof v==="string"&&/^(customer|project):2026$/.test(v));
-  assert.ok(keys.length>=2);
-  return[{success:true,results:[]},{success:true,results:[]},{success:true,results:[{next_value:value}]}];
+  assert.match(sql,/INSERT INTO business_sequences/);
+  assert.match(sql,/ON CONFLICT\(sequence_key\) DO UPDATE/);
+  assert.match(sql,/RETURNING next_value/);
+  return{bind(...args){
+   const key=args.find(v=>typeof v==="string"&&/^(customer|project):2026$/.test(v));
+   assert.ok(key);
+   return{first:async()=>({next_value:value})};
+  }};
  }
 });
 
