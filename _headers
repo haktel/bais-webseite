@@ -20,3 +20,12 @@
 /api/certificates/*
   Referrer-Policy: no-referrer
   Cache-Control: no-store
+
+/project-portal/kunde/*
+  Cache-Control: private, no-store, max-age=0
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/api/customer/*
+  Cache-Control: private, no-store, max-age=0
+  Referrer-Policy: no-referrer
