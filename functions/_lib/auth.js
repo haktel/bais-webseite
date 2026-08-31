@@ -61,7 +61,7 @@ export async function requireSession(db,request){
  if(!token)throw new ApiError(401,"authentication_required","Bitte melden Sie sich an.");
  const tokenHash=await sha256(token),nowMs=Date.now(),now=new Date(nowMs).toISOString();
  const session=await db.prepare("SELECT s.id AS session_id,s.user_id,s.expires_at,s.last_seen_at,s.user_agent_hash,u.display_name,u.email,u.role,u.status FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? LIMIT 1").bind(tokenHash).first();
- const idleExpired=!session?.last_seen_at||Date.parse(session.last_seen_at)<nowMs-IDLE_SECONDS*1000;
+ const idleExpired=Boolean(session?.last_seen_at)&&Date.parse(session.last_seen_at)<nowMs-IDLE_SECONDS*1000;
  const uaHash=await sha256(request.headers.get("user-agent")||"unknown"),uaMismatch=Boolean(session?.user_agent_hash)&&!safeEqual(session.user_agent_hash,uaHash);
  if(!session||session.expires_at<=now||idleExpired||uaMismatch||session.status!=="active"){
   if(session?.session_id)try{await db.prepare("DELETE FROM user_sessions WHERE id=?").bind(session.session_id).run();}catch{}
