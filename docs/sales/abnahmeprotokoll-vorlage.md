@@ -116,6 +116,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Deployment / Go-Live
 - [ ] Monitoring
 - [ ] Backup
+- [ ] Backup / Recovery / Monitoring Runbook bereitgestellt / aktualisiert – soweit vereinbart
 - [ ] Wartung
 - [ ] Patch-/Update-Service
 - [ ] BAIS Care
@@ -137,6 +138,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Benutzer-Schulung
 - [ ] Technische Dokumentation
 - [ ] Betriebs-Runbook
+- [ ] Kunden-Zusammenfassung zum Backup / Recovery / Monitoring Runbook – soweit vereinbart
 - [ ] Übergabe-Workshop
 
 # 4. Abnahmeergebnis
