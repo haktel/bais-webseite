@@ -35,6 +35,11 @@ if [ "$code" = "200" ]; then
     pass "production security runtime has MFA/bootstrap/mail secrets"
   else
     fail "production security runtime reports degraded"
+    if command -v jq >/dev/null 2>&1; then
+      echo "RUNTIME_MFA=$(jq -r '.runtime.mfa // false' /tmp/body)"
+      echo "RUNTIME_BOOTSTRAP=$(jq -r '.runtime.bootstrap // false' /tmp/body)"
+      echo "RUNTIME_MAIL=$(jq -r '.runtime.mail // false' /tmp/body)"
+    fi
   fi
 else
   fail "health expected 200, got ${code}"
