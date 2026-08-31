@@ -12,3 +12,9 @@ export async function ensureCertificateSchema(db){
   db.prepare("CREATE INDEX IF NOT EXISTS idx_certificates_course ON certificates(course_id,issued_at)")
  ]);
 }
+
+export function maskCertificateHolder(value){
+ const parts=String(value||"").trim().split(/\s+/).filter(Boolean);
+ if(!parts.length)return "";
+ return parts.map(part=>part.slice(0,1).toUpperCase()+".").join(" ");
+}
