@@ -14,6 +14,7 @@ check_redirect(){
 
 check_redirect "/admin/" "/academy/konto/"
 check_redirect "/admin/runbook/" "/academy/konto/"
+check_redirect "/admin/rechnung/" "/academy/konto/"
 check_redirect "/angebot/" "/academy/konto/"
 check_redirect "/abnahme/" "/academy/konto/"
 check_redirect "/project-portal/kunde/" "/academy/konto/"
