@@ -13,9 +13,11 @@ check_redirect(){
 }
 
 check_redirect "/admin/" "/academy/konto/"
+check_redirect "/admin/runbook/" "/academy/konto/"
 check_redirect "/angebot/" "/academy/konto/"
 check_redirect "/abnahme/" "/academy/konto/"
 check_redirect "/project-portal/kunde/" "/academy/konto/"
+check_redirect "/kundenbereich/betrieb/" "/academy/konto/"
 
 code="$(status "${BASE}/api/admin/mfa" || true)"
 [ "$code" = "401" ] && pass "admin MFA API blocks anonymous access" || fail "admin MFA API expected 401, got ${code}"
