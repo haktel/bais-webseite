@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 02 – Identitäten und Berechtigungen | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Eigene Agenten-Identitäten, Least Privilege und OAuth-Scopes: wie Zugriff auf AI-Systeme sauber verwaltet wird.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-it-security/modul-02/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/academy-business-labs.css?v=5.0">
+</head><body data-module="modul-02" data-course="ki-it-security">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein IT & Security</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 02 · PRIVATER LERNBEREICH</span><h1>Identitäten und Berechtigungen</h1><p class="lead">Modul 01 hat gezeigt, wo Daten fließen. Jetzt geht es darum, wer und was innerhalb dieser Architektur überhaupt worauf zugreifen darf — und warum genau das der häufigste reale Schwachpunkt ist.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein IT & Security-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-02 Lernarchitektur"><div class="courseMap"><div><b>IDENTITÄT</b><span>Eigene Agenten-ID</span></div><div><b>PRIVILEGE</b><span>Nur das Nötigste</span></div><div><b>SCOPES</b><span>Genau lesen</span></div><div><b>AUFRÄUMEN</b><span>Vor dem Rollout</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 02 · Lernpfad</strong>
+<a href="#l1">01 · Menschliche vs. Maschinen-Identität</a><a href="#l2">02 · Least Privilege für AI-Tools</a><a href="#l3">03 · OAuth-Scopes konkret verstehen</a><a href="#l4">04 · Bekannter Fall: Copilot-Oversharing</a><a href="#l5">05 · Berechtigungen vor Rollout aufräumen</a><a href="#l6">06 · Wer darf neue Berechtigungen vergeben</a><a href="#lab">07 · Live Lab</a><a href="#assessment">08 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Ein besonders lehrreicher realer Fall betrifft nicht das AI-Modell selbst, sondern bestehende Berechtigungen.</h2><p>Microsoft 365 Copilot zeigt: das größte Risiko ist oft nicht neu, sondern längst vorhanden und nie aufgeräumt.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Microsoft 365 Copilot</strong><span>Oversharing-Problem</span><b>Bestehende Rechte, neu sichtbar</b></article>
+    <article><strong>Least Privilege</strong><span>Klassisches Sicherheitsprinzip</span><b>Begrenzt Schaden im Missbrauchsfall</b></article>
+    <article><strong>Service-Identität</strong><span>Eigene Agenten-Identität</span><b>Nachvollziehbarkeit im Audit-Log</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">IDENTITÄT</div><h2>Ein AI-Agent braucht eine eigene, nachvollziehbare Identität</h2><p>Wenn ein Agent unter der Identität eines Menschen läuft, ist im Log nicht mehr unterscheidbar, wer wirklich gehandelt hat.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Mensch-Login geteilt</div><div class="vfArrow">→</div><div class="vfNode">Agent handelt "als" der Mensch</div><div class="vfArrow">→</div><div class="vfNode">Keine Unterscheidung im Audit-Log</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="depthBlock"><h3>Eigene Service-Identität als Grundprinzip</h3><p>Ein AI-Agent, der Dateien liest oder E-Mails verschickt, sollte eine eigene Service-Identität mit eigenen, bewusst zugewiesenen Berechtigungen haben — nicht die Zugangsdaten eines Menschen mitbenutzen. Das ist dieselbe Logik wie bei jedem anderen automatisierten System (z.B. einem Cronjob oder einer CI/CD-Pipeline).</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">LEAST PRIVILEGE</div><h2>Warum "Vollzugriff, um sicherzugehen" die falsche Antwort ist</h2><p>Je mehr ein Agent darf, desto größer der Schaden, wenn er durch einen Fehler oder eine Manipulation missbraucht wird.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Ansatz</th><th>Vorteil</th><th>Risiko</th></tr><tr><td>Vollzugriff "auf Nummer sicher"</td><td>Nie eine fehlende Berechtigung als Fehlerquelle</td><td>Maximaler Schaden bei Fehlverhalten oder Prompt Injection</td></tr><tr><td>Least Privilege (nur was nötig ist)</td><td>Schaden im Missbrauchsfall begrenzt</td><td>Mehr initialer Konfigurationsaufwand</td></tr></table>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Für jeden Agenten-Zugriff explizit fragen: "Welche einzelnen Aktionen muss dieser Agent wirklich ausführen können?" — nicht: "Welche Rolle in unserem System kommt dem am nächsten?"</p></div>
+</article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">OAUTH</div><h2>Scopes lesen, bevor man sie bestätigt</h2><p>Eine Berechtigungsanfrage wie "Zugriff auf Mail lesen und senden" klingt harmlos, kann aber weit mehr erlauben, als der eigentliche Anwendungsfall braucht.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="codeCompare"><div><span>Grobe Scope-Anfrage</span><pre>mail.readwrite (alle Postfächer,
+alle Ordner, unbegrenzt)</pre></div><div><span>Eng gefasste Alternative</span><pre>mail.read (nur ein
+gemeinsames Postfach,
+nur Betreffzeile+Absender)</pre></div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Wenn ihr die OAuth-Berechtigungen eures wichtigsten AI-Tools heute prüfen würdet: wüsstet ihr, wer diese Freigabe erteilt hat und warum genau dieser Umfang gewählt wurde?</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">BEKANNTER FALL</div><h2>Microsoft 365 Copilot und das Oversharing-Problem</h2><p>Ein vieldiskutierter realer Fall zeigt: die Gefahr liegt oft nicht im AI-Tool selbst, sondern in längst bestehenden, zu großzügigen Berechtigungen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · MICROSOFT 365 COPILOT</span><h3>Copilot findet Dateien, die technisch freigegeben, aber nie gemeint waren</h3><p>Mehrere Sicherheitsanbieter (u.a. Varonis) und auch Microsoft selbst wiesen darauf hin, dass Copilot durch seine Such- und Zusammenfassungsfunktion Dokumente auffindbar macht, die zwar formal für einen breiten Nutzerkreis freigegeben waren (z.B. "jeder im Unternehmen"), aber praktisch nie gefunden oder gelesen wurden — bis ein AI-Assistent gezielt danach fragen konnte. Microsoft empfiehlt seitdem ausdrücklich, Berechtigungen vor einem Copilot-Rollout zu bereinigen.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · vielfach dokumentiert seit 2023/2024</span></div>
+<div class="miniStat"><strong>0</strong><span>neue technische Schwachstellen nötig — bestehende Überberechtigung reichte aus</span></div></div>
+<div class="lessonCallout"><strong>Warum das wichtig ist</strong><p>Das Tool selbst muss nicht "gehackt" werden — es macht nur sichtbar, was durch jahrelang gewachsene, nie aufgeräumte Berechtigungen längst zugänglich war.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">VORBEREITUNG</div><h2>Berechtigungen vor Rollout aufräumen, nicht danach</h2><p>Ein AI-Rollout ist der beste Zeitpunkt, bestehende Zugriffsrechte zu bereinigen — nicht der Zeitpunkt, an dem man sie zum ersten Mal wirklich braucht.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Schritt</th><th>Ziel</th></tr><tr><td>Bestandsaufnahme</td><td>Wer/was hat aktuell Zugriff auf welche Datenquellen?</td></tr><tr><td>Bereinigung</td><td>Überflüssige "jeder im Unternehmen"-Freigaben entfernen</td></tr><tr><td>Neuvergabe</td><td>Agenten-Zugriffe gezielt nach Least Privilege (Lektion 02) einrichten</td></tr></table>
+</article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">GOVERNANCE</div><h2>Wer darf einem Agenten ein neues Werkzeug geben?</h2><p>Ohne klaren Prozess entstehen neue Berechtigungen informell — genau dort, wo Kontrolle am wichtigsten wäre.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Antrag auf neue Berechtigung → Prüfung durch Security (Least Privilege) → Freigabe durch AI Owner/Compliance → dokumentiert im Audit-Trail</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonCallout"><strong>Verbindung zu Modul 03 (Leadership)</strong><p>Diese Frage gehört in dieselbe RACI-Logik wie jede andere AI-Entscheidung: Wer ist "Responsible" für die technische Prüfung, wer "Accountable" für die finale Freigabe? Ohne diese Klärung entstehen Berechtigungen "mal eben schnell", weil ein Deadline-Druck bestand.</p></div>
+</details>
+</article>
+
+<section class="soft"><div class="c"><div class="academyLab" data-lab="security"><div class="labHead"><div><div class="ey">AI ATTACK & DEFENSE CHAIN · LIVE LAB</div><h2>Vom untrusted Input bis zur Incident Response.</h2><p>Angriffspunkt auswählen und den passenden Security Control prüfen.</p></div><span class="labBadge">SECURITY LAB</span></div><div class="labBody"><div class="threatChain"><button class="threatNode active" type="button" data-threat="input"><strong>Input</strong><span>Boundary</span></button><button class="threatNode" type="button" data-threat="inject"><strong>Injection</strong><span>Instructions</span></button><button class="threatNode" type="button" data-threat="tool"><strong>Tool Access</strong><span>Authorization</span></button><button class="threatNode" type="button" data-threat="exfil"><strong>Exfiltration</strong><span>DLP</span></button><button class="threatNode" type="button" data-threat="monitor"><strong>Detection</strong><span>Response</span></button></div><div class="labPanel"><h3 data-sec-title>Untrusted Input</h3><p data-sec-text>Externe Inhalte, Dokumente und Tool-Ausgaben grundsätzlich als nicht vertrauenswürdig behandeln.</p><span class="labStatus" data-sec-status>CONTROL: INPUT BOUNDARY</span></div></div></div></div></section><div id="lab"></div>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 02</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 02 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> erklären, warum ein Agent eine eigene Identität braucht</label><label><input type="checkbox"> Least Privilege auf einen AI-Anwendungsfall anwenden</label><label><input type="checkbox"> eine OAuth-Scope-Anfrage kritisch lesen</label><label><input type="checkbox"> den Copilot-Oversharing-Fall einordnen</label><label><input type="checkbox"> Berechtigungsbereinigung vor Rollout begründen</label><label><input type="checkbox"> einen Freigabeprozess für neue Agenten-Berechtigungen skizzieren</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 03 · Prompt Injection und Exfiltration</strong><span>Modul 03 zeigt konkret, wie Angreifer genau diese Architektur und Berechtigungen ausnutzen.</span><p><a href="../modul-03/">Modul 03 öffnen →</a></p></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein IT & Security</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
+<script src="../../../assets/academy-business-labs.js?v=5.0" defer></script>
+<script src="../../../assets/academy-portfolio-lab-progress.js?v=1.0" defer></script>
+<script src="../../../assets/kis-module-02-assessment.js?v=1.0" defer></script>
+</body></html>

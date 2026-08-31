@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 04 – Tool- und Anbieterprüfung | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Anbieter systematisch prüfen: Datenverarbeitung, Vertragslage, Transparenzdokumente und der Umgang mit Shadow AI.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-it-security/modul-04/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/academy-business-labs.css?v=5.0">
+</head><body data-module="modul-04" data-course="ki-it-security">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein IT & Security</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 04 · PRIVATER LERNBEREICH</span><h1>Tool- und Anbieterprüfung</h1><p class="lead">Modul 03 hat gezeigt, wie Angriffe innerhalb eines Systems funktionieren. Dieses Modul setzt davor an: wie du überhaupt entscheidest, ob ein AI-Tool oder -Anbieter sicher genug ist, um eingesetzt zu werden.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein IT & Security-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-04 Lernarchitektur"><div class="courseMap"><div><b>PRÜFUNG</b><span>3 Grundfragen</span></div><div><b>REGULATORIK</b><span>Reales Risiko</span></div><div><b>TRANSPARENZ</b><span>Model Cards</span></div><div><b>SCORECARD</b><span>Konsistente Freigabe</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 04 · Lernpfad</strong>
+<a href="#l1">01 · Warum "gute Reviews" keine Prüfung ist</a><a href="#l2">02 · Checkliste: Daten, Standort, AVV</a><a href="#l3">03 · Bekannter Fall: Italienische Behörde vs. ChatGPT</a><a href="#l4">04 · Model Cards lesen</a><a href="#l5">05 · Shadow AI erkennen</a><a href="#l6">06 · Eine Anbieter-Scorecard aufbauen</a><a href="#lab">07 · Live Lab</a><a href="#assessment">08 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Ein behördlicher Fall zeigt: Anbieterprüfung ist keine akademische Übung.</h2><p>Als eine Datenschutzbehörde ChatGPT vorübergehend sperrte, wurde regulatorisches Risiko für jedes nutzende Unternehmen plötzlich konkret.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Garante vs. OpenAI</strong><span>ChatGPT-Sperrung 2023</span><b>Reales regulatorisches Risiko</b></article>
+    <article><strong>Model Cards</strong><span>Anbieter-Transparenzdokument</span><b>Fehlen ist selbst ein Befund</b></article>
+    <article><strong>Shadow AI</strong><span>Ungeprüfte Tool-Nutzung</span><b>Schnellerer Prozess statt Verbot</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">AUSGANGSLAGE</div><h2>Eine überzeugende Demo ersetzt keine Anbieterprüfung</h2><p>Ein Tool kann technisch beeindruckend sein und trotzdem grundlegende Datenschutz- oder Sicherheitsanforderungen verfehlen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="visualFlow"><div class="vfNode">Überzeugende Demo</div><div class="vfArrow">→</div><div class="vfNode">Fachbereich will sofort starten</div><div class="vfArrow">→</div><div class="vfNode">Prüfung übersprungen</div></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Die Qualität einer Demo sagt nichts über Datenverarbeitung, Vertragslage oder Sicherheitsarchitektur eines Anbieters aus. Beide Fragen sind unabhängig voneinander zu beantworten — und beide müssen positiv beantwortet sein, bevor produktiv gestartet wird.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">CHECKLISTE</div><h2>Die drei Grundfragen jeder Anbieterprüfung</h2><p>Diese drei Fragen sollten für jedes AI-Tool schriftlich beantwortet sein, bevor es echte Unternehmensdaten verarbeitet.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Frage</th><th>Wonach gesucht wird</th></tr><tr><td>Wo werden Daten verarbeitet?</td><td>Serverstandort, Sub-Auftragsverarbeiter, Drittlandtransfer</td></tr><tr><td>Werden Eingaben zum Training genutzt?</td><td>Explizite vertragliche Zusicherung, nicht nur Marketing-Aussage</td></tr><tr><td>Gibt es einen gültigen Auftragsverarbeitungsvertrag (AVV/DPA)?</td><td>Rechtlich verbindliches Dokument, nicht nur AGB-Verweis</td></tr></table>
+<div class="lessonCallout"><strong>Trainer-Frage</strong><p>Für das meistgenutzte AI-Tool in eurem Unternehmen: Liegt ein unterschriebener AVV vor, oder wurde nur den Standard-AGB zugestimmt?</p></div>
+</article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BEKANNTER FALL</div><h2>Als eine Datenschutzbehörde ChatGPT vorübergehend sperrte</h2><p>Ein Fall auf Behördenebene zeigt, dass Anbieterprüfung keine akademische Übung ist, sondern reale regulatorische Konsequenzen haben kann.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · GARANTE (ITALIEN) VS. OPENAI</span><h3>Vorübergehende Sperrung von ChatGPT in Italien, 2023</h3><p>Die italienische Datenschutzbehörde Garante ordnete im März 2023 eine vorübergehende Sperrung von ChatGPT an und leitete eine Untersuchung ein — unter anderem wegen fehlender Rechtsgrundlage für die Verarbeitung personenbezogener Daten zum Training, fehlender Altersverifikation und unzureichender Information der Nutzer. Nach Anpassungen durch OpenAI (u.a. Transparenzhinweise, Widerspruchsmöglichkeit) wurde der Dienst wieder freigegeben.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Behördliche Maßnahme · Garante, März–April 2023</span></div>
+<div class="miniStat"><strong>~1 Monat</strong><span>Sperrung bis zur Umsetzung geforderter Anpassungen</span></div></div>
+<div class="lessonCallout"><strong>Warum das für Unternehmen relevant ist</strong><p>Wer ein Tool ohne Prüfung produktiv nutzt, übernimmt implizit das regulatorische Risiko des Anbieters — bis hin zu einer plötzlichen behördlichen Einschränkung, auf die das eigene Unternehmen keinen Einfluss hat.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">TRANSPARENZ</div><h2>Model Cards und System Cards als Prüfquelle</h2><p>Seriöse Anbieter veröffentlichen zunehmend strukturierte Dokumente zu Fähigkeiten, bekannten Grenzen und Trainingsdaten ihrer Modelle.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Dokument enthält</th><th>Wofür relevant</th></tr><tr><td>Bekannte Grenzen &amp; Fehlerarten</td><td>Realistische Erwartungssteuerung im eigenen Anwendungsfall</td></tr><tr><td>Trainingsdatenherkunft (grob)</td><td>Einschätzung von Bias-Risiken</td></tr><tr><td>Sicherheitstests &amp; Red-Teaming</td><td>Hinweis auf geprüfte, nicht nur behauptete Robustheit</td></tr></table>
+<div class="lessonCallout"><strong>Praxis</strong><p>Fehlt für ein Modell jede Form von Model Card oder vergleichbarer Dokumentation, ist das selbst ein relevantes Prüfergebnis — nicht nur eine fehlende Nebensächlichkeit.</p></div>
+</article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">SCHATTEN-IT</div><h2>Wenn Mitarbeitende die Prüfung selbst umgehen</h2><p>Die beste Anbieterprüfung nützt nichts, wenn parallel ungeprüfte Tools eigenständig eingeführt werden.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Offizielles Tool zu langsam freigegeben → Mitarbeitende nutzen privates Konto eines anderen Tools → keine Prüfung, kein AVV, keine Sichtbarkeit für IT</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Schatten-AI entsteht meist nicht aus böser Absicht, sondern aus einem echten Bedürfnis, das der offizielle Prozess zu langsam bedient. Der wirksamste Gegenmaßnahme ist selten reines Verbieten, sondern ein spürbar schnellerer, klar kommunizierter Freigabeprozess.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">WERKZEUG</div><h2>Eine einfache Scorecard für die Tool-Freigabe</h2><p>Eine kurze, konsistente Checkliste verhindert, dass jede Anbieterprüfung bei null beginnt.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Kriterium</th><th>Status</th></tr><tr><td>AVV/DPA vorhanden und geprüft</td><td>Ja/Nein</td></tr><tr><td>Serverstandort/Drittlandtransfer geklärt</td><td>Ja/Nein</td></tr><tr><td>Keine Trainingsnutzung ohne Zustimmung</td><td>Ja/Nein</td></tr><tr><td>Model/System Card oder vergleichbare Doku vorhanden</td><td>Ja/Nein</td></tr><tr><td>Least-Privilege-Berechtigungskonzept möglich</td><td>Ja/Nein</td></tr></table>
+</article>
+
+<section class="soft"><div class="c"><div class="academyLab" data-lab="security"><div class="labHead"><div><div class="ey">AI ATTACK & DEFENSE CHAIN · LIVE LAB</div><h2>Vom untrusted Input bis zur Incident Response.</h2><p>Angriffspunkt auswählen und den passenden Security Control prüfen.</p></div><span class="labBadge">SECURITY LAB</span></div><div class="labBody"><div class="threatChain"><button class="threatNode active" type="button" data-threat="input"><strong>Input</strong><span>Boundary</span></button><button class="threatNode" type="button" data-threat="inject"><strong>Injection</strong><span>Instructions</span></button><button class="threatNode" type="button" data-threat="tool"><strong>Tool Access</strong><span>Authorization</span></button><button class="threatNode" type="button" data-threat="exfil"><strong>Exfiltration</strong><span>DLP</span></button><button class="threatNode" type="button" data-threat="monitor"><strong>Detection</strong><span>Response</span></button></div><div class="labPanel"><h3 data-sec-title>Untrusted Input</h3><p data-sec-text>Externe Inhalte, Dokumente und Tool-Ausgaben grundsätzlich als nicht vertrauenswürdig behandeln.</p><span class="labStatus" data-sec-status>CONTROL: INPUT BOUNDARY</span></div></div></div></div></section><div id="lab"></div>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 04</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 04 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> erklären, warum eine Demo keine Anbieterprüfung ersetzt</label><label><input type="checkbox"> die drei Grundfragen einer Anbieterprüfung stellen</label><label><input type="checkbox"> den Garante/ChatGPT-Fall einordnen</label><label><input type="checkbox"> den Zweck einer Model Card erklären</label><label><input type="checkbox"> Shadow AI als Symptom statt nur als Regelverstoß erkennen</label><label><input type="checkbox"> eine Scorecard für eine Tool-Freigabe anwenden</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 05 · Logging, Monitoring und Tests</strong><span>Modul 05 zeigt, wie ein einmal freigegebenes Tool laufend überwacht statt nur einmalig geprüft wird.</span><p><a href="../modul-05/">Modul 05 öffnen →</a></p></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein IT & Security</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
+<script src="../../../assets/academy-business-labs.js?v=5.0" defer></script>
+<script src="../../../assets/academy-portfolio-lab-progress.js?v=1.0" defer></script>
+<script src="../../../assets/kis-module-04-assessment.js?v=1.0" defer></script>
+</body></html>
