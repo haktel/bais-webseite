@@ -42,8 +42,11 @@ export const onRequestPost=async({request,env})=>{
  }catch(error){
   if(userId)try{
    const db=assertDatabase(env);
+   await db.prepare("DELETE FROM audit_events WHERE actor_user_id=? OR organization_id=?").bind(userId,organizationId||"").run();
+   await db.prepare("DELETE FROM user_sessions WHERE user_id=?").bind(userId).run();
    if(organizationId){
     await db.prepare("DELETE FROM project_members WHERE user_id=? OR project_id IN (SELECT id FROM projects WHERE organization_id=?)").bind(userId,organizationId).run();
+    await db.prepare("DELETE FROM project_registry WHERE project_id IN (SELECT id FROM projects WHERE organization_id=?)").bind(organizationId).run();
     await db.prepare("DELETE FROM projects WHERE organization_id=?").bind(organizationId).run();
     await db.prepare("DELETE FROM customer_accounts WHERE organization_id=?").bind(organizationId).run();
    }
