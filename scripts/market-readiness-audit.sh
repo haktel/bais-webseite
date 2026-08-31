@@ -10,7 +10,7 @@ fail(){ printf 'FAIL  %s\n' "$*"; FAIL=$((FAIL+1)); }
 warn(){ printf 'WARN  %s\n' "$*"; WARN=$((WARN+1)); }
 
 echo "=== 1. CORE PAGES ==="
-for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
+for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /sla/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
   code="$(curl -LsS --max-time 20 -o /tmp/page -w '%{http_code}' "${BASE_URL}${path}" || true)"
   if [ "$code" = "200" ]; then pass "${path} HTTP 200"; else fail "${path} HTTP ${code}"; fi
   if [ "$code" = "200" ]; then
@@ -73,6 +73,12 @@ curl -LsS --max-time 20 "${BASE_URL}/avv/" >/tmp/avv || true
 grep -qi 'Art. 28 DSGVO' /tmp/avv && pass "AVV page contains Art. 28 scope" || fail "AVV page missing Art. 28 scope"
 grep -qi 'Technische und organisatorische Maßnahmen' /tmp/avv && pass "AVV contains TOM annex" || fail "AVV missing TOM annex"
 grep -qi 'Subprozessoren' /tmp/avv && pass "AVV contains subprocessor annex" || fail "AVV missing subprocessor annex"
+
+curl -LsS --max-time 20 "${BASE_URL}/sla/" >/tmp/sla || true
+grep -qi 'P1 · Kritisch' /tmp/sla && grep -qi 'P4 · Niedrig' /tmp/sla && pass "SLA page contains P1-P4" || fail "SLA page missing P1-P4"
+grep -qi 'Reaktionszeit ist nicht Lösungszeit' /tmp/sla && pass "SLA separates reaction and resolution time" || fail "SLA does not separate reaction and resolution"
+grep -qi 'RPO' /tmp/sla && grep -qi 'RTO' /tmp/sla && pass "SLA covers RPO/RTO" || fail "SLA missing RPO/RTO"
+grep -qi '24/7 nur bei ausdrücklicher Vereinbarung' /tmp/sla && pass "SLA avoids blanket 24/7 promise" || fail "SLA 24/7 boundary missing"
 
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
