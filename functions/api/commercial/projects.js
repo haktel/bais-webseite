@@ -6,6 +6,7 @@ export const onRequestGet=async({request,env})=>{
  const traceId=requestId(request);
  try{
   const db=assertDatabase(env);await ensureAuthSchema(db);const session=await requireSession(db,request);
+  if(session.role==="admin"||session.role==="trainer")throw new ApiError(403,"customer_context_required","Dieser Endpoint ist auf das eigene Kundenkonto beschränkt.");
   const identity=await ensureCommercialIdentityForUser(db,{userId:session.user_id,displayName:session.display_name,email:session.email});
   const rows=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at FROM projects p JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at DESC").bind(identity.organizationId).all();
   return json({ok:true,projects:rows.results||[],requestId:traceId});
