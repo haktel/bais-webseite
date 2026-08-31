@@ -36,8 +36,8 @@ export async function runPrivacyCleanup(db,{now=new Date().toISOString(),limit=5
  let deleted=0;
  for(const row of due.results||[]){
   let result=null;
-  if(row.entity_type==="contact")result=await db.prepare("DELETE FROM contacts WHERE id=? AND status='closed'").bind(row.entity_id).run();
-  if(row.entity_type==="enrollment_request")result=await db.prepare("DELETE FROM enrollment_requests WHERE id=? AND status IN('closed','rejected')").bind(row.entity_id).run();
+  if(row.entity_type==="contact")result=await db.prepare("DELETE FROM contacts WHERE id=? AND status IN('new','in_progress','closed')").bind(row.entity_id).run();
+  if(row.entity_type==="enrollment_request")result=await db.prepare("DELETE FROM enrollment_requests WHERE id=? AND status IN('new','contacted','qualified','closed','rejected')").bind(row.entity_id).run();
   if(Number(result?.meta?.changes||0)>0){
    await db.prepare("DELETE FROM privacy_retention WHERE entity_type=? AND entity_id=?").bind(row.entity_type,row.entity_id).run();
    deleted++;
