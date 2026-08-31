@@ -54,7 +54,7 @@ test("invoice admin view is protected by parent admin middleware and linked from
  const page=read("admin/rechnung/index.html");
  const admin=read("admin/index.html");
  const middleware=read("functions/admin/_middleware.js");
- assert.ok(page.includes("Rechnung + Zahlungsbedingungen"));
+ assert.ok(page.includes("Rechnung erstellen & drucken"));
  assert.ok(admin.includes("/admin/rechnung/"));
  assert.ok(middleware.includes("requireAdmin"));
  assert.ok(page.includes("noindex,nofollow,noarchive"));
