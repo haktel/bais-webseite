@@ -93,6 +93,9 @@ grep -qi '24/7 nur bei ausdrücklicher Vereinbarung' /tmp/sla && pass "SLA avoid
 curl -LsS --max-time 20 "${BASE_URL}/angebot/" >/tmp/angebot || true
 grep -qi 'Welche Leistungen werden gewünscht?' /tmp/angebot && pass "Angebot SOW live" || fail "Angebot SOW missing service selection"
 [ "$(grep -o 'type="checkbox"' /tmp/angebot | wc -l | tr -d ' ')" -ge 40 ] && pass "Angebot SOW checkbox selection" || fail "Angebot SOW checkbox count too low"
+[ "$(grep -o 'type="date"' /tmp/angebot | wc -l | tr -d ' ')" -ge 10 ] && pass "Angebot uses real date fields" || fail "Angebot date fields missing"
+grep -qi 'Drucken / als PDF speichern' /tmp/angebot && pass "Angebot print/PDF action live" || fail "Angebot print/PDF action missing"
+if grep -Eq '\[[A-ZÄÖÜ0-9_]{3,}\]' /tmp/angebot; then fail "Angebot still exposes placeholder codes"; else pass "Angebot has no placeholder codes"; fi
 
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
