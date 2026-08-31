@@ -1,7 +1,7 @@
 import{ApiError}from"./api.js";
 import{randomToken,sha256}from"./auth.js";
 
-const ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",STEP=30,SETUP_TTL_MS=10*60*1000;
+const ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",STEP=30,SETUP_TTL_MS=10*60*1000,MFA_VERIFICATION_TTL_MS=4*60*60*1000;
 
 const b64url=bytes=>{let s="";for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
 const fromB64url=value=>{const s=value.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-value.length%4)%4),bin=atob(s);return Uint8Array.from(bin,c=>c.charCodeAt(0));};
@@ -18,31 +18,28 @@ export function base32Decode(input){
  for(const char of clean){const idx=ALPHABET.indexOf(char);if(idx<0)throw new ApiError(400,"mfa_secret_invalid","Ungültiger MFA-Schlüssel.");value=(value<<5)|idx;bits+=5;if(bits>=8){out.push((value>>>(bits-8))&255);bits-=8;}}
  return new Uint8Array(out);
 }
-const rootSecrets=env=>[String(env?.MFA_ENCRYPTION_KEY||""),String(env?.TURNSTILE_SECRET||"")].filter((value,index,array)=>value.length>=20&&array.indexOf(value)===index);
+const rootSecret=env=>{
+ const value=String(env?.MFA_ENCRYPTION_KEY||"");
+ if(value.length<32)throw new ApiError(503,"mfa_key_not_configured","Dedizierte MFA-Verschlüsselung ist noch nicht konfiguriert.");
+ return value;
+};
 async function deriveEncryptionKey(secret){
  const material="BAIS-MFA-AES-GCM-v1\u0000"+secret;
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(material));
  return crypto.subtle.importKey("raw",digest,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
-async function encryptionKeys(env){
- const roots=rootSecrets(env);
- if(!roots.length)throw new ApiError(503,"mfa_key_not_configured","MFA-Verschlüsselung ist noch nicht konfiguriert.");
- return Promise.all(roots.map(deriveEncryptionKey));
-}
+async function encryptionKey(env){return deriveEncryptionKey(rootSecret(env));}
 async function encryptText(value,env){
- const iv=new Uint8Array(12);crypto.getRandomValues(iv);const[key]=await encryptionKeys(env);
+ const iv=new Uint8Array(12);crypto.getRandomValues(iv);const key=await encryptionKey(env);
  const ciphertext=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(value));
  return{ciphertext:b64url(new Uint8Array(ciphertext)),iv:b64url(iv)};
 }
 async function decryptText(ciphertext,iv,env){
- const keys=await encryptionKeys(env),nonce=fromB64url(iv),data=fromB64url(ciphertext);
- for(const key of keys){
-  try{
-   const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:nonce},key,data);
-   return new TextDecoder().decode(plain);
-  }catch{}
- }
- throw new ApiError(503,"mfa_secret_unavailable","MFA-Schlüssel konnte nicht entschlüsselt werden.");
+ const key=await encryptionKey(env),nonce=fromB64url(iv),data=fromB64url(ciphertext);
+ try{
+  const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:nonce},key,data);
+  return new TextDecoder().decode(plain);
+ }catch{throw new ApiError(503,"mfa_secret_unavailable","MFA-Schlüssel konnte nicht entschlüsselt werden.");}
 }
 export async function ensureMfaSchema(db){
  await db.batch([
@@ -74,11 +71,19 @@ export async function verifyTotpSecret(secretB32,code,{now=Date.now(),lastCounte
 export async function adminMfaState(db,user){
  await ensureMfaSchema(db);
  const configured=Boolean(await db.prepare("SELECT user_id FROM admin_mfa WHERE user_id=? LIMIT 1").bind(user.user_id).first());
- const verified=configured&&Boolean(await db.prepare("SELECT session_id FROM admin_mfa_sessions WHERE session_id=? AND user_id=? LIMIT 1").bind(user.session_id,user.user_id).first());
+ let verified=false;
+ if(configured){
+  const row=await db.prepare("SELECT verified_at FROM admin_mfa_sessions WHERE session_id=? AND user_id=? LIMIT 1").bind(user.session_id,user.user_id).first();
+  if(row?.verified_at){
+   const verifiedAt=Date.parse(row.verified_at),fresh=Number.isFinite(verifiedAt)&&verifiedAt>=Date.now()-MFA_VERIFICATION_TTL_MS;
+   verified=fresh;
+   if(!fresh)await db.prepare("DELETE FROM admin_mfa_sessions WHERE session_id=? AND user_id=?").bind(user.session_id,user.user_id).run();
+  }
+ }
  return{configured,verified};
 }
 export async function beginAdminMfaSetup(db,user,env){
- await ensureMfaSchema(db);await encryptionKeys(env);
+ await ensureMfaSchema(db);await encryptionKey(env);
  if(user.role!=="admin")throw new ApiError(403,"admin_required","Administrator-Berechtigung erforderlich.");
  const bytes=new Uint8Array(20);crypto.getRandomValues(bytes);const secret=base32Encode(bytes),enc=await encryptText(secret,env),now=new Date(),expires=new Date(now.getTime()+SETUP_TTL_MS).toISOString();
  await db.prepare("INSERT INTO admin_mfa_setup(user_id,secret_ciphertext,secret_iv,expires_at,created_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET secret_ciphertext=excluded.secret_ciphertext,secret_iv=excluded.secret_iv,expires_at=excluded.expires_at,created_at=excluded.created_at")
