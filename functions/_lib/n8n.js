@@ -28,12 +28,20 @@ const BUSINESS_SIGNALS=Object.freeze([
   ["support",["support","wartung","betrieb"]]
 ]);
 
+function normalizeSignalText(value){
+  return String(value??"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").replace(/\s+/g," ").trim();
+}
+
 export function deriveLeadSignals(message){
   const raw=typeof message==="string"?message:"";
-  const normalized=(" "+raw.toLowerCase().replace(/\s+/g," ").trim()+" ");
+  const normalized=" "+normalizeSignalText(raw)+" ";
   const signals=[];
   for(const [label,needles]of BUSINESS_SIGNALS){
-    if(needles.some(needle=>normalized.includes(needle)))signals.push(label);
+    const matched=needles.some(needle=>{
+      const token=normalizeSignalText(needle);
+      return token&&normalized.includes(" "+token+" ");
+    });
+    if(matched)signals.push(label);
     if(signals.length>=12)break;
   }
   return{
