@@ -391,11 +391,11 @@ function serialize(){
   return data;
 }
 function save(){
-  try{localStorage.setItem(KEY,JSON.stringify(serialize()));saveState.textContent="Lokal gespeichert"}catch{saveState.textContent="Speichern nicht verfügbar"}
+  try{sessionStorage.setItem(KEY,JSON.stringify(serialize()));saveState.textContent="Lokal gespeichert"}catch{saveState.textContent="Speichern nicht verfügbar"}
 }
 function restore(){
   try{
-    const data=JSON.parse(localStorage.getItem(KEY)||"null");if(!data)return;
+    const data=JSON.parse(sessionStorage.getItem(KEY)||"null");if(!data)return;
     for(const el of form.elements){
       if(!el.name||!(el.name in data))continue;
       if(el.type==="checkbox")el.checked=Boolean(data[el.name]);
@@ -412,7 +412,7 @@ hideUnchecked.addEventListener("change",save);
 
 document.getElementById("clearForm").addEventListener("click",()=>{
   if(!confirm("Alle Eingaben und Auswahlen dieses Angebots löschen?"))return;
-  form.reset();localStorage.removeItem(KEY);calculate();saveState.textContent="Formular geleert";
+  form.reset();sessionStorage.removeItem(KEY);calculate();saveState.textContent="Formular geleert";
 });
 
 document.getElementById("printOffer").addEventListener("click",()=>{
