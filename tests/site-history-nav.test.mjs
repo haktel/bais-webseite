@@ -20,14 +20,16 @@ test("BAIS history navigation assets exist and use session-scoped internal histo
  assert.match(css,/@media\(max-width:560px\)/);
 });
 
-test("desktop mega menus keep a continuous hover path and keyboard focus support",()=>{
+test("desktop mega menus use a full-width continuous hitbox and keyboard focus support",()=>{
  const css=read("assets/site.css");
- assert.match(css,/\.navItem::after\{content:"";position:absolute;left:-14px;top:100%;width:calc\(100% \+ 28px\);height:14px/);
- assert.match(css,/top:calc\(100% \+ 12px\)/);
- assert.match(css,/margin-top:0/);
+ assert.match(css,/\.submenu\{position:absolute;top:100%;left:-14px/);
+ assert.match(css,/padding:21px 9px 9px/);
+ assert.match(css,/background:transparent;border:0/);
+ assert.match(css,/\.submenu::before\{content:"";position:absolute;inset:12px 0 0/);
+ assert.match(css,/pointer-events:none/);
  assert.match(css,/\.navItem:hover \.submenu,\.navItem:focus-within \.submenu/);
  assert.match(css,/\.submenu a:hover,\.submenu a:focus-visible/);
- assert.match(css,/@media\(max-width:980px\)\{\.navItem::after\{content:none\}/);
+ assert.doesNotMatch(css,/\.navItem::after/);
 });
 
 test("key public BAIS pages include back-forward navigation",()=>{
