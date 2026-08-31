@@ -26,7 +26,11 @@ jobs:
           CF_TOKEN="${CF_TOKEN_PRIMARY:-${CF_TOKEN_ALT:-${CF_TOKEN_ALT2:-}}}"
           if [ -z "${CF_TOKEN}" ]; then
             echo "CONFIG_STATUS=CLOUDFLARE_TOKEN_MISSING"
-            exit 0
+            exit 1
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "MAIL_STATUS=RESEND_API_KEY_MISSING"
+            exit 1
           fi
 
           AUTH=(-H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json")
@@ -41,28 +45,43 @@ jobs:
 
           PROD_MFA="$(openssl rand -base64 48 | tr -d '\n')"
           PREVIEW_MFA="$(openssl rand -base64 48 | tr -d '\n')"
+          PROD_BOOTSTRAP="$(openssl rand -base64 48 | tr -d '\n')"
+          PREVIEW_BOOTSTRAP="$(openssl rand -base64 48 | tr -d '\n')"
           echo "::add-mask::${PROD_MFA}"
           echo "::add-mask::${PREVIEW_MFA}"
-          [ -n "${RESEND_API_KEY:-}" ] && echo "::add-mask::${RESEND_API_KEY}" || true
+          echo "::add-mask::${PROD_BOOTSTRAP}"
+          echo "::add-mask::${PREVIEW_BOOTSTRAP}"
+          echo "::add-mask::${RESEND_API_KEY}"
 
-          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg mfa "${PROD_MFA}" --arg resend "${RESEND_API_KEY:-}" '
+          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg mfa "${PROD_MFA}" --arg bootstrap "${PROD_BOOTSTRAP}" --arg resend "${RESEND_API_KEY}" '
             (if ($old|has("MFA_ENCRYPTION_KEY")) then $old else $old + {MFA_ENCRYPTION_KEY:{type:"secret_text",value:$mfa}} end)
-            | . + {PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"}}
-            | if ($resend|length)>0 then . + {RESEND_API_KEY:{type:"secret_text",value:$resend}} else . end
+            | (if (has("ADMIN_BOOTSTRAP_SECRET")) then . else . + {ADMIN_BOOTSTRAP_SECRET:{type:"secret_text",value:$bootstrap}} end)
+            | . + {
+                PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},
+                TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"},
+                RESEND_API_KEY:{type:"secret_text",value:$resend}
+              }
           ')"
-          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg mfa "${PREVIEW_MFA}" --arg resend "${RESEND_API_KEY:-}" '
+          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg mfa "${PREVIEW_MFA}" --arg bootstrap "${PREVIEW_BOOTSTRAP}" --arg resend "${RESEND_API_KEY}" '
             (if ($old|has("MFA_ENCRYPTION_KEY")) then $old else $old + {MFA_ENCRYPTION_KEY:{type:"secret_text",value:$mfa}} end)
-            | . + {PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"}}
-            | if ($resend|length)>0 then . + {RESEND_API_KEY:{type:"secret_text",value:$resend}} else . end
+            | (if (has("ADMIN_BOOTSTRAP_SECRET")) then . else . + {ADMIN_BOOTSTRAP_SECRET:{type:"secret_text",value:$bootstrap}} end)
+            | . + {
+                PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},
+                TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"},
+                RESEND_API_KEY:{type:"secret_text",value:$resend}
+              }
           ')"
 
           PATCH="$(jq -nc --argjson prod "${PROD_MERGED}" --argjson preview "${PREVIEW_MERGED}" '{deployment_configs:{production:{env_vars:$prod},preview:{env_vars:$preview}}}')"
           RESPONSE="$(curl -fsS -X PATCH "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}" --data "${PATCH}")"
           echo "${RESPONSE}" | jq -e '.success == true' >/dev/null
 
+          VERIFY="$(curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}")"
+          echo "${VERIFY}" | jq -e '.success == true' >/dev/null
+          echo "${VERIFY}" | jq -e '.result.deployment_configs.production.env_vars | has("MFA_ENCRYPTION_KEY") and has("ADMIN_BOOTSTRAP_SECRET") and has("RESEND_API_KEY")' >/dev/null
+          echo "${VERIFY}" | jq -e '.result.deployment_configs.preview.env_vars | has("MFA_ENCRYPTION_KEY") and has("ADMIN_BOOTSTRAP_SECRET") and has("RESEND_API_KEY")' >/dev/null
+
           echo "CONFIG_STATUS=CLOUDFLARE_SECURITY_PROVISIONED"
-          if [ -n "${RESEND_API_KEY:-}" ]; then
-            echo "MAIL_STATUS=RESEND_CONFIGURED"
-          else
-            echo "MAIL_STATUS=RESEND_API_KEY_MISSING"
-          fi
+          echo "MFA_STATUS=DEDICATED_KEY_CONFIGURED"
+          echo "BOOTSTRAP_STATUS=SECRET_CONFIGURED"
+          echo "MAIL_STATUS=RESEND_CONFIGURED"
