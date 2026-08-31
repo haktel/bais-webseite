@@ -9,13 +9,10 @@ export async function ensureCommercialSchema(db){
   db.prepare("CREATE TABLE IF NOT EXISTS business_sequences(sequence_key TEXT PRIMARY KEY,next_value INTEGER NOT NULL CHECK(next_value>=0),updated_at TEXT NOT NULL)"),
   db.prepare("CREATE TABLE IF NOT EXISTS customer_accounts(organization_id TEXT PRIMARY KEY,customer_number TEXT NOT NULL UNIQUE,account_status TEXT NOT NULL DEFAULT 'active' CHECK(account_status IN('active','inactive','blocked')),created_at TEXT NOT NULL,updated_at TEXT NOT NULL,FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE CASCADE)"),
   db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_customer_accounts_number ON customer_accounts(customer_number)"),
-  db.prepare("CREATE TABLE IF NOT EXISTS business_profile(id TEXT PRIMARY KEY CHECK(id='default'),legal_name TEXT NOT NULL,brand_name TEXT NOT NULL,owner_name TEXT,street_address TEXT,postal_code TEXT,city TEXT,country_code TEXT NOT NULL DEFAULT 'DE',vat_id TEXT,email TEXT,updated_at TEXT NOT NULL)")
+  db.prepare("CREATE TABLE IF NOT EXISTS business_profile(id TEXT PRIMARY KEY CHECK(id='default'),legal_name TEXT NOT NULL,brand_name TEXT NOT NULL,owner_name TEXT,street_address TEXT,postal_code TEXT,city TEXT,country_code TEXT NOT NULL DEFAULT 'DE',vat_id TEXT,email TEXT,updated_at TEXT NOT NULL)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS project_registry(project_id TEXT PRIMARY KEY,project_number TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE)"),
+  db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_project_registry_number ON project_registry(project_number)")
  ]);
- const columns=await db.prepare("PRAGMA table_info(projects)").all();
- if(!(columns.results||[]).some(column=>column.name==="project_number")){
-  await db.prepare("ALTER TABLE projects ADD COLUMN project_number TEXT").run();
- }
- await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_project_number ON projects(project_number)").run();
  await db.prepare("INSERT OR IGNORE INTO business_profile(id,legal_name,brand_name,owner_name,street_address,postal_code,city,country_code,vat_id,email,updated_at) VALUES('default','BAIT Solution','BAIS – Bünyamin Atik – IT Solutions','Bünyamin Atik','Kleine Burgholzstr. 11','44145','Dortmund','DE','DE815818009','info@bais-solutions.de',?)")
   .bind(new Date().toISOString()).run();
 }
@@ -60,20 +57,23 @@ export async function ensureCommercialIdentityForUser(db,{userId,displayName,ema
    customer={customer_number:customerNumber};
   }
 
-  let project=await db.prepare("SELECT id,project_number,name,status,created_at FROM projects WHERE organization_id=? ORDER BY created_at ASC LIMIT 1").bind(organizationId).first();
+  let project=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.created_at FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at ASC LIMIT 1").bind(organizationId).first();
   if(!project){
    const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
-   await db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at,project_number) VALUES(?,?,?,?,?,?)")
-    .bind(projectId,organizationId,intakeName,"planned",now,projectNumber).run();
-   await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer").run();
+   await db.batch([
+    db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,organizationId,intakeName,"planned",now),
+    db.prepare("INSERT INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(projectId,projectNumber,now),
+    db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer")
+   ]);
    createdProjectId=projectId;
    project={id:projectId,project_number:projectNumber,name:intakeName,status:"planned",created_at:now};
   }else{
    await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(project.id,userId,"customer").run();
    if(!project.project_number){
     const projectNumber=await allocateProjectNumber(db,now);
-    await db.prepare("UPDATE projects SET project_number=? WHERE id=?").bind(projectNumber,project.id).run();
-    project.project_number=projectNumber;
+    await db.prepare("INSERT OR IGNORE INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(project.id,projectNumber,now).run();
+    const registry=await db.prepare("SELECT project_number FROM project_registry WHERE project_id=? LIMIT 1").bind(project.id).first();
+    project.project_number=registry?.project_number||projectNumber;
    }
   }
 
@@ -97,7 +97,7 @@ export async function createProjectForUser(db,{userId,name,now=new Date().toISOS
  const projectName=String(name||"").trim().slice(0,180);
  if(projectName.length<2)throw new ApiError(422,"validation_failed","Ein Projektname ist erforderlich.");
 
- const intake=await db.prepare("SELECT id,project_number,name,status FROM projects WHERE organization_id=? AND name='Erstprojekt / Intake' AND status='planned' ORDER BY created_at ASC LIMIT 1")
+ const intake=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? AND p.name='Erstprojekt / Intake' AND p.status='planned' ORDER BY p.created_at ASC LIMIT 1")
   .bind(identity.organizationId).first();
  if(intake){
   await db.prepare("UPDATE projects SET name=? WHERE id=?").bind(projectName,intake.id).run();
@@ -107,7 +107,8 @@ export async function createProjectForUser(db,{userId,name,now=new Date().toISOS
 
  const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
  await db.batch([
-  db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at,project_number) VALUES(?,?,?,?,?,?)").bind(projectId,identity.organizationId,projectName,"planned",now,projectNumber),
+  db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,identity.organizationId,projectName,"planned",now),
+  db.prepare("INSERT INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(projectId,projectNumber,now),
   db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer")
  ]);
  return{id:projectId,projectNumber,name:projectName,status:"planned",reusedIntake:false};
