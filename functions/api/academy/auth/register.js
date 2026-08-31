@@ -2,6 +2,7 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{academyProgram}from"../../../_lib/academy.js";
 import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,hashPassword,normalizeEmail,randomToken,sessionCookie,sha256,validPassword}from"../../../_lib/auth.js";
 import{ensureCommercialIdentityForUser}from"../../../_lib/commercial.js";
+import{consumeRegistrationInvite,resolveRegistrationInvite}from"../../../_lib/invites.js";
 
 async function ensureCourseAndRun(db,slug,title,now){
  let course=await db.prepare("SELECT id FROM courses WHERE slug=? LIMIT 1").bind(slug).first();
@@ -58,6 +59,7 @@ export const onRequestPost=async({request,env})=>{
    email=normalizeEmail(body.email),
    password=body.password,
    company=cleanText(body.company,160),
+   inviteToken=cleanText(body.inviteToken,200),
    slug=cleanText(body.courseSlug,120),
    title=academyProgram(slug);
 
@@ -70,20 +72,18 @@ export const onRequestPost=async({request,env})=>{
   stage="rate_limit";
   const rateKey=await consumeRateLimit(db,request,"register",email,5);
 
+  stage="invite_lookup";
+  const now=new Date().toISOString(),invite=await resolveRegistrationInvite(db,{token:inviteToken,email,courseSlug:slug,now});
+
   stage="existing_account";
   const existing=await db.prepare("SELECT id FROM users WHERE lower(email)=lower(?) LIMIT 1").bind(email).first();
   if(existing)throw new ApiError(409,"account_exists","Für diese E-Mail besteht bereits ein Konto.");
 
   stage="password_hash";
-  const now=new Date().toISOString(),userId=crypto.randomUUID(),credential=await hashPassword(password);
+  const userId=crypto.randomUUID(),credential=await hashPassword(password);
 
   stage="course_lookup";
   const{courseId,runId}=await ensureCourseAndRun(db,slug,title,now);
-
-  stage="approval_lookup";
-  const preApproved=await db.prepare(
-   "SELECT id FROM enrollment_requests WHERE lower(email)=lower(?) AND course_id=? AND status='approved' ORDER BY created_at DESC LIMIT 1"
-  ).bind(email,courseId).first();
 
   stage="session_prepare";
   const session=await buildSession(userId,request,now);
@@ -92,7 +92,7 @@ export const onRequestPost=async({request,env})=>{
   await db.prepare("INSERT INTO users(id,display_name,email,role,status,created_at) VALUES(?,?,?,?,?,?)")
    .bind(userId,displayName,email,"student","active",now).run();
 
-  let accessStatus="pending",requestEntryId=preApproved?.id||null;
+  const accessStatus="active",requestEntryId=invite.enrollment_request_id;
   const childStatements=[
    db.prepare("INSERT INTO user_credentials(user_id,password_hash,password_salt,password_algorithm,password_iterations,updated_at) VALUES(?,?,?,?,?,?)")
     .bind(userId,credential.hash,credential.salt,"PBKDF2-SHA-256",credential.iterations,now),
@@ -100,25 +100,17 @@ export const onRequestPost=async({request,env})=>{
     .bind(session.statement.id,userId,session.statement.tokenHash,session.statement.createdAt,session.statement.lastSeenAt,session.statement.expiresAt,session.statement.userAgentHash)
   ];
 
-  if(preApproved){
-   childStatements.push(
-    db.prepare("INSERT OR IGNORE INTO enrollments(id,user_id,course_run_id,status,enrolled_at) VALUES(?,?,?,?,?)")
-     .bind(crypto.randomUUID(),userId,runId,"active",now),
-    db.prepare("INSERT OR IGNORE INTO course_progress(user_id,course_id,progress_percent,status,updated_at) VALUES(?,?,?,?,?)")
-     .bind(userId,courseId,0,"not_started",now)
-   );
-   accessStatus="active";
-  }else{
-   requestEntryId=crypto.randomUUID();
-   childStatements.push(
-    db.prepare("INSERT INTO enrollment_requests(id,course_id,name,email,company,note,status,created_at) VALUES(?,?,?,?,?,?,?,?)")
-     .bind(requestEntryId,courseId,displayName,email,null,"Academy-Konto erstellt · Kurszugang ausstehend","new",now)
-   );
-  }
+  childStatements.push(
+   db.prepare("INSERT OR IGNORE INTO enrollments(id,user_id,course_run_id,status,enrolled_at) VALUES(?,?,?,?,?)")
+    .bind(crypto.randomUUID(),userId,runId,"active",now),
+   db.prepare("INSERT OR IGNORE INTO course_progress(user_id,course_id,progress_percent,status,updated_at) VALUES(?,?,?,?,?)")
+    .bind(userId,courseId,0,"not_started",now),
+   db.prepare("UPDATE enrollment_requests SET status='approved' WHERE id=?").bind(requestEntryId)
+  );
 
   childStatements.push(
    db.prepare("INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)")
-    .bind(crypto.randomUUID(),userId,"academy.account.created","user",userId,JSON.stringify({courseSlug:slug,courseId,runId,access:accessStatus,enrollmentRequestId:requestEntryId}),now)
+    .bind(crypto.randomUUID(),userId,"academy.account.created","user",userId,JSON.stringify({courseSlug:slug,courseId,runId,access:accessStatus,enrollmentRequestId:requestEntryId,inviteId:invite.id}),now)
   );
 
   try{
@@ -132,11 +124,14 @@ export const onRequestPost=async({request,env})=>{
   stage="commercial_identity";
   let commercial;
   try{
-   commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now,intakeName:"Erstprojekt / Intake"});
+   commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company:company||cleanText(invite.company,160),now,intakeName:"Erstprojekt / Intake"});
   }catch(error){
    try{await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();}catch{}
    throw error;
   }
+
+  stage="invite_consume";
+  await consumeRegistrationInvite(db,invite.id,now);
 
   stage="rate_limit_cleanup";
   await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
@@ -147,9 +142,7 @@ export const onRequestPost=async({request,env})=>{
    user:{displayName,email,role:"student"},
    commercial:{customerNumber:commercial.customerNumber,projectNumber:commercial.project.project_number,projectName:commercial.project.name},
    access:{courseSlug:slug,status:accessStatus},
-   message:accessStatus==="active"
-    ?"Ihr Academy-Konto wurde erstellt. Der freigegebene Kurszugang ist aktiv."
-    :"Ihr Academy-Konto wurde erstellt. Der Kurszugang wird nach Freigabe aktiviert.",
+   message:"Ihr Academy-Konto wurde erstellt. Der freigegebene Kurszugang ist aktiv.",
    requestId:traceId
   },201,{"set-cookie":sessionCookie(session.token)});
  }catch(error){
