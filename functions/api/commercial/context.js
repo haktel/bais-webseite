@@ -27,7 +27,7 @@ export const onRequestGet=async({request,env})=>{
    now:new Date().toISOString()
   });
   const organization=await db.prepare("SELECT id,name,billing_email FROM organizations WHERE id=? LIMIT 1").bind(identity.organizationId).first();
-  const projects=await db.prepare("SELECT id,project_number,name,status,starts_at,ends_at,created_at FROM projects WHERE organization_id=? ORDER BY created_at DESC").bind(identity.organizationId).all();
+  const projects=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at FROM projects p JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at DESC").bind(identity.organizationId).all();
 
   return json({
    ok:true,
