@@ -1,10 +1,12 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../_lib/api.js";
 import{buildLeadPayload,callLeadQualificationWebhook,mapLeadResult}from"../_lib/n8n.js";
 import{privacyPolicy,scheduleRetention,runPrivacyCleanup}from"../_lib/privacy.js";
+import{ensureLeadScoringSchema}from"../_lib/lead-scoring-schema.js";
 const TOPICS=new Set(["AI Engineering","Cybersecurity","Automation / n8n","BAIS Academy","AI Governance / CAIO","Project Portal","Sonstiges"]);
 
 async function qualifyLead(db,leadId,lead,requestId){
  try{
+  await ensureLeadScoringSchema(db,"contacts");
   const upstream=await callLeadQualificationWebhook(buildLeadPayload(lead),{db});
   const mapped=mapLeadResult(await upstream.json().catch(()=>null));
   if(!mapped) throw new Error(`n8n responded with status ${upstream.status}`);
