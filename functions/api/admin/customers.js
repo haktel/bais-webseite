@@ -21,8 +21,8 @@ export const onRequestGet=async({request,env})=>{
    "FROM customer_accounts ca JOIN organizations o ON o.id=ca.organization_id ORDER BY ca.customer_number ASC"
   ).all();
   const projects=await db.prepare(
-   "SELECT p.id,p.organization_id,p.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at "+
-   "FROM projects p JOIN customer_accounts ca ON ca.organization_id=p.organization_id ORDER BY p.created_at DESC"
+   "SELECT p.id,p.organization_id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at "+
+   "FROM projects p JOIN project_registry pr ON pr.project_id=p.id JOIN customer_accounts ca ON ca.organization_id=p.organization_id ORDER BY p.created_at DESC"
   ).all();
   const provider=await getBusinessProfile(db);
 
