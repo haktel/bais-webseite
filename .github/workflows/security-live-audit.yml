@@ -8,9 +8,12 @@ on:
       - "functions/admin/**"
       - "functions/angebot/**"
       - "functions/abnahme/**"
+      - "functions/project-portal/**"
+      - "project-portal/kunde/**"
       - "functions/_lib/admin.js"
       - "functions/_lib/mfa.js"
       - "functions/_lib/api-access-policy.js"
+      - "functions/_lib/customer-access.js"
       - "scripts/security-live-audit.sh"
       - ".github/workflows/security-live-audit.yml"
   workflow_dispatch:
