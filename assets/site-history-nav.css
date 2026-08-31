@@ -1,40 +1,81 @@
 .baisHistoryNav{
   position:fixed;
-  left:clamp(12px,2vw,24px);
-  bottom:max(16px,env(safe-area-inset-bottom));
+  left:14px;
+  bottom:max(14px,env(safe-area-inset-bottom));
   z-index:1200;
   display:flex;
-  gap:8px;
-  padding:7px;
-  border:1px solid rgba(18,54,62,.16);
-  border-radius:999px;
-  background:rgba(255,255,255,.92);
-  box-shadow:0 10px 30px rgba(8,35,42,.14);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px)
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border:1px solid rgba(20,56,64,.10);
+  border-radius:12px;
+  background:rgba(255,255,255,.78);
+  box-shadow:0 4px 16px rgba(8,35,42,.09);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  opacity:.78;
+  transition:opacity .18s ease,box-shadow .18s ease,background .18s ease
+}
+.baisHistoryNav:hover,
+.baisHistoryNav:focus-within{
+  opacity:1;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 6px 20px rgba(8,35,42,.12)
 }
 .baisHistoryNav button{
-  min-height:40px;
-  padding:0 14px;
-  border:1px solid rgba(18,54,62,.14);
-  border-radius:999px;
-  background:#fff;
-  color:#173b43;
-  font:800 12px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  letter-spacing:.01em;
+  height:32px;
+  min-width:34px;
+  padding:0 9px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:#244850;
+  font:700 11px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
-  gap:7px;
-  transition:transform .16s ease,border-color .16s ease,background .16s ease,opacity .16s ease
+  justify-content:center;
+  gap:5px;
+  white-space:nowrap;
+  transition:background .15s ease,color .15s ease,transform .15s ease,opacity .15s ease
 }
-.baisHistoryNav button:hover:not(:disabled){transform:translateY(-1px);border-color:#0b8f83;background:#f1fbf9}
-.baisHistoryNav button:focus-visible{outline:3px solid rgba(11,143,131,.28);outline-offset:2px}
-.baisHistoryNav button:disabled{opacity:.34;cursor:not-allowed}
-.baisHistoryNav .navArrow{font-size:16px;line-height:1}
+.baisHistoryNav button:hover:not(:disabled){
+  background:rgba(11,143,131,.09);
+  color:#087d73;
+  transform:translateY(-1px)
+}
+.baisHistoryNav button:active:not(:disabled){transform:translateY(0)}
+.baisHistoryNav button:focus-visible{
+  outline:2px solid rgba(11,143,131,.32);
+  outline-offset:1px
+}
+.baisHistoryNav button:disabled{
+  opacity:.22;
+  cursor:default
+}
+.baisHistoryNav .navArrow{
+  font-size:14px;
+  line-height:1;
+  font-weight:700
+}
 @media(max-width:560px){
-  .baisHistoryNav{left:10px;bottom:max(10px,env(safe-area-inset-bottom));padding:6px;gap:5px}
-  .baisHistoryNav button{min-height:38px;padding:0 11px;font-size:11px}
+  .baisHistoryNav{
+    left:9px;
+    bottom:max(9px,env(safe-area-inset-bottom));
+    padding:2px;
+    border-radius:10px
+  }
+  .baisHistoryNav button{
+    width:30px;
+    min-width:30px;
+    height:30px;
+    padding:0;
+    border-radius:8px
+  }
+  .baisHistoryNav button span:not(.navArrow){display:none}
+  .baisHistoryNav .navArrow{font-size:15px}
 }
-@media(prefers-reduced-motion:reduce){.baisHistoryNav button{transition:none}}
+@media(prefers-reduced-motion:reduce){
+  .baisHistoryNav,.baisHistoryNav button{transition:none}
+}
 @media print{.baisHistoryNav{display:none!important}}
