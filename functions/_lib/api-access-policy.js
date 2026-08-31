@@ -16,7 +16,6 @@ const SESSION_EXACT=new Set([
  "/api/academy/n8n-final-exam",
  "/api/academy/progress",
  "/api/commercial/context",
- "/api/commercial/projects",
  "/api/privacy/me"
 ]);
 const normalize=path=>{const p=String(path||"").replace(/\/+$/,"");return p||"/";};
@@ -25,6 +24,7 @@ export function classifyApiPath(path){
  if(PUBLIC_EXACT.has(p)||/^\/api\/certificates\/[^/]+$/.test(p))return{mode:"public"};
  if(p==="/api/admin/mfa"||p==="/api/admin/bootstrap")return{mode:"admin_session"};
  if(p.startsWith("/api/admin/"))return{mode:"admin_mfa"};
+ if(p==="/api/customer/portal")return{mode:"customer_content",contentKey:"project_portal"};
  if(/^\/api\/n8n-module-(0[1-9]|1[0-2])$/.test(p)||p==="/api/academy/auth-lab-resource")return{mode:"course",courseSlug:"n8n-bootcamp"};
  if(/^\/api\/kif-module-0[1-6]$/.test(p))return{mode:"course",courseSlug:"ki-fuehrerschein"};
  if(SESSION_EXACT.has(p))return{mode:"session"};
