@@ -1,4 +1,4 @@
-import{ApiError,assertDatabase,handleError,json,requestId}from"../../_lib/api.js";
+import{ApiError,assertDatabase,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 
 async function ensureRun(db,courseId,courseSlug,courseTitle,now){
@@ -18,6 +18,12 @@ export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
  try{
   assertSameOrigin(request);
+  if(!env.ADMIN_BOOTSTRAP_SECRET)throw new ApiError(404,"not_found","Nicht verfügbar.");
+  const body=await readJson(request,2048),provided=typeof body.bootstrapSecret==="string"?body.bootstrapSecret:"";
+  const expectedBytes=new TextEncoder().encode(env.ADMIN_BOOTSTRAP_SECRET),providedBytes=new TextEncoder().encode(provided);
+  if(expectedBytes.length!==providedBytes.length)throw new ApiError(403,"bootstrap_not_allowed","Initialisierung ist nicht zulässig.");
+  let diff=0;for(let i=0;i<expectedBytes.length;i++)diff|=expectedBytes[i]^providedBytes[i];
+  if(diff!==0)throw new ApiError(403,"bootstrap_not_allowed","Initialisierung ist nicht zulässig.");
   const db=assertDatabase(env);
   await ensureAuthSchema(db);
   const user=await requireSession(db,request);
