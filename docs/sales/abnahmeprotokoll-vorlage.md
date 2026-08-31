@@ -2,6 +2,17 @@
 
 > Wiederverwendbare B2B-Vorlage. Unbekannte projekt-, zahlungs- oder gewährleistungsbezogene Angaben bleiben als `[PLACEHOLDER]` stehen und dürfen nicht automatisch erfunden werden.
 
+# Verbindliche Basismodul-Nomenklatur
+
+| Modul-ID | Modulname |
+|---|---|
+| MOD-01 | **Website-Entwicklung** |
+| MOD-02 | **Project Portal** |
+| MOD-03 | **Wartung/Hosting-Setup** |
+| MOD-04 | **Content-Pflege** |
+
+Diese Modulnamen müssen mit dem zugrunde liegenden SOW und dem Kunden-Onboarding übereinstimmen.
+
 # 1. Kopfzeile
 
 **Projekt:** [PROJEKT_NAME]  
@@ -39,7 +50,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 
 > Nur Leistungen markieren, die tatsächlich Bestandteil des zugrunde liegenden SOW waren.
 
-## Website & UX
+## MOD-01 – Website-Entwicklung
 - [ ] Discovery / Kick-off
 - [ ] Anforderungsanalyse
 - [ ] Informationsarchitektur
@@ -55,7 +66,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Accessibility / Barrierearmut
 - [ ] Performance-Optimierung
 
-## Project Portal
+## MOD-02 – Project Portal
 - [ ] Kundenlogin
 - [ ] Rollen & Berechtigungen
 - [ ] Projekt-Dashboard
@@ -67,7 +78,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Audit-/Aktivitätsverlauf
 - [ ] Reporting
 
-## Automation / n8n / Integration
+## Zusatzleistung – Automation / n8n / Integration
 - [ ] Prozessanalyse
 - [ ] n8n Workflow
 - [ ] Webhooks
@@ -78,7 +89,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Fehlerhandling / Retry
 - [ ] Logging / Execution Evidence
 
-## AI / RAG / Agents
+## Zusatzleistung – AI / RAG / Agents
 - [ ] AI Use-Case Discovery
 - [ ] RAG / Wissensassistent
 - [ ] Dokumentenverarbeitung
@@ -88,7 +99,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] Guardrails / Safety Controls
 - [ ] Evaluation / Qualitätsmessung
 
-## Cybersecurity & Governance
+## Zusatzleistung – Cybersecurity & Governance
 - [ ] Security Architecture Review
 - [ ] Rollen-/Berechtigungskonzept
 - [ ] Secrets / Credential Handling
@@ -99,7 +110,7 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] AI Governance
 - [ ] Risiko-/Control-Mapping
 
-## Hosting, Betrieb & Support
+## MOD-03 – Wartung/Hosting-Setup
 - [ ] Domain / DNS
 - [ ] Hosting / Cloud
 - [ ] Deployment / Go-Live
@@ -112,7 +123,16 @@ Gegenstand dieser Abnahme ist [PROJEKT_ODER_PHASE]. Grundlage sind das Angebot /
 - [ ] BAIS Critical / individuelles SLA
 - [ ] 24/7-Bereitschaft – nur soweit gesondert vereinbart
 
-## Schulung & Handover
+## MOD-04 – Content-Pflege
+- [ ] Texte eingepflegt / aktualisiert
+- [ ] Bilder / Medien eingepflegt
+- [ ] Downloads / Dokumente eingepflegt
+- [ ] vereinbarte Content-Migration durchgeführt
+- [ ] vereinbarte Meta-Daten gepflegt
+- [ ] vereinbarte Mehrsprachigkeit umgesetzt
+- [ ] sonstige Content-Leistung: [CONTENT_ABNAHME_SONSTIGES]
+
+## Zusatzleistung – Schulung & Handover
 - [ ] Admin-Schulung
 - [ ] Benutzer-Schulung
 - [ ] Technische Dokumentation
