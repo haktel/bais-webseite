@@ -43,6 +43,26 @@ function label(btn,entry,base){
   btn.disabled=!entry;
   btn.title=entry?base+": "+entry.title:base+" ist in dieser Sitzung nicht verfügbar";
 }
+
+function mountDropdownGuards(){
+  if(!matchMedia("(min-width:981px)").matches)return;
+  for(const item of document.querySelectorAll(".navItem")){
+    const trigger=item.querySelector(":scope > a"),submenu=item.querySelector(":scope > .submenu");
+    if(!trigger||!submenu)continue;
+    let closeTimer=0;
+    const open=()=>{clearTimeout(closeTimer);item.classList.add("navOpen");trigger.setAttribute("aria-expanded","true");};
+    const close=()=>{clearTimeout(closeTimer);closeTimer=setTimeout(()=>{if(!item.matches(":hover")&&!item.matches(":focus-within")){item.classList.remove("navOpen");trigger.setAttribute("aria-expanded","false");}},250);};
+    trigger.setAttribute("aria-haspopup","true");
+    trigger.setAttribute("aria-expanded","false");
+    item.addEventListener("pointerenter",open);
+    item.addEventListener("pointerleave",close);
+    item.addEventListener("focusin",open);
+    item.addEventListener("focusout",close);
+    submenu.addEventListener("pointerenter",open);
+    submenu.addEventListener("pointerleave",close);
+  }
+}
+
 function mount(){
   if(document.querySelector(".baisHistoryNav"))return;
   const nav=document.createElement("nav");
@@ -64,5 +84,6 @@ function mount(){
   document.body.append(nav);
   refresh();
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount,{once:true});else mount();
+const init=()=>{mount();mountDropdownGuards();};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
