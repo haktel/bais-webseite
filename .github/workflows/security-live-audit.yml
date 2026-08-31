@@ -6,9 +6,12 @@ on:
     paths:
       - "functions/api/**"
       - "functions/admin/**"
+      - "admin/runbook/**"
       - "functions/angebot/**"
       - "functions/abnahme/**"
       - "functions/project-portal/**"
+      - "functions/kundenbereich/**"
+      - "kundenbereich/**"
       - "project-portal/kunde/**"
       - "functions/_lib/admin.js"
       - "functions/_lib/mfa.js"
