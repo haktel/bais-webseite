@@ -3,6 +3,7 @@ import{requireAdmin,validAdminStatus}from"../../_lib/admin.js";
 import{assertSameOrigin}from"../../_lib/auth.js";
 import{clearRetention,privacyPolicy,scheduleRetention}from"../../_lib/privacy.js";
 import{createRegistrationInvite}from"../../_lib/invites.js";
+import{sendAcademyInviteEmail}from"../../_lib/mail.js";
 
 const load=async db=>{
  const result=await db.prepare("SELECT r.id,r.name,r.email,r.company,r.note,r.status,r.score,r.route,r.n8n_execution_id,r.created_at,c.title AS course_title,c.slug AS course_slug FROM enrollment_requests r JOIN courses c ON c.id=r.course_id ORDER BY r.created_at DESC LIMIT 200").all();
@@ -42,12 +43,12 @@ export const onRequestPatch=async({request,env})=>{
    throw new ApiError(422,"validation_failed","Gültige Anfrage und Status sind erforderlich.");
 
   const entry=await db.prepare(
-   "SELECT r.id,r.email,r.course_id,c.slug AS course_slug,c.title AS course_title FROM enrollment_requests r JOIN courses c ON c.id=r.course_id WHERE r.id=? LIMIT 1"
+   "SELECT r.id,r.name,r.email,r.status AS previous_status,r.course_id,c.slug AS course_slug,c.title AS course_title FROM enrollment_requests r JOIN courses c ON c.id=r.course_id WHERE r.id=? LIMIT 1"
   ).bind(id).first();
   if(!entry)throw new ApiError(404,"request_not_found","Academy-Anfrage wurde nicht gefunden.");
 
   const now=new Date().toISOString();
-  let accessGranted=false,userId=null,runId=null,registrationInvite=null,inviteId=null;
+  let accessGranted=false,userId=null,runId=null,registrationInvite=null,inviteId=null,emailSent=false;
   const statements=[db.prepare("UPDATE enrollment_requests SET status=? WHERE id=?").bind(status,id)];
   if(status!=="approved")statements.push(db.prepare("UPDATE academy_registration_invites SET used_at=COALESCE(used_at,?) WHERE enrollment_request_id=? AND used_at IS NULL").bind(now,id));
 
@@ -76,12 +77,29 @@ export const onRequestPatch=async({request,env})=>{
   );
 
   await db.batch(statements);
+  if(status==="approved"&&registrationInvite){
+   try{
+    const invitePath=registrationInvite.url;
+    await sendAcademyInviteEmail({env,to:entry.email,name:entry.name,courseTitle:entry.course_title,inviteUrl:invitePath,expiresAt:registrationInvite.expiresAt,idempotencyKey:"academy-invite/"+inviteId});
+    emailSent=true;
+    await db.prepare("INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)")
+     .bind(crypto.randomUUID(),admin.user_id,"academy.invite.email_sent","enrollment_request",id,JSON.stringify({inviteId,courseSlug:entry.course_slug}),now).run();
+   }catch(error){
+    await db.batch([
+     db.prepare("UPDATE enrollment_requests SET status=? WHERE id=?").bind(entry.previous_status,id),
+     db.prepare("UPDATE academy_registration_invites SET used_at=COALESCE(used_at,?) WHERE id=?").bind(now,inviteId),
+     db.prepare("INSERT INTO audit_events(id,actor_user_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?)")
+      .bind(crypto.randomUUID(),admin.user_id,"academy.invite.email_failed","enrollment_request",id,JSON.stringify({inviteId,courseSlug:entry.course_slug}),now)
+    ]);
+    throw error;
+   }
+  }
   if(status==="approved")await clearRetention(db,"enrollment_request",id,now);
   else{
    const policy=privacyPolicy(env);
    await scheduleRetention(db,{entityType:"enrollment_request",entityId:id,days:["closed","rejected"].includes(status)?policy.closedLeadDays:policy.openLeadDays,reason:["closed","rejected"].includes(status)?"closed_enrollment_retention":"active_enrollment_retention",now});
   }
-  return json({ok:true,accessGranted,registrationInvite,requests:await load(db),requestId:traceId});
+  return json({ok:true,accessGranted,emailSent,inviteExpiresAt:registrationInvite?.expiresAt||null,requests:await load(db),requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
 
