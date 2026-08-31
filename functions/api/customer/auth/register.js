@@ -2,7 +2,7 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{allocateCustomerNumber,ensureCommercialSchema}from"../../../_lib/commercial.js";
 
-const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v3-atomic-number");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
+const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v4-pbkdf2-100k");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
 
 const customerSlug=(company,organizationId)=>{
  const base=String(company||"kunde").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,42)||"kunde";
@@ -11,7 +11,7 @@ const customerSlug=(company,organizationId)=>{
 
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
- let stage="start",userId=null,organizationId=null;
+ let stage="start",userId=null,organizationId=null,rateKey=null;
  try{
   stage="origin";
   assertSameOrigin(request);
@@ -34,7 +34,7 @@ export const onRequestPost=async({request,env})=>{
   await verifyTurnstile(body.turnstileToken,request,env.TURNSTILE_SECRET);
 
   stage="rate_limit";
-  const rateKey=await consumeRateLimit(db,request,"customer-register",email,5);
+  rateKey=await consumeRateLimit(db,request,"customer-register-v2",email,5);
 
   stage="existing_account";
   const existing=await db.prepare("SELECT id FROM users WHERE lower(email)=lower(?) LIMIT 1").bind(email).first();
@@ -78,6 +78,7 @@ export const onRequestPost=async({request,env})=>{
    requestId:traceId
   },201,{"set-cookie":session.cookie}));
  }catch(error){
+  if(rateKey&&!(error instanceof ApiError))try{const db=assertDatabase(env);await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();}catch{}
   if(userId||organizationId)try{
    const db=assertDatabase(env);
    if(userId){
