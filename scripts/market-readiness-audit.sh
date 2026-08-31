@@ -10,7 +10,7 @@ fail(){ printf 'FAIL  %s\n' "$*"; FAIL=$((FAIL+1)); }
 warn(){ printf 'WARN  %s\n' "$*"; WARN=$((WARN+1)); }
 
 echo "=== 1. CORE PAGES ==="
-for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /sla/ /angebot/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
+for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /sla/ /angebot/ /abnahme/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
   code="$(curl -LsS --max-time 20 -o /tmp/page -w '%{http_code}' "${BASE_URL}${path}" || true)"
   if [ "$code" = "200" ]; then pass "${path} HTTP 200"; else fail "${path} HTTP ${code}"; fi
   if [ "$code" = "200" ]; then
@@ -96,6 +96,14 @@ grep -qi 'Welche Leistungen werden gewünscht?' /tmp/angebot && pass "Angebot SO
 [ "$(grep -o 'type="date"' /tmp/angebot | wc -l | tr -d ' ')" -ge 10 ] && pass "Angebot uses real date fields" || fail "Angebot date fields missing"
 grep -qi 'Drucken / als PDF speichern' /tmp/angebot && pass "Angebot print/PDF action live" || fail "Angebot print/PDF action missing"
 if grep -Eq '\[[A-ZÄÖÜ0-9_]{3,}\]' /tmp/angebot; then fail "Angebot still exposes placeholder codes"; else pass "Angebot has no placeholder codes"; fi
+
+curl -LsS --max-time 20 "${BASE_URL}/abnahme/" >/tmp/abnahme || true
+grep -qi 'Abnahmeprotokoll' /tmp/abnahme && pass "Abnahmeprotokoll live" || fail "Abnahmeprotokoll missing"
+grep -qi 'Vollständige Abnahme ohne Mängel' /tmp/abnahme && grep -qi 'Abnahme unter Vorbehalt' /tmp/abnahme && grep -qi 'Abnahme verweigert' /tmp/abnahme && pass "Abnahme has all three outcomes" || fail "Abnahme outcome set incomplete"
+grep -qi 'MÄNGELLISTE / OFFENE PUNKTE' /tmp/abnahme && pass "Abnahme defect list present" || fail "Abnahme defect list missing"
+[ "$(grep -o 'type="date"' /tmp/abnahme | wc -l | tr -d ' ')" -ge 10 ] && pass "Abnahme uses real date fields" || fail "Abnahme date fields missing"
+grep -qi 'Drucken / als PDF speichern' /tmp/abnahme && pass "Abnahme print/PDF action live" || fail "Abnahme print/PDF action missing"
+if grep -Eq '\[[A-ZÄÖÜ0-9_]{3,}\]' /tmp/abnahme; then fail "Abnahme exposes placeholder codes"; else pass "Abnahme has no placeholder codes"; fi
 
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
