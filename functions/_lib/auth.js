@@ -1,5 +1,5 @@
 import{ApiError}from"./api.js";
-const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24*7,PBKDF2_ITERATIONS=100000;
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8;export const PASSWORD_HASH_ITERATIONS=600000;
 
 const bytesToBase64Url=bytes=>{
  let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
@@ -17,7 +17,7 @@ export async function sha256(value){
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
  return bytesToBase64Url(new Uint8Array(digest));
 }
-export async function hashPassword(password,salt=randomToken(16),iterations=PBKDF2_ITERATIONS){
+export async function hashPassword(password,salt=randomToken(16),iterations=PASSWORD_HASH_ITERATIONS){
  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
  const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:base64UrlToBytes(salt),iterations},key,256);
  return{hash:bytesToBase64Url(new Uint8Array(bits)),salt,iterations};
@@ -40,22 +40,33 @@ export function parseCookies(request){
   const index=part.indexOf("=");if(index>0)values[part.slice(0,index).trim()]=part.slice(index+1).trim();
  }return values;
 }
-export function sessionCookie(token,maxAge=SESSION_SECONDS){
- return SESSION_COOKIE+"="+token+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age="+maxAge;
+export function sessionCookie(token,maxAge=null){
+ const base=SESSION_COOKIE+"="+token+"; Path=/; HttpOnly; Secure; SameSite=Lax";
+ return maxAge===null?base:base+"; Max-Age="+maxAge;
 }
-export function clearSessionCookie(){return sessionCookie("",0);}
+export function clearSessionCookie(){return sessionCookie("",0)+"; Expires=Thu, 01 Jan 1970 00:00:00 GMT";}
 export async function createSession(db,userId,request){
- const token=randomToken(),tokenHash=await sha256(token),now=new Date(),expires=new Date(now.getTime()+SESSION_SECONDS*1000);
- await db.prepare("INSERT INTO user_sessions(id,user_id,token_hash,created_at,last_seen_at,expires_at,user_agent_hash) VALUES(?,?,?,?,?,?,?)")
-  .bind(crypto.randomUUID(),userId,tokenHash,now.toISOString(),now.toISOString(),expires.toISOString(),await sha256(request.headers.get("user-agent")||"unknown")).run();
+ const token=randomToken(),tokenHash=await sha256(token),now=new Date(),expires=new Date(now.getTime()+SESSION_SECONDS*1000),uaHash=await sha256(request.headers.get("user-agent")||"unknown");
+ const nowIso=now.toISOString();
+ await db.batch([
+  db.prepare("DELETE FROM user_sessions WHERE expires_at<=? OR last_seen_at<?").bind(nowIso,new Date(now.getTime()-IDLE_SECONDS*1000).toISOString()),
+  db.prepare("DELETE FROM user_sessions WHERE user_id=? AND id IN (SELECT id FROM user_sessions WHERE user_id=? ORDER BY last_seen_at DESC LIMIT -1 OFFSET 4)").bind(userId,userId),
+  db.prepare("INSERT INTO user_sessions(id,user_id,token_hash,created_at,last_seen_at,expires_at,user_agent_hash) VALUES(?,?,?,?,?,?,?)")
+   .bind(crypto.randomUUID(),userId,tokenHash,nowIso,nowIso,expires.toISOString(),uaHash)
+ ]);
  return{token,cookie:sessionCookie(token)};
 }
 export async function requireSession(db,request){
  const token=parseCookies(request)[SESSION_COOKIE];
  if(!token)throw new ApiError(401,"authentication_required","Bitte melden Sie sich an.");
- const tokenHash=await sha256(token),now=new Date().toISOString();
- const session=await db.prepare("SELECT s.id AS session_id,s.user_id,s.expires_at,u.display_name,u.email,u.role,u.status FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? LIMIT 1").bind(tokenHash).first();
- if(!session||session.expires_at<=now||session.status!=="active")throw new ApiError(401,"session_expired","Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.");
+ const tokenHash=await sha256(token),nowMs=Date.now(),now=new Date(nowMs).toISOString();
+ const session=await db.prepare("SELECT s.id AS session_id,s.user_id,s.expires_at,s.last_seen_at,s.user_agent_hash,u.display_name,u.email,u.role,u.status FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? LIMIT 1").bind(tokenHash).first();
+ const idleExpired=!session?.last_seen_at||Date.parse(session.last_seen_at)<nowMs-IDLE_SECONDS*1000;
+ const uaHash=await sha256(request.headers.get("user-agent")||"unknown"),uaMismatch=Boolean(session?.user_agent_hash)&&!safeEqual(session.user_agent_hash,uaHash);
+ if(!session||session.expires_at<=now||idleExpired||uaMismatch||session.status!=="active"){
+  if(session?.session_id)try{await db.prepare("DELETE FROM user_sessions WHERE id=?").bind(session.session_id).run();}catch{}
+  throw new ApiError(401,"session_expired","Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.");
+ }
  await db.prepare("UPDATE user_sessions SET last_seen_at=? WHERE id=?").bind(now,session.session_id).run();
  return session;
 }
@@ -77,7 +88,9 @@ export async function ensureAuthSchema(db){
 
 export async function consumeRateLimit(db,request,action,email,maxAttempts=8){
  const ip=request.headers.get("cf-connecting-ip")||"unknown",key=await sha256(action+":"+ip+":"+normalizeEmail(email));
- const now=Date.now(),windowStart=new Date(now-15*60*1000).toISOString(),current=await db.prepare("SELECT attempts,window_started_at FROM auth_rate_limits WHERE id=?").bind(key).first();
+ const now=Date.now(),windowStart=new Date(now-15*60*1000).toISOString();
+ await db.prepare("DELETE FROM auth_rate_limits WHERE updated_at<?").bind(new Date(now-24*60*60*1000).toISOString()).run();
+ const current=await db.prepare("SELECT attempts,window_started_at FROM auth_rate_limits WHERE id=?").bind(key).first();
  if(!current||current.window_started_at<windowStart){
   await db.prepare("INSERT INTO auth_rate_limits(id,attempts,window_started_at,updated_at) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET attempts=excluded.attempts,window_started_at=excluded.window_started_at,updated_at=excluded.updated_at").bind(key,1,new Date(now).toISOString(),new Date(now).toISOString()).run();return key;
  }
