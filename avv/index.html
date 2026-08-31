@@ -82,12 +82,12 @@
 <article class="annex">
 <table class="matrix">
 <tr><th>Schutzziel</th><th>BAIS-Baseline</th></tr>
-<tr><td>Zugriffskontrolle</td><td>Rollen-/Need-to-know-Prinzip, Least Privilege, getrennte Accounts, restriktive Rechtevergabe; MFA dort, wo Plattform und Projekt dies unterstützen bzw. erfordern.</td></tr>
+<tr><td>Zugriffskontrolle</td><td>Rollen-/Need-to-know-Prinzip, Least Privilege, getrennte Accounts und restriktive Rechtevergabe; Administratorzugriffe auf die BAIS Plattform erfordern TOTP-MFA bzw. einmalige Recovery-Codes zusätzlich zur Passwort-Session.</td></tr>
 <tr><td>Secrets & Credentials</td><td>Secrets nicht im öffentlichen Sourcecode; Nutzung von Secret-/Environment-Mechanismen; keine Ausgabe von Credentials in UI oder öffentlichen Logs.</td></tr>
 <tr><td>Transportverschlüsselung</td><td>TLS/HTTPS für öffentlich erreichbare Systeme und API-Kommunikation; HSTS auf der BAIS-Webplattform.</td></tr>
 <tr><td>Webhook-/API-Schutz</td><td>Für die produktive BAIS-n8n-Integration HMAC-SHA256, Timestamp, Nonce und Replay-Schutz; direkte unsignierte Aufrufe werden abgewiesen.</td></tr>
 <tr><td>Datenminimierung</td><td>Nur erforderliche Datenfelder; bei BAIS Kontakt-/Academy-Qualification bleiben Identifikatoren und Freitext in D1 und werden nicht an n8n weitergegeben. n8n erhält abgeleitete Business-Signale und Nachrichtenlänge.</td></tr>
-<tr><td>Integrität / Eingabevalidierung</td><td>Serverseitige Validierung, Allow-Lists, Payload-Limits, Content-Type-Prüfung und kontrollierte API-Pfade.</td></tr>
+<tr><td>Integrität / Eingabevalidierung</td><td>Serverseitige Validierung, Allow-Lists, Payload-Limits und Content-Type-Prüfung. Eine zentrale fail-closed API-Policy sperrt unbekannte API-Routen standardmäßig; Academy-Labs benötigen Session und passende Programmeinschreibung.</td></tr>
 <tr><td>Missbrauchsschutz</td><td>Turnstile für öffentliche Formulare; Rate-/Burst-Limits für exponierte Demo-Endpunkte; Herkunfts- und Request-Validierung.</td></tr>
 <tr><td>Protokollierung / Evidence</td><td>Request-/Execution-IDs, Audit-Status und technische Evidence ohne unnötige Offenlegung von Secrets oder personenbezogenen Inhalten.</td></tr>
 <tr><td>Verfügbarkeit</td><td>Cloud-/Plattformmechanismen, Timeout-/Fehlerpfade und Monitoring nach Projektumfang; konkrete RPO/RTO nur bei ausdrücklich vereinbartem SLA.</td></tr>
@@ -105,6 +105,7 @@
 <tr><th>Anbieter</th><th>Zweck / Dienste</th><th>Datenschutz-/Transferstatus</th><th>Status</th></tr>
 <tr><td><strong>Cloudflare, Inc. / Cloudflare Group</strong></td><td>Je nach Projekt: Pages, Functions, D1, Turnstile, Netzwerk-/Security-Dienste.</td><td>Cloudflare veröffentlicht ein aktuelles Customer DPA; internationale Übermittlungen werden dort u. a. über SCCs bzw. anwendbare Angemessenheitsmechanismen geregelt. Konkrete Produkt-/Datenresidenz wird projektspezifisch geprüft.</td><td><span class="statusTag">optional / projektbezogen</span></td></tr>
 <tr><td><strong>RepoCloud, LLC</strong></td><td>Hosting einer isolierten n8n-Instanz, sofern im Projekt vorgesehen.</td><td>Für personenbezogene Kundendaten nur nach dokumentierter projektbezogener Prüfung der Art.-28- und Kapitel-V-Grundlage. Die öffentliche BAIS Kontakt-/Academy-Qualification sendet an n8n nur privacy-minimierte, nicht identifizierende Metadaten.</td><td><span class="statusTag warnTag">nur nach Freigabe</span></td></tr>
+<tr><td><strong>Plus Five Five, Inc. / Resend</strong></td><td>Transaktionaler E-Mail-Versand, insbesondere einmalige Academy-/Konto-Einladungen, soweit aktiviert.</td><td>Resend veröffentlicht einen Art.-28-DPA einschließlich EU-Standardvertragsklauseln. Nach Anbieterangaben werden E-Mail-Inhalte und Delivery-Logs in den USA gespeichert; der Einsatz ist deshalb nur für den dokumentierten Versandzweck und mit aktivem DPA/Transfermechanismus vorgesehen.</td><td><span class="statusTag warnTag">optional / nur bei Versand</span></td></tr>
 <tr><td><strong>Weitere AI-/Cloud-/SaaS-Anbieter</strong></td><td>Nur wenn im Angebot/SOW ausdrücklich vorgesehen.</td><td>Anbieter, Zweck, Region, Datenkategorien und Transfermechanismus werden vor Einsatz in dieser Anlage bzw. einer aktualisierten Subprozessorenliste dokumentiert.</td><td><span class="statusTag warnTag">nicht pauschal genehmigt</span></td></tr>
 </table>
 <p>Änderungsmechanismus: BAIS informiert den Auftraggeber vor Hinzunahme oder Ersetzung eines für personenbezogene Kundendaten relevanten Subprozessors. Ein Widerspruch ist innerhalb der mitgeteilten Frist aus nachvollziehbaren datenschutzrechtlichen Gründen möglich.</p>
