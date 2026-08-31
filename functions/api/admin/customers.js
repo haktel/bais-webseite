@@ -9,16 +9,16 @@ export const onRequestGet=async({request,env})=>{
   await ensureCommercialSchema(db);
 
   // Backfill active external accounts that predate commercial numbering.
-  const users=await db.prepare("SELECT id,display_name,email,organization_id FROM users WHERE status='active' ORDER BY created_at ASC LIMIT 500").all();
+  const users=await db.prepare("SELECT id,display_name,email,organization_id FROM users WHERE status='active' AND role IN('student','customer') ORDER BY created_at ASC LIMIT 500").all();
   for(const user of users.results||[]){
    await ensureCommercialIdentityForUser(db,{userId:user.id,displayName:user.display_name,email:user.email});
   }
 
   const customers=await db.prepare(
    "SELECT ca.customer_number,o.id AS organization_id,o.name AS organization_name,o.billing_email,ca.account_status,ca.created_at,"+
-   "(SELECT u.display_name FROM users u WHERE u.organization_id=o.id AND u.status='active' ORDER BY u.created_at ASC LIMIT 1) AS contact_name,"+
-   "(SELECT u.email FROM users u WHERE u.organization_id=o.id AND u.status='active' ORDER BY u.created_at ASC LIMIT 1) AS contact_email "+
-   "FROM customer_accounts ca JOIN organizations o ON o.id=ca.organization_id ORDER BY ca.customer_number ASC"
+   "(SELECT u.display_name FROM users u WHERE u.organization_id=o.id AND u.status='active' AND u.role IN('student','customer') ORDER BY u.created_at ASC LIMIT 1) AS contact_name,"+
+   "(SELECT u.email FROM users u WHERE u.organization_id=o.id AND u.status='active' AND u.role IN('student','customer') ORDER BY u.created_at ASC LIMIT 1) AS contact_email "+
+   "FROM customer_accounts ca JOIN organizations o ON o.id=ca.organization_id WHERE EXISTS(SELECT 1 FROM users ux WHERE ux.organization_id=o.id AND ux.status='active' AND ux.role IN('student','customer')) ORDER BY ca.customer_number ASC"
   ).all();
   const projects=await db.prepare(
    "SELECT p.id,p.organization_id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at "+
