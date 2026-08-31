@@ -2,7 +2,7 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{allocateCustomerNumber,ensureCommercialSchema}from"../../../_lib/commercial.js";
 
-const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v2");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
+const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v3-atomic-number");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
 
 const customerSlug=(company,organizationId)=>{
  const base=String(company||"kunde").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,42)||"kunde";
