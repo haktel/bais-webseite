@@ -248,11 +248,11 @@ function serialize(){
  }
  return data;
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(serialize()));saveState.textContent="Lokal gespeichert"}catch{saveState.textContent="Speichern nicht verfügbar"}}
+function save(){try{sessionStorage.setItem(KEY,JSON.stringify(serialize()));saveState.textContent="Lokal gespeichert"}catch{saveState.textContent="Speichern nicht verfügbar"}}
 let timer;function scheduleSave(){saveState.textContent="Speichert …";clearTimeout(timer);timer=setTimeout(save,250)}
 function restore(){
  try{
-  const data=JSON.parse(localStorage.getItem(KEY)||"null");
+  const data=JSON.parse(sessionStorage.getItem(KEY)||"null");
   if(!data){body.append(defectRow(),defectRow(),defectRow());renumber();return}
   for(const el of form.elements){
    if(!el.name||el.name.startsWith("defect"))continue;
@@ -271,7 +271,7 @@ form.addEventListener("input",scheduleSave);form.addEventListener("change",save)
 hideUnchecked.addEventListener("change",save);hideEmptyDefects.addEventListener("change",save);
 document.getElementById("addDefect").addEventListener("click",()=>{body.append(defectRow());renumber();save()});
 document.getElementById("copyAcceptanceDate").addEventListener("click",()=>{document.getElementById("warrantyStart").value=document.getElementById("acceptanceDate").value;save()});
-document.getElementById("clearProtocol").addEventListener("click",()=>{if(!confirm("Alle Eingaben dieses Abnahmeprotokolls löschen?"))return;form.reset();body.innerHTML="";body.append(defectRow(),defectRow(),defectRow());renumber();localStorage.removeItem(KEY);saveState.textContent="Formular geleert"});
+document.getElementById("clearProtocol").addEventListener("click",()=>{if(!confirm("Alle Eingaben dieses Abnahmeprotokolls löschen?"))return;form.reset();body.innerHTML="";body.append(defectRow(),defectRow(),defectRow());renumber();sessionStorage.removeItem(KEY);saveState.textContent="Formular geleert"});
 function applyPrint(){document.body.classList.toggle("printHideUnchecked",hideUnchecked.checked);document.body.classList.toggle("printHideEmptyDefects",hideEmptyDefects.checked);[...body.children].forEach(markEmpty)}
 document.getElementById("printProtocol").addEventListener("click",()=>{applyPrint();window.print()});
 window.addEventListener("beforeprint",applyPrint);window.addEventListener("afterprint",()=>{document.body.classList.remove("printHideUnchecked","printHideEmptyDefects")});
