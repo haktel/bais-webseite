@@ -26,11 +26,13 @@ export const onRequestGet=async({request,env})=>{
   const db=assertDatabase(env);
   await requireAdmin(db,request);
   await ensureCustomerAccessSchema(db);
-  const customers=await customerRows(db),grants=[];
-  for(const customer of customers){
-   const access=await listCustomerContentAccess(db,customer.organization_id);
-   grants.push(...access.map(item=>({...item,organization_id:customer.organization_id})));
-  }
+  const customers=await customerRows(db);
+  const grantRows=await db.prepare(
+   "SELECT organization_id,content_key,project_id,status,granted_at,expires_at,revoked_at "+
+   "FROM customer_access_grants ORDER BY organization_id,content_key,project_id"
+  ).all();
+  const now=new Date().toISOString();
+  const grants=(grantRows.results||[]).map(row=>({...row,effective:row.status==="active"&&(!row.expires_at||row.expires_at>now)}));
   return json({
    ok:true,
    contentKeys:CUSTOMER_CONTENT_KEYS.map(key=>({key,label:LABELS[key]||key})),
