@@ -4,7 +4,7 @@ import{ensureCommercialIdentityForUser}from"../../../_lib/commercial.js";
 
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
- let userId=null;
+ let userId=null,organizationId=null;
  try{
   assertSameOrigin(request);
   const db=assertDatabase(env);await ensureAuthSchema(db);
@@ -26,6 +26,7 @@ export const onRequestPost=async({request,env})=>{
    db.prepare("INSERT INTO user_credentials(user_id,password_hash,password_salt,password_algorithm,password_iterations,updated_at) VALUES(?,?,?,?,?,?)").bind(userId,credential.hash,credential.salt,"PBKDF2-SHA-256",credential.iterations,now)
   ]);
   const commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now,intakeName:"Erstprojekt / Intake"});
+  organizationId=commercial.organizationId;
   await db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?,?)")
    .bind(crypto.randomUUID(),userId,commercial.organizationId,"customer.account.created","user",userId,JSON.stringify({customerNumber:commercial.customerNumber,source:"self_registration",defaultAccess:"deny"}),now).run();
   const session=await createSession(db,userId,request);
@@ -39,7 +40,16 @@ export const onRequestPost=async({request,env})=>{
    requestId:traceId
   },201,{"set-cookie":session.cookie});
  }catch(error){
-  if(userId)try{const db=assertDatabase(env);await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();}catch{}
+  if(userId)try{
+   const db=assertDatabase(env);
+   if(organizationId){
+    await db.prepare("DELETE FROM project_members WHERE user_id=? OR project_id IN (SELECT id FROM projects WHERE organization_id=?)").bind(userId,organizationId).run();
+    await db.prepare("DELETE FROM projects WHERE organization_id=?").bind(organizationId).run();
+    await db.prepare("DELETE FROM customer_accounts WHERE organization_id=?").bind(organizationId).run();
+   }
+   await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();
+   if(organizationId)await db.prepare("DELETE FROM organizations WHERE id=?").bind(organizationId).run();
+  }catch{}
   return handleError(error,traceId);
  }
 };
