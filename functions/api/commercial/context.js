@@ -8,18 +8,7 @@ export const onRequestGet=async({request,env})=>{
   const db=assertDatabase(env);
   await ensureAuthSchema(db);
   const provider=await getBusinessProfile(db);
-  let session;
-  try{session=await requireSession(db,request);}catch{
-   return json({ok:true,authenticated:false,provider:{
-    legalName:provider?.legal_name||"",
-    brandName:provider?.brand_name||"",
-    ownerName:provider?.owner_name||"",
-    role:"Inhaber",
-    address:[provider?.street_address,[provider?.postal_code,provider?.city].filter(Boolean).join(" "),provider?.country_code].filter(Boolean).join(", "),
-    email:provider?.email||"",
-    vatId:provider?.vat_id||""
-   },requestId:traceId});
-  }
+  const session=await requireSession(db,request);
 
   if(session.role==="admin"||session.role==="trainer"){
    return json({
