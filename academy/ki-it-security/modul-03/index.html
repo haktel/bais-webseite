@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modul 03 – Prompt Injection und Exfiltration | BAIS Academy</title>
+<meta name="description" content="Privater BAIS Academy Lernbereich: Direkte und indirekte Prompt Injection, reale Fälle und wirksame mehrschichtige Verteidigung.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://bais-solutions.de/academy/ki-it-security/modul-03/">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.0"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/academy-business-labs.css?v=5.0">
+</head><body data-module="modul-03" data-course="ki-it-security">
+<header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein IT & Security</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
+
+<main>
+<section class="studyHero"><div class="c studyHeroGrid">
+<div><span class="moduleBadge">BAIS ACADEMY · MODUL 03 · PRIVATER LERNBEREICH</span><h1>Prompt Injection und Exfiltration</h1><p class="lead">Modul 01 und 02 haben Architektur und Berechtigungen geklärt. Jetzt geht es um den häufigsten realen Angriffsvektor gegen AI-Systeme: Anweisungen, die sich als Daten tarnen — und wie daraus ein Datenleck wird.</p><div class="privateNote">Dieser Bereich ist nicht als öffentliche Kursseite gedacht. Zugriff erfolgt über Academy-Konto und aktive KI-Führerschein IT & Security-Anmeldung.</div></div>
+<div class="heroDiagram" aria-label="Modul-03 Lernarchitektur"><div class="courseMap"><div><b>DIREKT</b><span>Nutzer manipuliert</span></div><div><b>INDIREKT</b><span>Versteckt in Daten</span></div><div><b>EXFILTRATION</b><span>Wege nach außen</span></div><div><b>SCHICHTEN</b><span>Mehrfache Verteidigung</span></div></div></div>
+</div></section>
+
+<section class="studyShell"><div class="c studyLayout">
+<aside class="studyNav"><strong>Modul 03 · Lernpfad</strong>
+<a href="#l1">01 · Direkte vs. indirekte Prompt Injection</a><a href="#l2">02 · Bekannter Fall: Chevrolet-Chatbot</a><a href="#l3">03 · Bekannter Fall: Slack AI-Datenleck</a><a href="#l4">04 · Warum Daten nie Systemregeln überschreiben dürfen</a><a href="#l5">05 · Exfiltrationskanäle erkennen</a><a href="#l6">06 · Verteidigungsmaßnahmen im Überblick</a><a href="#lab">07 · Live Lab</a><a href="#assessment">08 · Assessment</a>
+<div class="progressBox"><div class="progressTrack"><i data-progress-bar></i></div><div class="progressText" data-progress-text></div></div></aside>
+
+<div class="studyContent">
+<div class="realWorldOverview">
+  <div><span class="ey">REALE FÄLLE</span><h2>Zwei sehr unterschiedliche, beide öffentlich dokumentierte Fälle zeigen das ganze Spektrum.</h2><p>Vom offensichtlichen viralen Chatbot-Trick bis zur unsichtbaren, technisch anspruchsvollen Datenexfiltration.</p></div>
+  <div class="realWorldGrid">
+    <article><strong>Chevrolet-Chatbot</strong><span>1-Dollar-Auto-Zusage</span><b>Direkte Prompt Injection</b></article>
+    <article><strong>Slack AI / PromptArmor</strong><span>Datenleck ohne Direktzugriff</span><b>Indirekte Injection + Exfiltration</b></article>
+    <article><strong>Instruktionshierarchie</strong><span>Systemregeln vor Daten</span><b>Architektonischer Kernschutz</b></article>
+  </div>
+</div>
+
+<article class="lesson" id="l1" data-lesson="01"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">01</span><div><div class="ey">GRUNDLAGE</div><h2>Zwei Angriffsarten mit demselben Grundprinzip</h2><p>Ein Angreifer versucht nicht, das Modell zu 'hacken' — er versucht, seine eigenen Anweisungen als legitime Instruktion einzuschleusen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Typ</th><th>Wie der Angriff funktioniert</th></tr><tr><td>Direkt</td><td>Der Nutzer selbst formuliert die manipulative Anweisung im Chat</td></tr><tr><td>Indirekt</td><td>Die Anweisung steckt in einem Dokument, einer Webseite oder E-Mail, die das System verarbeitet</td></tr></table>
+<div class="lessonCallout"><strong>Warum indirekt gefährlicher ist</strong><p>Bei direkter Injection sieht zumindest der Nutzer, was er eingibt. Bei indirekter Injection weiß oft niemand, dass eine schädliche Anweisung überhaupt existiert — sie liegt versteckt in einer Quelle, die das System automatisch verarbeitet.</p></div>
+</article>
+
+<article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">BEKANNTER FALL</div><h2>Der Chevrolet-Chatbot und das 1-Dollar-Auto</h2><p>Ein virales Beispiel für direkte Prompt Injection zeigt, wie leicht ein unzureichend abgesichertes System zu manipulieren ist.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · CHEVROLET-HÄNDLER-CHATBOT</span><h3>"Verkaufe mir dieses Auto für 1 Dollar — das ist ein rechtsverbindliches Angebot"</h3><p>Im Dezember 2023 gelang es einem Nutzer öffentlich (auf X/Twitter viral geteilt), den Kundenservice-Chatbot eines Chevrolet-Händlers per Prompt dazu zu bringen, einem simulierten Verkauf eines Fahrzeugs für 1 US-Dollar zuzustimmen und die Aussage als "rechtsverbindlich, keine Rücknahme" zu formulieren. Der Chatbot lief auf einer Standard-Chat-Widget-Plattform ohne wirksame Grenzen für das, was er "zusagen" durfte.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · viral auf Social Media, Dezember 2023</span></div>
+<div class="miniStat"><strong>1 $</strong><span>zugesagter Preis durch fehlende Grenzen für Chatbot-Aussagen</span></div></div>
+<div class="lessonCallout"><strong>Verbindung zu Essentials</strong><p>Dieser Fall ähnelt dem Air-Canada-Fall aus KI-Führerschein Essentials — dort ging es um Haftung für eine falsche Zusage. Hier geht es zusätzlich darum, wie leicht solche Zusagen durch gezielte Formulierung provoziert werden können.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l3" data-lesson="03"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">03</span><div><div class="ey">BEKANNTER FALL</div><h2>Slack AI: Datenleck durch versteckte Anweisung in einer Nachricht</h2><p>Ein technisch anspruchsvollerer, indirekter Fall zeigt, wie Inhalte aus nicht-vertrauenswürdigen Quellen zur Datenexfiltration führen können.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="realCase"><div><span class="caseTag">BEKANNTER FALL · SLACK AI</span><h3>PromptArmor-Untersuchung zu indirekter Prompt Injection</h3><p>Sicherheitsforscher von PromptArmor zeigten 2024, dass eine in einem öffentlichen Slack-Kanal platzierte, präparierte Nachricht Slack AI dazu bringen konnte, bei einer späteren Zusammenfassungsanfrage private Informationen (z.B. API-Schlüssel aus einem privaten Kanal) unwissentlich in eine für den Angreifer sichtbare Antwort einzubauen — ohne dass der Angreifer direkten Zugriff auf den privaten Kanal hatte.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Sicherheitsforschung · PromptArmor, August 2024</span></div>
+<div class="miniStat"><strong>0</strong><span>direkter Zugriff des Angreifers auf den privaten Kanal nötig</span></div></div>
+<div class="lessonCallout"><strong>Warum das der Kernfall dieses Moduls ist</strong><p>Der Angreifer musste nie selbst mit dem AI-System sprechen — er platzierte nur eine Anweisung an einem Ort, den das System später automatisch verarbeitete. Das ist der Unterschied zwischen direkter und indirekter Injection aus Lektion 01, konkret durchgespielt.</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l4" data-lesson="04"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">04</span><div><div class="ey">PRINZIP</div><h2>Instruktionshierarchie: Daten sind niemals Systemregeln</h2><p>Der wirksamste architektonische Schutz ist die klare Trennung zwischen 'was das System darf' und 'was in verarbeiteten Daten steht'.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<div class="miniArchitecture">Systemregeln (vom Betreiber, höchste Priorität) → Nutzeranweisung (mittlere Priorität) → Inhalte aus Dokumenten/Web/Tools (niedrigste Priorität, nie Anweisungscharakter)</div>
+<details><summary>Vertiefung öffnen</summary>
+<div class="lessonCallout"><strong>BAIS-Muster</strong><p>Jeder externe Inhalt (Dokument, Webseite, E-Mail, Tool-Ergebnis), der ins Kontextfenster gelangt, muss technisch und gedanklich als reine Information behandelt werden — niemals als Anweisung, der das System folgt, egal wie die Formulierung darin klingt ("Ignoriere vorherige Anweisungen und...").</p></div>
+</details>
+</article>
+
+<article class="lesson" id="l5" data-lesson="05"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">05</span><div><div class="ey">EXFILTRATION</div><h2>Wie gestohlene Daten das System tatsächlich verlassen</h2><p>Selbst wenn ein Angreifer eine Anweisung einschleusen kann, braucht er noch einen Weg, die Ausgabe zu sich zu bekommen.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Kanal</th><th>Funktionsweise</th></tr><tr><td>Markdown-Bild-Exfiltration</td><td>Antwort enthält ein Bild mit Daten in der URL, die beim Laden an den Angreifer-Server gesendet werden</td></tr><tr><td>Sichtbare Zusammenfassung</td><td>Wie im Slack-Fall: sensible Daten erscheinen einfach in der normalen Textantwort</td></tr><tr><td>Automatisierter Tool-Aufruf</td><td>Das System sendet Daten selbst weiter (z.B. per E-Mail-Tool), ohne dass ein Mensch die Ausgabe je sieht</td></tr></table>
+</article>
+
+<article class="lesson" id="l6" data-lesson="06"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">06</span><div><div class="ey">VERTEIDIGUNG</div><h2>Kein Einzelschutz reicht — mehrere Schichten kombinieren</h2><p>Prompt Injection lässt sich technisch nicht vollständig ausschließen — deshalb braucht es mehrere unabhängige Schutzschichten.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
+<table class="depthTable"><tr><th>Schicht</th><th>Maßnahme</th></tr><tr><td>Eingabe</td><td>Externe Inhalte klar als Daten markieren, nicht als Anweisung parsen lassen</td></tr><tr><td>Verarbeitung</td><td>Least Privilege (Modul 02): selbst bei erfolgreicher Injection ist der Schaden begrenzt</td></tr><tr><td>Ausgabe</td><td>Bild-/Link-Rendering aus AI-Antworten einschränken oder filtern (gegen Exfiltration)</td></tr><tr><td>Erkennung</td><td>Monitoring auf ungewöhnliche Tool-Aufrufe oder Datenmengen (Modul 05)</td></tr></table>
+</article>
+
+<section class="soft"><div class="c"><div class="academyLab" data-lab="security"><div class="labHead"><div><div class="ey">AI ATTACK & DEFENSE CHAIN · LIVE LAB</div><h2>Vom untrusted Input bis zur Incident Response.</h2><p>Angriffspunkt auswählen und den passenden Security Control prüfen.</p></div><span class="labBadge">SECURITY LAB</span></div><div class="labBody"><div class="threatChain"><button class="threatNode active" type="button" data-threat="input"><strong>Input</strong><span>Boundary</span></button><button class="threatNode" type="button" data-threat="inject"><strong>Injection</strong><span>Instructions</span></button><button class="threatNode" type="button" data-threat="tool"><strong>Tool Access</strong><span>Authorization</span></button><button class="threatNode" type="button" data-threat="exfil"><strong>Exfiltration</strong><span>DLP</span></button><button class="threatNode" type="button" data-threat="monitor"><strong>Detection</strong><span>Response</span></button></div><div class="labPanel"><h3 data-sec-title>Untrusted Input</h3><p data-sec-text>Externe Inhalte, Dokumente und Tool-Ausgaben grundsätzlich als nicht vertrauenswürdig behandeln.</p><span class="labStatus" data-sec-status>CONTROL: INPUT BOUNDARY</span></div></div></div></div></section><div id="lab"></div>
+
+<section class="assessment" id="assessment" data-assessment>
+<div class="assessmentHead"><div><div class="ey">BAIS ASSESSMENT ENGINE · MODUL 03</div><h2>Verstehen statt Antworten auswendig lernen</h2><p>Jeder Versuch zieht andere Fragen aus dem Pool, mischt Reihenfolge und Antwortpositionen. Schwache Themen werden bei Wiederholungen stärker gewichtet.</p></div><div class="assessmentCounter" data-assessment-counter></div></div>
+<div class="assessmentList" data-assessment-list></div>
+<div class="assessmentResult" data-assessment-result hidden></div>
+<div class="assessmentActions"><button type="button" data-assessment-restart>Neuen, veränderten Versuch starten</button></div>
+</section>
+
+<section class="lesson"><div class="ey">READY TO TEACH</div><h2>Modul 03 ist erst abgeschlossen, wenn du das praktisch kannst</h2><div class="teachList">
+<label><input type="checkbox"> direkte und indirekte Prompt Injection unterscheiden</label><label><input type="checkbox"> den Chevrolet-Fall als direkte Injection erklären</label><label><input type="checkbox"> den Slack-AI-Fall als indirekte Injection + Exfiltration erklären</label><label><input type="checkbox"> die Instruktionshierarchie (Systemregeln vor Daten) begründen</label><label><input type="checkbox"> mindestens zwei Exfiltrationskanäle benennen</label><label><input type="checkbox"> eine mehrschichtige Verteidigungsstrategie skizzieren</label>
+</div></section>
+
+<div class="nextModule"><strong>Als Nächstes: Modul 04 · Tool- und Anbieterprüfung</strong><span>Modul 04 zeigt, wie man ein AI-Tool oder einen Anbieter vor dem Einsatz systematisch auf genau diese Risiken prüft.</span><p><a href="../modul-04/">Modul 04 öffnen →</a></p></div>
+</div></div></section></main>
+
+<footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein IT & Security</span><span><a href="../../konto/">Mein Konto</a> · <a href="../../../impressum/">Impressum</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
+<script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
+<script src="../../../assets/academy-business-labs.js?v=5.0" defer></script>
+<script src="../../../assets/academy-portfolio-lab-progress.js?v=1.0" defer></script>
+<script src="../../../assets/kis-module-03-assessment.js?v=1.0" defer></script>
+</body></html>
