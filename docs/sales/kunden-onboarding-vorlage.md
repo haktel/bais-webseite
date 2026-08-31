@@ -609,6 +609,9 @@ Der Auftragnehmer ist insbesondere verantwortlich für:
 - [ ] Credential-Handling geprüft
 - [ ] Lösch-/Aufbewahrungsanforderungen dokumentiert
 - [ ] Logging / Audit-Anforderungen dokumentiert
+- [ ] Backup / Recovery / Monitoring Runbook initialisiert – falls MOD-03 beauftragt
+- [ ] Runbook-Owner und Eskalationskontakte festgelegt
+- [ ] echte RTO/RPO-/Reaktionszeitwerte nur aus SOW/SLA übernommen
 - [ ] Security-Ausnahmen schriftlich dokumentiert
 
 ## Interne Onboarding-Freigabe
@@ -677,6 +680,7 @@ Die spätere Abnahme erfolgt anhand:
 4. **Nur beauftragte SOW-Module aktivieren.** Onboarding darf den Scope nicht stillschweigend erweitern.
 5. **Kundenkonto ≠ Vollzugriff.** Registrierung erzeugt Identität/Kunden-Nr.; geschützte Projektinhalte werden nur explizit und kundenbezogen freigeschaltet.
 6. **Onboarding und Abnahme müssen dieselben Modulnamen verwenden.** Dadurch bleibt nachvollziehbar, was verkauft, vorbereitet, umgesetzt und später abgenommen wurde.
+7. **Bei MOD-03 – Wartung/Hosting-Setup das Backup / Recovery / Monitoring Runbook initialisieren.** Onboarding sammelt Zugänge und Owner; das Runbook beschreibt den späteren Betriebsablauf.
 
 ---
 
