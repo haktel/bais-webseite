@@ -2,6 +2,8 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{allocateCustomerNumber,ensureCommercialSchema}from"../../../_lib/commercial.js";
 
+const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v2");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
+
 const customerSlug=(company,organizationId)=>{
  const base=String(company||"kunde").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,42)||"kunde";
  return base+"-"+organizationId.slice(0,8);
@@ -61,14 +63,14 @@ export const onRequestPost=async({request,env})=>{
   await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
 
   stage="complete";
-  return json({
+  return withRegistrationVersion(json({
    ok:true,
    user:{displayName,email,role:"customer"},
    commercial:{customerNumber},
    contentAccess:[],
    message:"Kundenkonto erstellt. Geschützte Inhalte werden erst nach ausdrücklicher Freigabe sichtbar.",
    requestId:traceId
-  },201,{"set-cookie":session.cookie});
+  },201,{"set-cookie":session.cookie}));
  }catch(error){
   if(userId||organizationId)try{
    const db=assertDatabase(env);
@@ -84,8 +86,8 @@ export const onRequestPost=async({request,env})=>{
    }
   }catch{}
   if(!(error instanceof ApiError))console.error(JSON.stringify({level:"error",area:"customer.register",stage,requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
-  if(error instanceof ApiError)return handleError(error,traceId);
-  return json({ok:false,error:{code:"customer_registration_failed",message:"Das Kundenkonto konnte nicht erstellt werden. Referenz: "+traceId},requestId:traceId},500);
+  if(error instanceof ApiError)return withRegistrationVersion(handleError(error,traceId));
+  return withRegistrationVersion(json({ok:false,error:{code:"customer_registration_failed",message:"Das Kundenkonto konnte nicht erstellt werden. Referenz: "+traceId},requestId:traceId},500));
  }
 };
-export const onRequest=()=>json({ok:false,error:{code:"method_not_allowed",message:"Methode nicht erlaubt."}},405,{allow:"POST"});
+export const onRequest=()=>withRegistrationVersion(json({ok:false,error:{code:"method_not_allowed",message:"Methode nicht erlaubt."}},405,{allow:"POST"}));
