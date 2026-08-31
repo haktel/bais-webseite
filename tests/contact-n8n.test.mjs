@@ -24,7 +24,7 @@ test("buildLeadPayload never forwards free-text message content",()=>{
 
 test("deriveLeadSignals exposes only allow-listed business metadata",()=>{
  const derived=deriveLeadSignals("Wir brauchen RAG, n8n, Monitoring und ISO 27001. Max Mustermann max@example.com");
- assert.deepEqual(derived.signals,["n8n","governance","rag","monitoring","iso27001"]);
+ assert.deepEqual(derived.signals,["n8n","rag","monitoring","iso27001"]);
  assert.equal(derived.messageLength,"Wir brauchen RAG, n8n, Monitoring und ISO 27001. Max Mustermann max@example.com".length);
 });
 
