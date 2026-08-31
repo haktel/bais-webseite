@@ -15,9 +15,19 @@ check_redirect(){
 check_redirect "/admin/" "/academy/konto/"
 check_redirect "/angebot/" "/academy/konto/"
 check_redirect "/abnahme/" "/academy/konto/"
+check_redirect "/project-portal/kunde/" "/academy/konto/"
 
 code="$(status "${BASE}/api/admin/mfa" || true)"
 [ "$code" = "401" ] && pass "admin MFA API blocks anonymous access" || fail "admin MFA API expected 401, got ${code}"
+
+code="$(status "${BASE}/api/customer/portal" || true)"
+[ "$code" = "401" ] && pass "customer portal API blocks anonymous access" || fail "customer portal API expected 401, got ${code}"
+
+code="$(status "${BASE}/api/admin/customer-access" || true)"
+[ "$code" = "401" ] && pass "customer access admin API blocks anonymous access" || fail "customer access admin API expected 401, got ${code}"
+
+code="$(status "${BASE}/api/commercial/context" || true)"
+[ "$code" = "401" ] && pass "commercial customer context blocks anonymous access" || fail "commercial context expected 401, got ${code}"
 
 code="$(status -X POST -H 'Origin: https://bais-solutions.de' -H 'Content-Type: application/json' --data '{"name":"Synthetic","email":"synthetic@example.com","company":"Demo","budget":5000}' "${BASE}/api/n8n-module-01" || true)"
 [ "$code" = "401" ] && pass "n8n Academy lab requires authenticated enrollment" || fail "n8n Academy lab expected 401, got ${code}"
