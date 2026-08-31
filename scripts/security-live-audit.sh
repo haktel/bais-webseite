@@ -29,7 +29,16 @@ code="$(status -H 'X-API-Key: bais-demo-key-read' "${BASE}/api/academy/auth-lab-
 [ "$code" = "401" ] && pass "auth lab demo credentials do not bypass Academy session" || fail "auth lab expected 401, got ${code}"
 
 code="$(status "${BASE}/api/health" || true)"
-[ "$code" = "200" ] && pass "public health endpoint remains available" || fail "health expected 200, got ${code}"
+if [ "$code" = "200" ]; then
+  pass "public health endpoint remains available"
+  if grep -q '"securityRuntime":"ready"' /tmp/body; then
+    pass "production security runtime has MFA/bootstrap/mail secrets"
+  else
+    fail "production security runtime reports degraded"
+  fi
+else
+  fail "health expected 200, got ${code}"
+fi
 
 code="$(status "${BASE}/api/definitely-not-a-real-route" || true)"
 if [ "$code" = "403" ] || [ "$code" = "404" ]; then pass "unknown API route fails closed"; else fail "unknown API route expected 403/404, got ${code}"; fi
