@@ -24,7 +24,7 @@ async function ensureCourseAndRun(db,slug,title,now){
 }
 
 async function buildSession(userId,request,now){
- const token=randomToken(),tokenHash=await sha256(token),expires=new Date(Date.parse(now)+7*24*60*60*1000).toISOString();
+ const token=randomToken(),tokenHash=await sha256(token),expires=new Date(Date.parse(now)+24*60*60*1000).toISOString();
  return{
   token,
   statement:{
