@@ -64,13 +64,15 @@ test("customer self-registration creates identity but grants no protected conten
  assert.match(source,/verifyTurnstile/);
  assert.match(source,/consumeRateLimit/);
  assert.match(source,/"customer","active"/);
- assert.match(source,/ensureCommercialIdentityForUser/);
- assert.match(source,/customerNumber:commercial\.customerNumber/);
+ assert.match(source,/ensureCommercialSchema/);
+ assert.match(source,/allocateCustomerNumber/);
+ assert.match(source,/INSERT INTO organizations/);
+ assert.match(source,/INSERT INTO customer_accounts/);
+ assert.match(source,/commercial:\{customerNumber\}/);
  assert.match(source,/contentAccess:\[\]/);
  assert.match(source,/defaultAccess:"deny"/);
  assert.doesNotMatch(source,/customer_access_grants/);
  assert.match(source,/DELETE FROM audit_events/);
- assert.match(source,/DELETE FROM project_registry/);
  assert.match(source,/DELETE FROM customer_accounts/);
 });
 
