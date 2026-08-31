@@ -7,11 +7,15 @@ import{firstIncompletePriorN8nModule}from"../../_lib/n8n-course-access.js";
 // count or lab case ids leaking into the other's validation.
 const LESSONS_PER_MODULE={
   "n8n-bootcamp":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12,"modul-06":12,"modul-07":12,"modul-08":12,"modul-09":12,"modul-10":12,"modul-11":12,"modul-12":12},
-  "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12,"modul-06":12}
+  "ki-fuehrerschein":{"modul-01":12,"modul-02":12,"modul-03":12,"modul-04":12,"modul-05":12,"modul-06":12},
+  "ki-leadership":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6},
+  "ki-it-security":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6}
 };
 const LAB_CASES={
   "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"],"modul-04":["api-key","bearer","forbidden","expired"],"modul-05":["mixed","high","fallback","invalid"],"modul-06":["success","client","rate","server"],"modul-07":["create","update","event-first","event-repeat"],"modul-08":["csv","unicode","json","unsafe","invalid"],"modul-09":["grounded","unknown","injection","cost"],"modul-10":["standard","messy","extra","invalid"],"modul-11":["trusted","tampered","pii","ssrf","destructive"],"modul-12":["happy","high","invalid","security","weakroi"]},
-  "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"],"modul-05":["belegt","vage","unbelegt"],"modul-06":["keine","team_review","vollfreigabe"]}
+  "ki-fuehrerschein":{"modul-01":["gut","verbesserungswuerdig","blockiert"],"modul-02":["verlaesslich","pruefen","kritisch"],"modul-03":["vollstaendig","teilweise","unzureichend"],"modul-04":["unbedenklich","personenbezogen","besondere_kategorie"],"modul-05":["belegt","vage","unbelegt"],"modul-06":["keine","team_review","vollfreigabe"]},
+  "ki-leadership":{"modul-01":["scale","pilot","observe","stop"],"modul-02":["scale","pilot","observe","stop"],"modul-03":["scale","pilot","observe","stop"],"modul-04":["scale","pilot","observe","stop"],"modul-05":["scale","pilot","observe","stop"],"modul-06":["scale","pilot","observe","stop"]},
+  "ki-it-security":{"modul-01":["input","inject","tool","exfil","monitor"],"modul-02":["input","inject","tool","exfil","monitor"],"modul-03":["input","inject","tool","exfil","monitor"],"modul-04":["input","inject","tool","exfil","monitor"],"modul-05":["input","inject","tool","exfil","monitor"],"modul-06":["input","inject","tool","exfil","monitor"]}
 };
 
 const parseArray=value=>{
