@@ -1,5 +1,6 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../_lib/api.js";
 import{buildLeadPayload,callLeadQualificationWebhook,mapLeadResult}from"../_lib/n8n.js";
+import{privacyPolicy,scheduleRetention,runPrivacyCleanup}from"../_lib/privacy.js";
 const TOPICS=new Set(["AI Engineering","Cybersecurity","Automation / n8n","BAIS Academy","AI Governance / CAIO","Project Portal","Sonstiges"]);
 
 async function qualifyLead(db,leadId,lead,requestId){
@@ -27,7 +28,9 @@ export const onRequestPost=async({request,env,waitUntil})=>{
   const leadId=crypto.randomUUID(),createdAt=new Date().toISOString();
   await db.prepare("INSERT INTO contacts(id,name,company,email,phone,topic,timeline,message,status,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
    .bind(leadId,name,company||null,email,phone||null,topic||"Sonstiges",timeline||null,message,"new",createdAt).run();
+  await scheduleRetention(db,{entityType:"contact",entityId:leadId,days:privacyPolicy(env).openLeadDays,reason:"open_lead_retention",now:createdAt});
   waitUntil(Promise.resolve().then(()=>console.log(JSON.stringify({level:"info",event:"contact_created",leadId,requestId:id}))));
+  waitUntil(runPrivacyCleanup(db,{limit:20}).catch(()=>null));
   waitUntil(qualifyLead(db,leadId,{name,email,company,topic,message},id));
   return json({ok:true,id:leadId,message:"Vielen Dank. Ihre Anfrage wurde sicher übermittelt.",requestId:id},201);
  }catch(error){return handleError(error,id);}
