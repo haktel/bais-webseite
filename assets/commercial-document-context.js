@@ -96,7 +96,12 @@ async function createProject(){
   const result=await request("/api/commercial/projects",{method:"POST",body:JSON.stringify({name,organizationId:organizationId||undefined})});
   if(!result.response.ok)throw new Error(result.data?.error?.message||"Projekt konnte nicht angelegt werden.");
   input.value="";await refresh();
-  const picker=byId("projectPicker");if(picker&&result.data?.project?.id){picker.value=result.data.project.id;picker.dispatchEvent(new Event("change"))}
+  if(adminData&&organizationId){
+   const customerPicker=byId("customerPicker");if(customerPicker)customerPicker.value=organizationId;
+   applyAdminCustomer(organizationId,result.data?.project?.id);
+  }else{
+   const picker=byId("projectPicker");if(picker&&result.data?.project?.id){picker.value=result.data.project.id;picker.dispatchEvent(new Event("change"))}
+  }
   status("Projekt angelegt · "+result.data.project.projectNumber);
  }catch(error){status(error.message||"Projekt konnte nicht angelegt werden.")}finally{button.disabled=false}
 }
