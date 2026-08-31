@@ -27,6 +27,7 @@ test("public API surface stays intentionally small and hardened",async()=>{
   ["functions/api/contact.js",/verifyTurnstile/],
   ["functions/api/academy/enrollments.js",/verifyTurnstile/],
   ["functions/api/academy/auth/register.js",/verifyTurnstile/],
+  ["functions/api/customer/auth/register.js",/verifyTurnstile/],
   ["functions/api/academy/auth/login.js",/consumeRateLimit/],
   ["functions/api/n8n-demo.js",/synthetisch|synthetic/i],
   ["functions/api/n8n-signature-verify.js",/verifyN8nSignature/],
@@ -44,6 +45,13 @@ test("Academy lab APIs are no longer authenticated by Origin alone",()=>{
   assert.equal(policy.mode,"course");
   assert.ok(policy.courseSlug);
  }
+});
+
+test("customer protected API requires explicit content entitlement",()=>{
+ const policy=classifyApiPath("/api/customer/portal");
+ assert.equal(policy.mode,"customer_content");
+ assert.equal(policy.contentKey,"project_portal");
+ assert.equal(classifyApiPath("/api/customer/internal-debug").mode,"deny");
 });
 
 test("admin APIs require MFA except the MFA/bootstrap control plane",()=>{
