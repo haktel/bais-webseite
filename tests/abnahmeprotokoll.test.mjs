@@ -39,11 +39,11 @@ test("Abnahme has usable dynamic defect management",()=>{
  assert.match(acceptance,/removeDefect/);
 });
 
-test("Abnahme uses real dates, print-to-PDF and local-only draft storage",()=>{
+test("Abnahme uses real dates, print-to-PDF and session-scoped draft storage",()=>{
  assert.ok((acceptance.match(/type="date"/g)||[]).length>=10);
  assert.match(acceptance,/Drucken \/ als PDF speichern/);
  assert.match(acceptance,/window\.print\(\)/);
- assert.match(acceptance,/localStorage/);
+ assert.match(acceptance,/sessionStorage/);
  assert.match(acceptance,/printHideUnchecked/);
  assert.match(acceptance,/printHideEmptyDefects/);
  assert.doesNotMatch(acceptance,/fetch\s*\(/i);
