@@ -92,7 +92,8 @@ async function createProject(){
  if(name.length<2){status("Bitte zuerst einen Projektnamen eingeben.");input?.focus();return}
  button.disabled=true;status("Projekt wird angelegt …");
  try{
-  const result=await request("/api/commercial/projects",{method:"POST",body:JSON.stringify({name})});
+  const organizationId=adminData?byId("customerPicker")?.value||"":"";
+  const result=await request("/api/commercial/projects",{method:"POST",body:JSON.stringify({name,organizationId:organizationId||undefined})});
   if(!result.response.ok)throw new Error(result.data?.error?.message||"Projekt konnte nicht angelegt werden.");
   input.value="";await refresh();
   const picker=byId("projectPicker");if(picker&&result.data?.project?.id){picker.value=result.data.project.id;picker.dispatchEvent(new Event("change"))}
