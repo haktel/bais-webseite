@@ -1,0 +1,68 @@
+name: BAIS Security Runtime Provisioning
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/security-runtime-provision.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    env:
+      CF_TOKEN_PRIMARY: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_TOKEN_ALT: ${{ secrets.CF_API_TOKEN }}
+      CF_TOKEN_ALT2: ${{ secrets.CLOUDFLARE_TOKEN }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+    steps:
+      - name: Provision stable security runtime configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          CF_TOKEN="${CF_TOKEN_PRIMARY:-${CF_TOKEN_ALT:-${CF_TOKEN_ALT2:-}}}"
+          if [ -z "${CF_TOKEN}" ]; then
+            echo "CONFIG_STATUS=CLOUDFLARE_TOKEN_MISSING"
+            exit 0
+          fi
+
+          AUTH=(-H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json")
+          ACCOUNT_ID="$(curl -fsS "${AUTH[@]}" https://api.cloudflare.com/client/v4/accounts | jq -r '.result[0].id // empty')"
+          test -n "${ACCOUNT_ID}"
+          PROJECT="bais-webseite"
+          PROJECT_JSON="$(curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}")"
+          echo "${PROJECT_JSON}" | jq -e '.success == true' >/dev/null
+
+          PROD="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.production.env_vars // {}')"
+          PREVIEW="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.preview.env_vars // {}')"
+
+          PROD_MFA="$(openssl rand -base64 48 | tr -d '\n')"
+          PREVIEW_MFA="$(openssl rand -base64 48 | tr -d '\n')"
+          echo "::add-mask::${PROD_MFA}"
+          echo "::add-mask::${PREVIEW_MFA}"
+          [ -n "${RESEND_API_KEY:-}" ] && echo "::add-mask::${RESEND_API_KEY}" || true
+
+          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg mfa "${PROD_MFA}" --arg resend "${RESEND_API_KEY:-}" '
+            (if ($old|has("MFA_ENCRYPTION_KEY")) then $old else $old + {MFA_ENCRYPTION_KEY:{type:"secret_text",value:$mfa}} end)
+            | . + {PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"}}
+            | if ($resend|length)>0 then . + {RESEND_API_KEY:{type:"secret_text",value:$resend}} else . end
+          ')"
+          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg mfa "${PREVIEW_MFA}" --arg resend "${RESEND_API_KEY:-}" '
+            (if ($old|has("MFA_ENCRYPTION_KEY")) then $old else $old + {MFA_ENCRYPTION_KEY:{type:"secret_text",value:$mfa}} end)
+            | . + {PUBLIC_BASE_URL:{type:"plain_text",value:"https://bais-solutions.de"},TRANSACTIONAL_EMAIL_FROM:{type:"plain_text",value:"BAIS <info@bais-solutions.de>"}}
+            | if ($resend|length)>0 then . + {RESEND_API_KEY:{type:"secret_text",value:$resend}} else . end
+          ')"
+
+          PATCH="$(jq -nc --argjson prod "${PROD_MERGED}" --argjson preview "${PREVIEW_MERGED}" '{deployment_configs:{production:{env_vars:$prod},preview:{env_vars:$preview}}}')"
+          RESPONSE="$(curl -fsS -X PATCH "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}" --data "${PATCH}")"
+          echo "${RESPONSE}" | jq -e '.success == true' >/dev/null
+
+          echo "CONFIG_STATUS=CLOUDFLARE_SECURITY_PROVISIONED"
+          if [ -n "${RESEND_API_KEY:-}" ]; then
+            echo "MAIL_STATUS=RESEND_CONFIGURED"
+          else
+            echo "MAIL_STATUS=RESEND_API_KEY_MISSING"
+          fi
