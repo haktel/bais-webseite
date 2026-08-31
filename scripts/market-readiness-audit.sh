@@ -67,7 +67,7 @@ done
 curl -LsS --max-time 20 "${BASE_URL}/kontakt/" >/tmp/contact || true
 grep -qi '/api/contact' /tmp/contact && pass "contact form wired to API" || fail "contact form API wiring not found"
 grep -qi 'challenges.cloudflare.com\|turnstile' /tmp/contact && pass "contact form Turnstile present" || fail "contact form Turnstile not found"
-grep -qi 'mailto:info@bais-solutions.de\|info@bais-solutions.de' /tmp/contact && pass "fallback contact email present" || warn "fallback email not visible"
+grep -qi 'mailto:info@bais-solutions.de\|info@bais-solutions.de\|data-cfemail=' /tmp/contact && pass "contact email/fallback present" || warn "fallback email not visible"
 
 curl -LsS --max-time 20 "${BASE_URL}/avv/" >/tmp/avv || true
 grep -qi 'Art. 28 DSGVO' /tmp/avv && pass "AVV page contains Art. 28 scope" || fail "AVV page missing Art. 28 scope"
