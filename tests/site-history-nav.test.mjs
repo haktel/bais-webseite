@@ -36,7 +36,7 @@ test("key public BAIS pages include back-forward navigation",()=>{
   "sla/index.html"
  ]){
    const html=read(path);
-   assert.match(html,/site-history-nav\.css\?v=1\.0/,path+" missing navigation CSS");
+   assert.match(html,/site-history-nav\.css\?v=1\.1/,path+" missing navigation CSS");
    assert.match(html,/site-history-nav\.js\?v=1\.0/,path+" missing navigation JS");
  }
 });
