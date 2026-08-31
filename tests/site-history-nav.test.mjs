@@ -27,9 +27,14 @@ test("desktop mega menus use a full-width continuous hitbox and keyboard focus s
  assert.match(css,/background:transparent;border:0/);
  assert.match(css,/\.submenu::before\{content:"";position:absolute;inset:12px 0 0/);
  assert.match(css,/pointer-events:none/);
- assert.match(css,/\.navItem:hover \.submenu,\.navItem:focus-within \.submenu/);
+ assert.match(css,/\.navItem:hover \.submenu,\.navItem:focus-within \.submenu,\.navItem\.navOpen \.submenu/);
  assert.match(css,/\.submenu a:hover,\.submenu a:focus-visible/);
  assert.doesNotMatch(css,/\.navItem::after/);
+ const js=read("assets/site-history-nav.js");
+ assert.match(js,/mountDropdownGuards/);
+ assert.match(js,/setTimeout/);
+ assert.match(js,/250/);
+ assert.match(js,/aria-expanded/);
 });
 
 test("key public BAIS pages include back-forward navigation",()=>{
@@ -49,7 +54,7 @@ test("key public BAIS pages include back-forward navigation",()=>{
  ]){
    const html=read(path);
    assert.match(html,/site-history-nav\.css\?v=1\.1/,path+" missing navigation CSS");
-   assert.match(html,/site-history-nav\.js\?v=1\.0/,path+" missing navigation JS");
+   assert.match(html,/site-history-nav\.js\?v=1\.1/,path+" missing navigation JS");
  }
 });
 
