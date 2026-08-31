@@ -20,6 +20,16 @@ for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /sla/ /re
 done
 
 echo
+echo "=== 1B. SITE NAVIGATION ==="
+nav_js="$(curl -LsS --max-time 20 -o /tmp/site-history-nav.js -w '%{http_code}' "${BASE_URL}/assets/site-history-nav.js?v=1.0" || true)"
+nav_css="$(curl -LsS --max-time 20 -o /tmp/site-history-nav.css -w '%{http_code}' "${BASE_URL}/assets/site-history-nav.css?v=1.0" || true)"
+[ "$nav_js" = "200" ] && pass "history navigation asset JS" || fail "history navigation JS HTTP ${nav_js}"
+[ "$nav_css" = "200" ] && pass "history navigation asset CSS" || fail "history navigation CSS HTTP ${nav_css}"
+curl -LsS --max-time 20 "${BASE_URL}/" >/tmp/navhome || true
+grep -qi 'site-history-nav.js' /tmp/navhome && pass "homepage loads history navigation" || fail "homepage missing history navigation"
+grep -qi 'site-history-nav.css' /tmp/navhome && pass "homepage loads history navigation styles" || fail "homepage missing history navigation styles"
+
+echo
 echo "=== 2. ERROR BEHAVIOR ==="
 code="$(curl -LsS --max-time 20 -o /tmp/missing -w '%{http_code}' "${BASE_URL}/this-path-must-not-exist-market-audit-934781/" || true)"
 [ "$code" = "404" ] && pass "unknown path returns 404" || fail "unknown path returned ${code}, expected 404"
