@@ -65,7 +65,7 @@ export const onRequestPatch=async({request,env})=>{
    }else{
     const invite=await createRegistrationInvite(db,{enrollmentRequestId:id,email:entry.email,courseId:entry.course_id,createdBy:admin.user_id,env,now});
     inviteId=invite.id;
-    registrationInvite={url:"/academy/konto/?invite="+encodeURIComponent(invite.token),expiresAt:invite.expiresAt};
+    registrationInvite={url:"/academy/konto/#invite="+encodeURIComponent(invite.token),expiresAt:invite.expiresAt};
    }
   }
 
