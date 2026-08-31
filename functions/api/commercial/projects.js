@@ -7,7 +7,7 @@ export const onRequestGet=async({request,env})=>{
  try{
   const db=assertDatabase(env);await ensureAuthSchema(db);const session=await requireSession(db,request);
   const identity=await ensureCommercialIdentityForUser(db,{userId:session.user_id,displayName:session.display_name,email:session.email});
-  const rows=await db.prepare("SELECT id,project_number,name,status,starts_at,ends_at,created_at FROM projects WHERE organization_id=? ORDER BY created_at DESC").bind(identity.organizationId).all();
+  const rows=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.starts_at,p.ends_at,p.created_at FROM projects p JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at DESC").bind(identity.organizationId).all();
   return json({ok:true,projects:rows.results||[],requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
