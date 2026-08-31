@@ -63,6 +63,8 @@ test("customer self-registration creates identity but grants no protected conten
  const source=read("functions/api/customer/auth/register.js");
  assert.match(source,/verifyTurnstile/);
  assert.match(source,/consumeRateLimit/);
+ assert.match(source,/customer-register-v2/);
+ assert.match(source,/DELETE FROM auth_rate_limits/);
  assert.match(source,/"customer","active"/);
  assert.match(source,/ensureCommercialSchema/);
  assert.match(source,/allocateCustomerNumber/);
