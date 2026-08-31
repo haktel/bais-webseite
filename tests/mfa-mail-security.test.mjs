@@ -20,10 +20,15 @@ test("TOTP replay of an already accepted counter is rejected",async()=>{
  assert.equal(replay.ok,false);
 });
 
-test("admin MFA secrets are encrypted and admin APIs require verified MFA",()=>{
+test("admin MFA uses a dedicated encryption root and time-limited step-up",()=>{
  const mfa=read("functions/_lib/mfa.js");
  assert.match(mfa,/AES-GCM/);
  assert.match(mfa,/MFA_ENCRYPTION_KEY/);
+ assert.match(mfa,/mfa_key_not_configured/);
+ assert.doesNotMatch(mfa,/TURNSTILE_SECRET/);
+ assert.match(mfa,/MFA_VERIFICATION_TTL_MS=4\*60\*60\*1000/);
+ assert.match(mfa,/verified_at/);
+ assert.match(mfa,/DELETE FROM admin_mfa_sessions/);
  assert.match(mfa,/admin_mfa_recovery_codes/);
  assert.match(mfa,/last_counter/);
  const admin=read("functions/_lib/admin.js");
@@ -61,7 +66,7 @@ test("transactional mail uses Resend bearer auth and idempotency without logging
  assert.doesNotMatch(mail,/console\.(log|error)/);
 });
 
-test("security runtime provisioning never rotates an existing MFA key",()=>{
+test("security runtime provisioning preserves existing MFA root and requires transactional mail",()=>{
  const workflow=read(".github/workflows/security-runtime-provision.yml");
  assert.match(workflow,/has\("MFA_ENCRYPTION_KEY"\)/);
  assert.match(workflow,/RESEND_API_KEY/);
