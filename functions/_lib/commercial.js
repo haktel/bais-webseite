@@ -96,10 +96,19 @@ export async function createProjectForUser(db,{userId,name,now=new Date().toISOS
  const identity=await ensureCommercialIdentityForUser(db,{userId,displayName:user.display_name,email:user.email,now});
  const projectName=String(name||"").trim().slice(0,180);
  if(projectName.length<2)throw new ApiError(422,"validation_failed","Ein Projektname ist erforderlich.");
+
+ const intake=await db.prepare("SELECT id,project_number,name,status FROM projects WHERE organization_id=? AND name='Erstprojekt / Intake' AND status='planned' ORDER BY created_at ASC LIMIT 1")
+  .bind(identity.organizationId).first();
+ if(intake){
+  await db.prepare("UPDATE projects SET name=? WHERE id=?").bind(projectName,intake.id).run();
+  await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(intake.id,userId,"customer").run();
+  return{id:intake.id,projectNumber:intake.project_number,name:projectName,status:"planned",reusedIntake:true};
+ }
+
  const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
  await db.batch([
   db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at,project_number) VALUES(?,?,?,?,?,?)").bind(projectId,identity.organizationId,projectName,"planned",now,projectNumber),
   db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer")
  ]);
- return{id:projectId,projectNumber,name:projectName,status:"planned"};
+ return{id:projectId,projectNumber,name:projectName,status:"planned",reusedIntake:false};
 }
