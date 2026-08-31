@@ -16,10 +16,10 @@ export const onRequest=async context=>{
   await requireAdmin(db,context.request);
   return privateResponse(await context.next());
  }catch(error){
-  if(error?.status===401){
+  if(error?.status===401||error?.code==="mfa_setup_required"){
    const target=new URL("/academy/konto/",context.request.url);
    target.searchParams.set("continue","/admin/");
-   target.searchParams.set("reason","admin_login_required");
+   target.searchParams.set("reason",error?.code==="mfa_setup_required"?"mfa_setup_required":error?.code==="mfa_required"?"mfa_required":"admin_login_required");
    return Response.redirect(target,302);
   }
   return new Response("Forbidden",{status:403,headers:{"cache-control":"no-store","content-type":"text/plain; charset=utf-8"}});
