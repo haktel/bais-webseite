@@ -56,14 +56,21 @@
 <form id="acceptanceForm" autocomplete="off">
 <article class="apHeader">
 <div class="ey">ABNAHMEPROTOKOLL</div>
+<div class="legalLine" id="commercialStatus">DB-Kontext wird geladen …</div>
 <div class="fieldGrid" style="margin-top:12px">
-<div class="formField"><label for="projectName">Projektname</label><input id="projectName" name="projectName" type="text"></div>
+<div class="formField"><label for="customerPicker">Kunde aus DB</label><select id="customerPicker" aria-label="Kunde auswählen"><option value="">Wird geladen …</option></select></div>
+<div class="formField"><label for="customerNumber">Kunden-Nr.</label><input id="customerNumber" name="customerNumber" type="text" readonly></div>
+<div class="formField"><label for="projectPicker">Projekt aus DB</label><select id="projectPicker" aria-label="Projekt auswählen"><option value="">Wird geladen …</option></select></div>
+<div class="formField"><label for="projectNo">Projekt-Nr.</label><input id="projectNo" name="projectNo" type="text" readonly></div>
+</div>
+<div class="fieldGrid">
+<div class="formField"><label for="projectName">Projektname</label><input id="projectName" name="projectName" type="text" readonly></div>
 <div class="formField"><label for="offerNo">Angebots-/SOW-Nummer</label><input id="offerNo" name="offerNo" type="text"></div>
-<div class="formField"><label for="projectNo">Projekt-/Auftragsnummer</label><input id="projectNo" name="projectNo" type="text"></div>
+<div class="formField"><label for="offerDate">Datum des Angebots / SOW</label><input id="offerDate" name="offerDate" type="date"></div>
 <div class="formField"><label for="acceptanceDate">Datum der Abnahme</label><input id="acceptanceDate" name="acceptanceDate" type="date"></div>
 </div>
 <div class="fieldGrid">
-<div class="formField"><label for="offerDate">Datum des Angebots / SOW</label><input id="offerDate" name="offerDate" type="date"></div>
+<div class="formField"><label for="newProjectName">Neues Projekt</label><input id="newProjectName" type="text" placeholder="Projektname eingeben"><button id="createProject" type="button" style="margin-top:6px;padding:9px;border:1px solid #bfd0d5;border-radius:9px;background:#fff;font-weight:800;cursor:pointer">Projekt anlegen</button></div>
 <div class="formField"><label for="acceptancePlace">Abnahmeort / Format</label><input id="acceptancePlace" name="acceptancePlace" type="text" placeholder="z. B. Dortmund / Remote"></div>
 <div class="formField"><label for="projectPhase">Projekt / Phase</label><input id="projectPhase" name="projectPhase" type="text"></div>
 <div class="formField"><label for="handoverDate">Handover-Datum</label><input id="handoverDate" name="handoverDate" type="date"></div>
@@ -71,14 +78,14 @@
 
 <div class="partyGrid">
 <section class="party"><h3>Auftraggeber</h3>
-<div class="formField"><label for="clientCompany">Unternehmen</label><input id="clientCompany" name="clientCompany" type="text"></div>
-<div class="formField"><label for="clientContact">Ansprechpartner</label><input id="clientContact" name="clientContact" type="text"></div>
+<div class="formField"><label for="clientCompany">Unternehmen</label><input id="clientCompany" name="clientCompany" type="text" readonly></div>
+<div class="formField"><label for="clientContact">Name / Ansprechpartner</label><input id="clientContact" name="clientContact" type="text" readonly></div>
 <div class="formField"><label for="clientRole">Funktion</label><input id="clientRole" name="clientRole" type="text"></div>
 </section>
 <section class="party"><h3>Auftragnehmer</h3>
-<div class="formField"><label for="providerCompany">Unternehmen</label><input id="providerCompany" name="providerCompany" type="text"></div>
-<div class="formField"><label for="providerContact">Ansprechpartner</label><input id="providerContact" name="providerContact" type="text"></div>
-<div class="formField"><label for="providerRole">Funktion</label><input id="providerRole" name="providerRole" type="text"></div>
+<div class="formField"><label for="providerCompany">Unternehmen</label><input id="providerCompany" name="providerCompany" type="text" readonly></div>
+<div class="formField"><label for="providerContact">Ansprechpartner</label><input id="providerContact" name="providerContact" type="text" readonly></div>
+<div class="formField"><label for="providerRole">Funktion</label><input id="providerRole" name="providerRole" type="text" readonly></div><div class="formField"><label for="providerAddress">Anschrift</label><input id="providerAddress" name="providerAddress" type="text" readonly></div>
 </section>
 </div>
 </article>
@@ -271,5 +278,6 @@ window.addEventListener("beforeprint",applyPrint);window.addEventListener("after
 restore();
 })();
 </script>
+<script src="/assets/commercial-document-context.js?v=1.0" defer></script>
 </body>
 </html>
