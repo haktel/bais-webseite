@@ -1,6 +1,7 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../../_lib/api.js";
 import{academyProgram}from"../../../_lib/academy.js";
 import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,hashPassword,normalizeEmail,randomToken,sessionCookie,sha256,validPassword}from"../../../_lib/auth.js";
+import{ensureCommercialIdentityForUser}from"../../../_lib/commercial.js";
 
 async function ensureCourseAndRun(db,slug,title,now){
  let course=await db.prepare("SELECT id FROM courses WHERE slug=? LIMIT 1").bind(slug).first();
@@ -56,6 +57,7 @@ export const onRequestPost=async({request,env})=>{
    displayName=cleanText(body.displayName,120),
    email=normalizeEmail(body.email),
    password=body.password,
+   company=cleanText(body.company,160),
    slug=cleanText(body.courseSlug,120),
    title=academyProgram(slug);
 
@@ -127,6 +129,15 @@ export const onRequestPost=async({request,env})=>{
    throw error;
   }
 
+  stage="commercial_identity";
+  let commercial;
+  try{
+   commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now,intakeName:"Erstprojekt / Intake"});
+  }catch(error){
+   try{await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();}catch{}
+   throw error;
+  }
+
   stage="rate_limit_cleanup";
   await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
 
@@ -134,6 +145,7 @@ export const onRequestPost=async({request,env})=>{
   return json({
    ok:true,
    user:{displayName,email,role:"student"},
+   commercial:{customerNumber:commercial.customerNumber,projectNumber:commercial.project.project_number,projectName:commercial.project.name},
    access:{courseSlug:slug,status:accessStatus},
    message:accessStatus==="active"
     ?"Ihr Academy-Konto wurde erstellt. Der freigegebene Kurszugang ist aktiv."
