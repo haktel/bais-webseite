@@ -1,10 +1,12 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../_lib/api.js";
 import{buildLeadPayload,callLeadQualificationWebhook,mapLeadResult}from"../../_lib/n8n.js";
 import{privacyPolicy,scheduleRetention,runPrivacyCleanup}from"../../_lib/privacy.js";
+import{ensureLeadScoringSchema}from"../../_lib/lead-scoring-schema.js";
 const PROGRAMS={"ki-fuehrerschein":"KI-Führerschein Essentials","ki-leadership":"KI-Führerschein Leadership","ki-it-security":"KI-Führerschein IT & Security","data-literacy":"Datenkompetenz für AI","prompt-engineering":"Prompt Engineering Professional","secure-ai-rag":"Secure AI & RAG","ai-agents":"AI Agents & Workflow Labs","enterprise-tools":"ChatGPT, Copilot & Gemini","n8n-bootcamp":"n8n Automation Bootcamp","ai-coding":"AI-gestützte Softwareentwicklung","api-integration":"APIs, Webhooks & Systemintegration","knowledge-assistant-lab":"Knowledge Assistant Lab","ai-governance":"AI Governance Essentials","eu-ai-act":"AI Literacy & EU AI Act Awareness","caio-masterguide":"CAIO Masterguide","policy-enablement":"AI Policy Enablement","ai-for-sales":"AI for Sales & B2B Vertrieb","ai-customer-service":"AI im Kundenservice","prozessanalyse-automation":"Prozessanalyse & Automation Discovery","it-projektmanagement-ai-delivery":"IT-Projektmanagement & AI Delivery"};
 
 async function qualifyEnrollment(db,enrollmentId,lead,traceId){
  try{
+  await ensureLeadScoringSchema(db,"enrollment_requests");
   const upstream=await callLeadQualificationWebhook(buildLeadPayload(lead),{db});
   const mapped=mapLeadResult(await upstream.json().catch(()=>null));
   if(!mapped) throw new Error(`n8n responded with status ${upstream.status}`);
