@@ -26,7 +26,7 @@ export async function resolveRegistrationInvite(db,{token,email,courseSlug,now=n
  await ensureInviteSchema(db);
  if(typeof token!=="string"||token.length<32)throw new ApiError(403,"invite_required","Für die Kontoerstellung ist ein gültiger Einladungslink erforderlich.");
  const tokenHash=await sha256(token),normalizedEmail=normalizeEmail(email);
- const row=await db.prepare("SELECT i.id,i.enrollment_request_id,i.email,i.course_id,i.expires_at,c.slug,c.title FROM academy_registration_invites i JOIN courses c ON c.id=i.course_id WHERE i.token_hash=? AND i.used_at IS NULL AND i.expires_at>? LIMIT 1").bind(tokenHash,now).first();
+ const row=await db.prepare("SELECT i.id,i.enrollment_request_id,i.email,i.course_id,i.expires_at,c.slug,c.title,r.company,r.name FROM academy_registration_invites i JOIN courses c ON c.id=i.course_id JOIN enrollment_requests r ON r.id=i.enrollment_request_id WHERE i.token_hash=? AND i.used_at IS NULL AND i.expires_at>? LIMIT 1").bind(tokenHash,now).first();
  if(!row||row.email!==normalizedEmail||row.slug!==courseSlug)throw new ApiError(403,"invite_invalid","Der Einladungslink ist ungültig, abgelaufen oder passt nicht zu den Registrierungsdaten.");
  return row;
 }
