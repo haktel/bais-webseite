@@ -127,6 +127,7 @@ Weitere Leistungen wie Automation/n8n, AI/RAG, Cybersecurity/Governance oder Sch
 - [ ] Deployment / Go-Live
 - [ ] Monitoring
 - [ ] Backup
+- [ ] Backup / Recovery / Monitoring Runbook
 - [ ] Wartung
 - [ ] Patch-/Update-Service
 - [ ] BAIS Care
@@ -448,3 +449,4 @@ Unterschrift: ______________________________
 3. **Nicht markiert = nicht automatisch beauftragt.** Dies sollte im Angebot ausdrücklich stehen.
 4. **Acceptance Criteria vor Projektstart definieren.** Das spätere Abnahmeprotokoll referenziert diese Kriterien.
 5. **Betrieb vom Projekt trennen.** Hosting, Wartung, Monitoring, RPO/RTO, 24/7 und Service Credits nur bei ausdrücklicher Vereinbarung.
+6. **Bei MOD-03 – Wartung/Hosting-Setup das Operations-Runbook referenzieren.** Backup-, Restore-, Monitoring-, Eskalations- und Kundenkommunikationswerte müssen aus dem vereinbarten Scope/SLA übernommen werden.
