@@ -1,0 +1,79 @@
+import test from"node:test";
+import assert from"node:assert/strict";
+import fs from"node:fs";
+import{allocateCustomerNumber,allocateProjectNumber}from"../functions/_lib/commercial.js";
+
+const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
+
+const fakeSequenceDb=value=>({
+ prepare(sql){
+  assert.match(sql,/business_sequences/);
+  return{bind(key,now){
+   return{first:async()=>{
+    assert.match(key,/^(customer|project):2026$/);
+    assert.match(now,/^2026-/);
+    return{next_value:value};
+   }};
+  }};
+ }
+});
+
+test("commercial numbering uses stable year-prefixed customer and project formats",async()=>{
+ assert.equal(await allocateCustomerNumber(fakeSequenceDb(7),"2026-08-31T09:00:00.000Z"),"KD-2026-000007");
+ assert.equal(await allocateProjectNumber(fakeSequenceDb(42),"2026-08-31T09:00:00.000Z"),"PR-2026-000042");
+});
+
+test("commercial migration uses dedicated registries without altering projects",()=>{
+ const sql=read("migrations/0009_commercial_identity.sql");
+ for(const table of["business_sequences","customer_accounts","business_profile","project_registry"])
+  assert.match(sql,new RegExp("CREATE TABLE IF NOT EXISTS "+table));
+ assert.doesNotMatch(sql,/ALTER TABLE projects/i);
+ assert.match(sql,/project_number TEXT NOT NULL UNIQUE/i);
+});
+
+test("registration assigns commercial identity automatically",()=>{
+ const register=read("functions/api/academy/auth/register.js");
+ assert.match(register,/ensureCommercialIdentityForUser/);
+ assert.match(register,/company=cleanText\(body\.company,160\)/);
+ assert.match(register,/customerNumber:commercial\.customerNumber/);
+ assert.match(register,/projectNumber:commercial\.project\.project_number/);
+ const account=read("academy/konto/index.html");
+ assert.match(account,/name="company"/);
+});
+
+test("commercial APIs expose context, project creation and admin customer selection",()=>{
+ const context=read("functions/api/commercial/context.js");
+ const projects=read("functions/api/commercial/projects.js");
+ const admin=read("functions/api/admin/customers.js");
+ assert.match(context,/customerNumber/);
+ assert.match(context,/project_registry/);
+ assert.match(projects,/createProjectForUser/);
+ assert.match(projects,/project\.created/);
+ assert.match(admin,/requireAdmin/);
+ assert.match(admin,/customer_accounts/);
+ assert.match(admin,/project_registry/);
+});
+
+test("Angebot and Abnahme use readonly DB identifiers and shared autofill",()=>{
+ for(const path of["angebot/index.html","abnahme/index.html"]){
+  const html=read(path);
+  assert.match(html,/id="customerNumber"[^>]*readonly/);
+  assert.match(html,/id="projectNo"[^>]*readonly/);
+  assert.match(html,/id="customerPicker"/);
+  assert.match(html,/id="projectPicker"/);
+  assert.match(html,/id="createProject"/);
+  assert.match(html,/commercial-document-context\.js\?v=1\.0/);
+  assert.match(html,/id="providerCompany"[^>]*readonly/);
+  assert.match(html,/id="providerContact"[^>]*readonly/);
+ }
+});
+
+test("account dashboard surfaces automatic customer and project identity",()=>{
+ const html=read("academy/konto/index.html");
+ const js=read("assets/academy-account.js");
+ assert.match(html,/KUNDENKONTO · AUTOMATISCHE NUMMERN/);
+ assert.match(html,/data-commercial-identity/);
+ assert.match(html,/data-new-project-form/);
+ assert.match(js,/\/api\/commercial\/context/);
+ assert.match(js,/\/api\/commercial\/projects/);
+});
