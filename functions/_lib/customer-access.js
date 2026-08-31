@@ -13,6 +13,15 @@ export async function requireCustomerDocumentAccess(request,env){
  return{ok:true,user};
 }
 
+export function privatePageResponse(response){
+ const headers=new Headers(response.headers);
+ headers.set("cache-control","private, no-store, max-age=0");
+ headers.set("pragma","no-cache");
+ headers.set("x-robots-tag","noindex, nofollow, noarchive");
+ headers.set("referrer-policy","no-referrer");
+ return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+}
+
 export function customerLoginRedirect(request,continuePath){
  const target=new URL("/academy/konto/",request.url);
  target.searchParams.set("continue",continuePath);
