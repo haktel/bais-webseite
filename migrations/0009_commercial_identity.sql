@@ -31,8 +31,13 @@ CREATE TABLE IF NOT EXISTS business_profile(
   updated_at TEXT NOT NULL
 );
 
-ALTER TABLE projects ADD COLUMN project_number TEXT;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_project_number ON projects(project_number);
+CREATE TABLE IF NOT EXISTS project_registry(
+  project_id TEXT PRIMARY KEY,
+  project_number TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_project_registry_number ON project_registry(project_number);
 
 INSERT OR IGNORE INTO business_profile(
  id,legal_name,brand_name,owner_name,street_address,postal_code,city,country_code,vat_id,email,updated_at
