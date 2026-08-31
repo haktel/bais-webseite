@@ -387,6 +387,7 @@ Vertragsbestandteile – soweit vereinbart:
 5. AVV / DPA
 6. SLA / Wartungsvertrag
 7. AGB
+8. Rechnung / Zahlungsbedingungen Vorlage – soweit als Vertrags-/Abrechnungsreferenz verwendet
 
 - **AGB:** [AGB_LINK_ODER_ANLAGE]
 - **AVV:** [AVV_LINK_ODER_ANLAGE]
@@ -450,3 +451,4 @@ Unterschrift: ______________________________
 4. **Acceptance Criteria vor Projektstart definieren.** Das spätere Abnahmeprotokoll referenziert diese Kriterien.
 5. **Betrieb vom Projekt trennen.** Hosting, Wartung, Monitoring, RPO/RTO, 24/7 und Service Credits nur bei ausdrücklicher Vereinbarung.
 6. **Bei MOD-03 – Wartung/Hosting-Setup das Operations-Runbook referenzieren.** Backup-, Restore-, Monitoring-, Eskalations- und Kundenkommunikationswerte müssen aus dem vereinbarten Scope/SLA übernommen werden.
+7. **Rechnungslogik aus dem SOW übernehmen.** Anzahlung, Raten, Meilenstein- und Schlusszahlung müssen später in Rechnung und Zahlungsbedingungen identisch umgesetzt werden.
