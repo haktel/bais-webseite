@@ -10,7 +10,7 @@ fail(){ printf 'FAIL  %s\n' "$*"; FAIL=$((FAIL+1)); }
 warn(){ printf 'WARN  %s\n' "$*"; WARN=$((WARN+1)); }
 
 echo "=== 1. CORE PAGES ==="
-for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
+for path in / /preise/ /kontakt/ /impressum/ /datenschutz/ /agb/ /avv/ /referenzen/ /referenzen/n8n-live-demo/ /loesungen/ /ueber-bais/ /project-portal/ /academy/ /ai-governance/; do
   code="$(curl -LsS --max-time 20 -o /tmp/page -w '%{http_code}' "${BASE_URL}${path}" || true)"
   if [ "$code" = "200" ]; then pass "${path} HTTP 200"; else fail "${path} HTTP ${code}"; fi
   if [ "$code" = "200" ]; then
@@ -60,7 +60,7 @@ for needle in 'Inhaber' 'USt' 'Dortmund'; do
 done
 
 curl -LsS --max-time 20 "${BASE_URL}/datenschutz/" >/tmp/privacy || true
-for needle in 'DSGVO' 'Cloudflare' 'D1' 'Turnstile'; do
+for needle in 'DSGVO' 'Cloudflare' 'D1' 'Turnstile' 'RepoCloud' 'Privacy-minimierte'; do
   grep -qi "$needle" /tmp/privacy && pass "privacy covers ${needle}" || warn "privacy does not mention ${needle}"
 done
 
@@ -68,6 +68,11 @@ curl -LsS --max-time 20 "${BASE_URL}/kontakt/" >/tmp/contact || true
 grep -qi '/api/contact' /tmp/contact && pass "contact form wired to API" || fail "contact form API wiring not found"
 grep -qi 'challenges.cloudflare.com\|turnstile' /tmp/contact && pass "contact form Turnstile present" || fail "contact form Turnstile not found"
 grep -qi 'mailto:info@bais-solutions.de\|info@bais-solutions.de' /tmp/contact && pass "fallback contact email present" || warn "fallback email not visible"
+
+curl -LsS --max-time 20 "${BASE_URL}/avv/" >/tmp/avv || true
+grep -qi 'Art. 28 DSGVO' /tmp/avv && pass "AVV page contains Art. 28 scope" || fail "AVV page missing Art. 28 scope"
+grep -qi 'Technische und organisatorische Maßnahmen' /tmp/avv && pass "AVV contains TOM annex" || fail "AVV missing TOM annex"
+grep -qi 'Subprozessoren' /tmp/avv && pass "AVV contains subprocessor annex" || fail "AVV missing subprocessor annex"
 
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
@@ -109,7 +114,7 @@ echo "=== 8. SALES-READINESS SIGNALS (NON-BLOCKING) ==="
 curl -LsS --max-time 20 "${BASE_URL}/" >/tmp/home || true
 grep -qi 'Demo statt Kundenreferenz\|Demonstrator' /tmp/home && pass "claims distinguish demos from real references" || warn "demo/reference boundary not obvious"
 grep -qi 'AGB' /tmp/home && pass "AGB linked from home" || warn "AGB not linked from home"
-grep -qi 'AVV\|Auftragsverarbeitung' /tmp/home && pass "AVV/DPA surfaced" || warn "AVV/DPA not surfaced"
+grep -qi 'AVV / DPA\|Auftragsverarbeitung' /tmp/home && pass "AVV/DPA surfaced" || warn "AVV/DPA not surfaced"
 grep -qi 'SLA\|Service Level' /tmp/home && pass "SLA surfaced" || warn "SLA not surfaced"
 grep -qi 'Kundenreferenz\|Case Study' /tmp/home && pass "customer proof surfaced" || warn "no real customer case study surfaced"
 
