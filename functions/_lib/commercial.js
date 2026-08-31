@@ -19,12 +19,12 @@ export async function ensureCommercialSchema(db){
 
 async function nextNumber(db,prefix,kind,now){
  const year=yearOf(now),key=kind+":"+year;
- const result=await db.batch([
-  db.prepare("INSERT OR IGNORE INTO business_sequences(sequence_key,next_value,updated_at) VALUES(?,0,?)").bind(key,now),
-  db.prepare("UPDATE business_sequences SET next_value=next_value+1,updated_at=? WHERE sequence_key=?").bind(now,key),
-  db.prepare("SELECT next_value FROM business_sequences WHERE sequence_key=? LIMIT 1").bind(key)
- ]);
- const value=Number(result?.[2]?.results?.[0]?.next_value);
+ const row=await db.prepare(
+  "INSERT INTO business_sequences(sequence_key,next_value,updated_at) VALUES(?,1,?) "+
+  "ON CONFLICT(sequence_key) DO UPDATE SET next_value=business_sequences.next_value+1,updated_at=excluded.updated_at "+
+  "RETURNING next_value"
+ ).bind(key,now).first();
+ const value=Number(row?.next_value);
  if(!Number.isInteger(value)||value<1)throw new ApiError(500,"sequence_failed","Die Geschäftsnummer konnte nicht erzeugt werden.");
  return prefix+"-"+year+"-"+pad(value);
 }
