@@ -49,6 +49,7 @@ export const onRequestPatch=async({request,env})=>{
   const now=new Date().toISOString();
   let accessGranted=false,userId=null,runId=null,registrationInvite=null,inviteId=null;
   const statements=[db.prepare("UPDATE enrollment_requests SET status=? WHERE id=?").bind(status,id)];
+  if(status!=="approved")statements.push(db.prepare("UPDATE academy_registration_invites SET used_at=COALESCE(used_at,?) WHERE enrollment_request_id=? AND used_at IS NULL").bind(now,id));
 
   if(status==="approved"){
    const user=await db.prepare("SELECT id FROM users WHERE lower(email)=lower(?) AND status='active' LIMIT 1").bind(entry.email).first();
