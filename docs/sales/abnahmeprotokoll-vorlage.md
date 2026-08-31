@@ -166,6 +166,7 @@ Sofern der zugrunde liegende Vertrag / SOW die Abnahme als Auslöser für eine S
 
 **Zahlungsfolge gemäß SOW / Vertrag:** [ZAHLUNGSFOLGE]  
 **Betroffene Rechnung / Rate:** [RECHNUNG_ODER_RATE]  
+**Rechnung / Schlussrechnung Referenz:** [RECHNUNG_REFERENZ]  
 **Zahlungsziel:** [ZAHLUNGSZIEL]  
 **Besonderheiten bei Vorbehaltsmängeln:** [ZAHLUNG_VORBEHALT]
 
@@ -212,3 +213,4 @@ Unterschrift: ______________________________
 3. **Keine Zahlungsfolge erfinden.** Ob und wann eine Schlusszahlung ausgelöst wird, muss aus dem Angebot/SOW bzw. Vertrag übernommen werden.
 4. **Keine Gewährleistungsdauer automatisch einsetzen.** Die konkrete Frist aus Vertrag/AGB bzw. der anwendbaren gesetzlichen Regelung übernehmen.
 5. **Bei verweigerter Abnahme die Gründe konkret benennen.** Pauschale Aussagen wie „funktioniert nicht“ reichen für eine saubere Projektakte nicht aus.
+6. **Schlussrechnung nur entsprechend SOW/Vertrag auslösen.** Die Rechnungsvorlage darf keine andere Zahlungsfolge erzeugen als die vertraglich vereinbarte.
