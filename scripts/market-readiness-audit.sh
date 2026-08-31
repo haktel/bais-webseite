@@ -113,6 +113,8 @@ else
 fi
 grep -qi 'id="customerNumber"' /tmp/angebot && grep -qi 'id="projectNo"' /tmp/angebot && grep -qi 'commercial-document-context.js' /tmp/angebot && pass "Angebot DB identity fields live" || fail "Angebot DB identity integration missing"
 grep -qi 'id="customerNumber"' /tmp/abnahme && grep -qi 'id="projectNo"' /tmp/abnahme && grep -qi 'commercial-document-context.js' /tmp/abnahme && pass "Abnahme DB identity fields live" || fail "Abnahme DB identity integration missing"
+grep -qi 'commercial-document-context.js?v=1.1' /tmp/angebot && grep -qi 'commercial-document-context.js?v=1.1' /tmp/abnahme && pass "commercial document autofill v1.1 live" || fail "commercial document autofill version stale"
+grep -qi 'id="createProject"' /tmp/angebot && grep -qi 'id="createProject"' /tmp/abnahme && pass "document project creation control live" || fail "document project creation control missing"
 
 echo
 echo "=== 6. KEY INTERNAL LINKS / ASSETS ==="
