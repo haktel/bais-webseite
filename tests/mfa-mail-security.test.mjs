@@ -44,7 +44,8 @@ test("admin MFA setup renders the otpauth URI as a local QR code without third-p
  const account=read("assets/academy-account.js"),html=read("academy/konto/index.html"),qr=read("assets/vendor/qrcode.mjs"),license=read("assets/vendor/qrcode.LICENSE.txt");
  assert.match(account,/import\("\.\/vendor\/qrcode\.mjs"\)/);
  assert.match(account,/data\.setup\.otpauthUri/);
- assert.match(account,/qrcode\(0,"M"\)/);\n assert.match(account,/qrFactoryPromise/);
+ assert.match(account,/qrcode\(0,"M"\)/);
+ assert.match(account,/qrFactoryPromise/);
  assert.doesNotMatch(account,/quickchart|api\.qrserver|chart\.google|googleapis/i);
  assert.match(html,/data-mfa-qr/);
  assert.match(html,/Manuellen Schlüssel anzeigen/);
