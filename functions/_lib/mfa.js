@@ -78,7 +78,7 @@ export async function adminMfaState(db,user){
  return{configured,verified};
 }
 export async function beginAdminMfaSetup(db,user,env){
- await ensureMfaSchema(db);await encryptionKey(env);
+ await ensureMfaSchema(db);await encryptionKeys(env);
  if(user.role!=="admin")throw new ApiError(403,"admin_required","Administrator-Berechtigung erforderlich.");
  const bytes=new Uint8Array(20);crypto.getRandomValues(bytes);const secret=base32Encode(bytes),enc=await encryptText(secret,env),now=new Date(),expires=new Date(now.getTime()+SETUP_TTL_MS).toISOString();
  await db.prepare("INSERT INTO admin_mfa_setup(user_id,secret_ciphertext,secret_iv,expires_at,created_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET secret_ciphertext=excluded.secret_ciphertext,secret_iv=excluded.secret_iv,expires_at=excluded.expires_at,created_at=excluded.created_at")
