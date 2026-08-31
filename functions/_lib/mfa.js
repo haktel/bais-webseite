@@ -18,20 +18,31 @@ export function base32Decode(input){
  for(const char of clean){const idx=ALPHABET.indexOf(char);if(idx<0)throw new ApiError(400,"mfa_secret_invalid","Ungültiger MFA-Schlüssel.");value=(value<<5)|idx;bits+=5;if(bits>=8){out.push((value>>>(bits-8))&255);bits-=8;}}
  return new Uint8Array(out);
 }
-async function encryptionKey(env){
- const secret=String(env?.MFA_ENCRYPTION_KEY||"");
- if(secret.length<32)throw new ApiError(503,"mfa_key_not_configured","MFA-Verschlüsselung ist noch nicht konfiguriert.");
- const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(secret));
+const rootSecrets=env=>[String(env?.MFA_ENCRYPTION_KEY||""),String(env?.TURNSTILE_SECRET||"")].filter((value,index,array)=>value.length>=20&&array.indexOf(value)===index);
+async function deriveEncryptionKey(secret){
+ const material="BAIS-MFA-AES-GCM-v1\u0000"+secret;
+ const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(material));
  return crypto.subtle.importKey("raw",digest,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
+async function encryptionKeys(env){
+ const roots=rootSecrets(env);
+ if(!roots.length)throw new ApiError(503,"mfa_key_not_configured","MFA-Verschlüsselung ist noch nicht konfiguriert.");
+ return Promise.all(roots.map(deriveEncryptionKey));
+}
 async function encryptText(value,env){
- const iv=new Uint8Array(12);crypto.getRandomValues(iv);const key=await encryptionKey(env);
+ const iv=new Uint8Array(12);crypto.getRandomValues(iv);const[key]=await encryptionKeys(env);
  const ciphertext=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(value));
  return{ciphertext:b64url(new Uint8Array(ciphertext)),iv:b64url(iv)};
 }
 async function decryptText(ciphertext,iv,env){
- const key=await encryptionKey(env),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64url(iv)},key,fromB64url(ciphertext));
- return new TextDecoder().decode(plain);
+ const keys=await encryptionKeys(env),nonce=fromB64url(iv),data=fromB64url(ciphertext);
+ for(const key of keys){
+  try{
+   const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:nonce},key,data);
+   return new TextDecoder().decode(plain);
+  }catch{}
+ }
+ throw new ApiError(503,"mfa_secret_unavailable","MFA-Schlüssel konnte nicht entschlüsselt werden.");
 }
 export async function ensureMfaSchema(db){
  await db.batch([
