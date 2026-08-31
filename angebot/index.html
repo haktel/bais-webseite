@@ -140,8 +140,11 @@
 
 <form id="offerForm" autocomplete="off">
 <article class="offerHeader">
+<div class="intro" id="commercialStatus">DB-Kontext wird geladen …</div>
+<div class="fieldGrid" style="margin-top:12px"><div class="formField"><label for="customerPicker">Kunde aus DB</label><select id="customerPicker" aria-label="Kunde auswählen"><option value="">Wird geladen …</option></select></div><div class="formField"><label for="customerNumber">Kunden-Nr.</label><input id="customerNumber" name="customerNumber" type="text" readonly></div><div class="formField"><label for="projectPicker">Projekt aus DB</label><select id="projectPicker" aria-label="Projekt auswählen"><option value="">Wird geladen …</option></select></div><div class="formField"><label for="projectNo">Projekt-Nr.</label><input id="projectNo" name="projectNo" type="text" readonly></div></div>
+<div class="fieldGrid"><div class="formField"><label for="newProjectName">Neues Projekt</label><input id="newProjectName" type="text" placeholder="Projektname eingeben"><button id="createProject" type="button" style="margin-top:6px;padding:9px;border:1px solid #bfd0d5;border-radius:9px;background:#fff;font-weight:800;cursor:pointer">Projekt anlegen</button></div></div>
 <div class="ey">ANGEBOT / STATEMENT OF WORK</div>
-<div class="formField" style="max-width:640px;margin-top:9px"><label for="projectName">Projektname</label><input id="projectName" name="projectName" type="text" placeholder="z. B. Website Relaunch & Kundenportal"></div>
+<div class="formField" style="max-width:640px;margin-top:9px"><label for="projectName">Projektname</label><input id="projectName" name="projectName" type="text" readonly></div>
 
 <div class="fieldGrid" style="margin-top:18px">
 <div class="formField"><label for="offerNo">Angebotsnummer</label><input id="offerNo" name="offerNo" type="text" placeholder="z. B. 2026-001"></div>
@@ -152,17 +155,17 @@
 
 <div class="partyGrid">
 <section class="party"><h3>Auftraggeber</h3>
-<div class="formField"><label for="clientCompany">Unternehmen</label><input id="clientCompany" name="clientCompany" type="text"></div>
+<div class="formField"><label for="clientCompany">Unternehmen</label><input id="clientCompany" name="clientCompany" type="text" readonly></div>
 <div class="formField"><label for="clientAddress">Anschrift</label><textarea id="clientAddress" name="clientAddress" rows="2"></textarea></div>
-<div class="formField"><label for="clientContact">Ansprechpartner</label><input id="clientContact" name="clientContact" type="text"></div>
-<div class="formField"><label for="clientEmail">E-Mail</label><input id="clientEmail" name="clientEmail" type="email"></div>
+<div class="formField"><label for="clientContact">Name / Ansprechpartner</label><input id="clientContact" name="clientContact" type="text" readonly></div>
+<div class="formField"><label for="clientEmail">E-Mail</label><input id="clientEmail" name="clientEmail" type="email" readonly></div>
 <div class="formField"><label for="clientPhone">Telefon</label><input id="clientPhone" name="clientPhone" type="tel"></div>
 </section>
 <section class="party"><h3>Auftragnehmer</h3>
-<div class="formField"><label for="providerCompany">Unternehmen</label><input id="providerCompany" name="providerCompany" type="text"></div>
-<div class="formField"><label for="providerAddress">Anschrift</label><textarea id="providerAddress" name="providerAddress" rows="2"></textarea></div>
-<div class="formField"><label for="providerContact">Ansprechpartner</label><input id="providerContact" name="providerContact" type="text"></div>
-<div class="formField"><label for="providerEmail">E-Mail</label><input id="providerEmail" name="providerEmail" type="email"></div>
+<div class="formField"><label for="providerCompany">Unternehmen</label><input id="providerCompany" name="providerCompany" type="text" readonly></div>
+<div class="formField"><label for="providerAddress">Anschrift</label><textarea id="providerAddress" name="providerAddress" rows="2" readonly></textarea></div>
+<div class="formField"><label for="providerContact">Ansprechpartner</label><input id="providerContact" name="providerContact" type="text" readonly></div>
+<div class="formField"><label for="providerEmail">E-Mail</label><input id="providerEmail" name="providerEmail" type="email" readonly></div>
 <div class="formField"><label for="providerPhone">Telefon</label><input id="providerPhone" name="providerPhone" type="tel"></div>
 </section>
 </div>
@@ -422,5 +425,6 @@ window.addEventListener("afterprint",()=>document.body.classList.remove("printHi
 restore();calculate();
 })();
 </script>
+<script src="/assets/commercial-document-context.js?v=1.0" defer></script>
 </body>
 </html>
