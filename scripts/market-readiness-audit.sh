@@ -22,7 +22,7 @@ done
 echo
 echo "=== 1B. SITE NAVIGATION ==="
 nav_js="$(curl -LsS --max-time 20 -o /tmp/site-history-nav.js -w '%{http_code}' "${BASE_URL}/assets/site-history-nav.js?v=1.0" || true)"
-nav_css="$(curl -LsS --max-time 20 -o /tmp/site-history-nav.css -w '%{http_code}' "${BASE_URL}/assets/site-history-nav.css?v=1.0" || true)"
+nav_css="$(curl -LsS --max-time 20 -o /tmp/site-history-nav.css -w '%{http_code}' "${BASE_URL}/assets/site-history-nav.css?v=1.1" || true)"
 [ "$nav_js" = "200" ] && pass "history navigation asset JS" || fail "history navigation JS HTTP ${nav_js}"
 [ "$nav_css" = "200" ] && pass "history navigation asset CSS" || fail "history navigation CSS HTTP ${nav_css}"
 curl -LsS --max-time 20 "${BASE_URL}/" >/tmp/navhome || true
