@@ -4,6 +4,7 @@ const PUBLIC_EXACT=new Set([
  "/api/academy/enrollments",
  "/api/academy/auth/login",
  "/api/academy/auth/register",
+ "/api/customer/auth/register",
  "/api/academy/auth/logout",
  "/api/n8n-demo",
  "/api/n8n-signature-verify"
