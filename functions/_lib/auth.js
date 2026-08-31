@@ -1,5 +1,5 @@
 import{ApiError}from"./api.js";
-const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8;export const PASSWORD_HASH_ITERATIONS=600000;
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8;export const PASSWORD_HASH_ITERATIONS=100000;
 
 const bytesToBase64Url=bytes=>{
  let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
@@ -28,8 +28,14 @@ const safeEqual=(left,right)=>{
  return result===0;
 };
 export async function verifyPassword(password,credential){
- const result=await hashPassword(password,credential.password_salt,credential.password_iterations);
- return safeEqual(result.hash,credential.password_hash);
+ try{
+  const result=await hashPassword(password,credential.password_salt,Number(credential.password_iterations)||PASSWORD_HASH_ITERATIONS);
+  return safeEqual(result.hash,credential.password_hash);
+ }catch(error){
+  if(Number(credential.password_iterations)>PASSWORD_HASH_ITERATIONS&&String(error?.name||"").includes("NotSupported"))
+   throw new ApiError(503,"password_rehash_required","Dieses Passwortprofil muss einmal neu gesetzt werden, bevor die Anmeldung wieder möglich ist.");
+  throw error;
+ }
 }
 export function assertSameOrigin(request){
  const origin=request.headers.get("origin"),expected=new URL(request.url).origin;
