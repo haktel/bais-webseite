@@ -14,6 +14,7 @@ export async function enqueueProjectIntegrations(db,{projectId,now=new Date().to
  if(!row)throw new ApiError(404,"sow_not_found","Für dieses Projekt ist noch kein SOW gespeichert.");
  if(row.sow_status!=="signed")return{queued:false,reason:"sow_not_signed"};
  await db.batch([
+  db.prepare("INSERT INTO project_integration_links(project_id,dolibarr_sync_status,jira_sync_status,updated_at) VALUES(?,'pending','pending',?) ON CONFLICT(project_id) DO UPDATE SET dolibarr_sync_status='pending',jira_sync_status='pending',last_error=NULL,updated_at=excluded.updated_at").bind(projectId,now),
   db.prepare("INSERT INTO project_sync_jobs(id,project_id,target,status,attempts,next_attempt_at,last_error,created_at,updated_at) VALUES(?,?,'dolibarr','pending',0,?,NULL,?,?) ON CONFLICT(project_id,target) DO UPDATE SET status='pending',next_attempt_at=excluded.next_attempt_at,last_error=NULL,updated_at=excluded.updated_at").bind(crypto.randomUUID(),projectId,now,now,now),
   db.prepare("INSERT INTO project_sync_jobs(id,project_id,target,status,attempts,next_attempt_at,last_error,created_at,updated_at) VALUES(?,?,'jira','pending',0,?,NULL,?,?) ON CONFLICT(project_id,target) DO UPDATE SET status='pending',next_attempt_at=excluded.next_attempt_at,last_error=NULL,updated_at=excluded.updated_at").bind(crypto.randomUUID(),projectId,now,now,now)
  ]);
