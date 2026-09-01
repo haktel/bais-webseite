@@ -111,6 +111,10 @@ test("customer activation requires a hashed expiring email-verification token",(
  assert.match(auth,/customer_email_verifications/);
  assert.match(auth,/sha256\(value\)/);
  assert.match(auth,/EMAIL_VERIFICATION_SECONDS=60\*60\*24/);
+ const ui=read("assets/academy-account.js"),mail=read("functions/_lib/mail.js");
+ assert.match(ui,/location\.hash/);
+ assert.match(ui,/get\("verify"\)/);
+ assert.match(mail,/url\.hash="verify="/);
  assert.match(verify,/UPDATE users SET status='active'/);
  assert.match(verify,/customer\.email\.verified/);
  assert.match(verify,/enqueueErpProspectSync/);
