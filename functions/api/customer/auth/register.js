@@ -2,6 +2,7 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{assertSameOrigin,consumeRateLimit,ensureAuthSchema,hashPassword,issueCustomerEmailVerification,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{ensureCommercialIdentityForLead,ensureCommercialSchema}from"../../../_lib/commercial.js";
 import{sendCustomerVerificationEmail}from"../../../_lib/mail.js";
+import{enqueueErpProspectSync,syncPendingErpJobs}from"../../../_lib/erp-sync.js";
 
 const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-v5-email-verification");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
 
@@ -71,6 +72,15 @@ export const onRequestPost=async context=>{
    env,to:email,name:displayName,verificationToken:verification.token,expiresAt:verification.expiresAt,
    idempotencyKey:"customer-verify:"+userId+":"+verification.expiresAt
   });
+
+  stage="erp_enqueue";
+  try{
+   await enqueueErpProspectSync(db,{organizationId,now});
+   const task=syncPendingErpJobs(db,env,{limit:5}).catch(error=>console.error(JSON.stringify({level:"error",area:"erp.sync",requestId:traceId,message:error instanceof Error?error.message:"unknown"})));
+   if(typeof context.waitUntil==="function")context.waitUntil(task);else void task;
+  }catch(error){
+   console.error(JSON.stringify({level:"error",area:"erp.enqueue",requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
+  }
 
   stage="rate_limit_cleanup";
   await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
