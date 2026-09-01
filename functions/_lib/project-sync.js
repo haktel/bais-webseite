@@ -89,18 +89,29 @@ async function upsertJiraParent(db,config,row,now){
  const existing=await db.prepare("SELECT jira_parent_id,jira_parent_key FROM project_integration_links WHERE project_id=? LIMIT 1").bind(row.id).first();
  const summary=row.project_number+" · "+row.name;
  const description="BAIS Projekt "+row.project_number+" | Kunde "+row.customer_number+" | SOW "+(row.offer_number||"ohne Angebotsnummer")+" | Status "+row.sow_status;
- if(existing?.jira_parent_key){
-  await jiraRequest(config,"issue/"+encodeURIComponent(existing.jira_parent_key),{method:"PUT",body:{fields:{summary,description:adf(description)}}});
-  return{id:String(existing.jira_parent_id||""),key:String(existing.jira_parent_key)};
+ const uniqueLabel=projectJiraLabel(row);
+ let id=String(existing?.jira_parent_id||""),key=String(existing?.jira_parent_key||"");
+ if(!key){
+  const jql="project = "+jiraJqlString(config.projectKey)+" AND labels = "+jiraJqlString(uniqueLabel)+" AND labels = "+jiraJqlString("bais-project");
+  const matches=await jiraSearch(config,jql);
+  if(matches.length>1)throw new Error("Jira contains multiple BAIS parent issues for "+row.project_number);
+  if(matches.length===1){id=jiraId(matches[0]);key=jiraKey(matches[0]);}
+ }
+ if(key){
+  await jiraRequest(config,"issue/"+encodeURIComponent(key),{method:"PUT",body:{fields:{summary,description:adf(description),labels:["bais","bais-project",uniqueLabel]}}});
+  await db.prepare("UPDATE project_integration_links SET jira_parent_id=?,jira_parent_key=?,updated_at=? WHERE project_id=?").bind(id||null,key,now,row.id).run();
+  return{id,key};
  }
  const created=await jiraRequest(config,"issue",{method:"POST",body:{fields:{
   project:{key:config.projectKey},summary,issuetype:{name:config.parentIssueType},description:adf(description),
-  labels:["bais",row.project_number.toLowerCase().replace(/[^a-z0-9-]/g,"-")]
+  labels:["bais","bais-project",uniqueLabel]
  }}});
- const key=jiraKey(created),id=jiraId(created);if(!key)throw new Error("Jira parent issue returned no key.");
+ key=jiraKey(created);id=jiraId(created);
+ if(!key)throw new Error("Jira parent issue returned no key.");
  await db.prepare("UPDATE project_integration_links SET jira_parent_id=?,jira_parent_key=?,updated_at=? WHERE project_id=?").bind(id||null,key,now,row.id).run();
  return{id,key};
 }
+
 async function upsertJiraModules(db,config,row,parent,now){
  for(const module of row.modules){
   const existing=await db.prepare("SELECT jira_issue_id,jira_issue_key FROM project_module_integration_links WHERE project_id=? AND module_code=? LIMIT 1").bind(row.id,module.module_code).first();
