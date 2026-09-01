@@ -67,3 +67,19 @@ test("ERP sync D1 upsert has one binding per SQL placeholder",()=>{
  assert.ok(m,"ERP link upsert SQL not found");
  assert.equal((m[1].match(/\?/g)||[]).length,m[2].split(",").length);
 });
+
+
+test("all public lead registrations reuse one BAIS customer master and queue Dolibarr",()=>{
+ const commercial=read("functions/_lib/commercial.js");
+ const academy=read("functions/api/academy/enrollments.js");
+ const contact=read("functions/api/contact.js");
+ const customer=read("functions/api/customer/auth/register.js");
+ assert.match(commercial,/ensureCommercialIdentityForLead/);
+ assert.match(commercial,/lower\(o\.billing_email\)=lower\(\?\)/);
+ assert.match(academy,/ensureCommercialIdentityForLead/);
+ assert.match(academy,/enqueueErpProspectSync/);
+ assert.match(contact,/ensureCommercialIdentityForLead/);
+ assert.match(contact,/enqueueErpProspectSync/);
+ assert.match(customer,/ensureCommercialIdentityForLead/);
+ assert.doesNotMatch(customer,/allocateCustomerNumber/);
+});
