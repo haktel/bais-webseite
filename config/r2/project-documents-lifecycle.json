@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "id": "bais-incoming-customer-documents-cleanup",
+      "enabled": true,
+      "conditions": {
+        "prefix": "incoming/customer-documents/"
+      },
+      "deleteObjectsTransition": {
+        "condition": {
+          "type": "Age",
+          "maxAge": 86400
+        }
+      }
+    }
+  ]
+}
