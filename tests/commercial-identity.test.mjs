@@ -31,12 +31,16 @@ test("commercial migration uses dedicated registries without altering projects",
  assert.match(sql,/project_number TEXT NOT NULL UNIQUE/i);
 });
 
-test("registration assigns commercial identity automatically",()=>{
+test("registration assigns customer identity without fabricating a project",()=>{
  const register=read("functions/api/academy/auth/register.js");
+ const commercial=read("functions/_lib/commercial.js");
  assert.match(register,/ensureCommercialIdentityForUser/);
  assert.match(register,/company=cleanText\(body\.company,160\)/);
- assert.match(register,/customerNumber:commercial\.customerNumber/);
- assert.match(register,/projectNumber:commercial\.project\.project_number/);
+ assert.match(register,/commercial:\{customerNumber:commercial\.customerNumber\}/);
+ assert.doesNotMatch(register,/commercial\.project/);
+ const ensureSection=commercial.slice(commercial.indexOf("export async function ensureCommercialIdentityForUser"),commercial.indexOf("export async function createProjectForOrganization"));
+ assert.doesNotMatch(ensureSection,/INSERT INTO projects/);
+ assert.doesNotMatch(ensureSection,/allocateProjectNumber/);
  const account=read("academy/konto/index.html");
  assert.match(account,/name="company"/);
 });
@@ -68,12 +72,32 @@ test("Angebot and Abnahme use readonly DB identifiers and shared autofill",()=>{
  }
 });
 
-test("account dashboard surfaces automatic customer and project identity",()=>{
+test("account dashboard renders a real empty project state",()=>{
  const html=read("academy/konto/index.html");
  const js=read("assets/academy-account.js");
- assert.match(html,/KUNDENKONTO · AUTOMATISCHE NUMMERN/);
+ assert.match(html,/KUNDENKONTO · AUTOMATISCHE KUNDEN-NR\./);
  assert.match(html,/data-commercial-identity/);
  assert.match(html,/data-new-project-form/);
  assert.match(js,/\/api\/commercial\/context/);
  assert.match(js,/\/api\/commercial\/projects/);
+ assert.match(js,/Noch kein Projekt/);
+ assert.doesNotMatch(html,/Das erste Intake-Projekt/);
+});
+
+
+test("legacy empty intake placeholders are removed without deleting projects that contain real data",()=>{
+ const commercial=read("functions/_lib/commercial.js");
+ const portal=read("functions/api/customer/portal.js");
+ const migration=read("migrations/0017_remove_dummy_intake_projects.sql");
+ assert.match(commercial,/removeLegacyEmptyIntakeProjects/);
+ assert.match(commercial,/SELECT 1 AS present FROM milestones/);
+ assert.match(commercial,/SELECT 1 AS present FROM documents/);
+ assert.match(commercial,/SELECT 1 AS present FROM approvals/);
+ assert.match(commercial,/SELECT 1 AS present FROM document_uploads/);
+ assert.match(portal,/removeLegacyEmptyIntakeProjects/);
+ assert.match(migration,/Erstprojekt \/ Intake/);
+ assert.match(migration,/NOT EXISTS\(SELECT 1 FROM milestones/);
+ assert.match(migration,/NOT EXISTS\(SELECT 1 FROM documents/);
+ assert.match(migration,/NOT EXISTS\(SELECT 1 FROM approvals/);
+ assert.match(migration,/NOT EXISTS\(SELECT 1 FROM document_uploads/);
 });
