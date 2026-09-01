@@ -4,30 +4,31 @@ import fs from"node:fs";
 
 const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 
-test("R2 runtime uses aws4fetch and a private production-origin CORS contract",()=>{
+test("production declares native R2 binding while keeping aws4fetch as optional S3 mode",()=>{
  const pkg=JSON.parse(read("package.json"));
- const cors=JSON.parse(read("config/r2/project-documents-cors.json"));
- const lifecycle=JSON.parse(read("config/r2/project-documents-lifecycle.json"));
- const workflow=read(".github/workflows/r2-runtime-provision.yml");
- assert.match(pkg.dependencies.aws4fetch,/^\^1\.0\.20$/);
- assert.deepEqual(cors.rules[0].allowed.origins,["https://bais-solutions.de"]);
- assert.ok(cors.rules[0].allowed.methods.includes("PUT"));
- assert.deepEqual(cors.rules[0].allowed.headers,["Content-Type"]);
- assert.equal(lifecycle.rules[0].conditions.prefix,"incoming/customer-documents/");
- assert.equal(lifecycle.rules[0].deleteObjectsTransition.condition.maxAge,86400);
- assert.match(workflow,/R2_ACCESS_KEY_ID/);
- assert.match(workflow,/R2_SECRET_ACCESS_KEY/);
- assert.match(workflow,/\/r2\/buckets\/\$\{R2_BUCKET_NAME\}\/cors/);
- assert.match(workflow,/\/r2\/buckets\/\$\{R2_BUCKET_NAME\}\/lifecycle/);
- assert.match(workflow,/R2_STATUS=PROJECT_PORTAL_STORAGE_PROVISIONED/);
-});
-
-test("R2 storage helper never exposes credentials and uses short-lived presigned operations",()=>{
+ const wrangler=JSON.parse(read("wrangler.jsonc"));
  const helper=read("functions/_lib/r2-documents.js");
+ assert.match(pkg.dependencies.aws4fetch,/^\^1\.0\.20$/);
+ assert.equal(wrangler.d1_databases[0].binding,"DB");
+ assert.equal(wrangler.d1_databases[0].database_id,"0f4ed49b-6a7c-4645-9737-750fced2ecb8");
+ assert.equal(wrangler.r2_buckets[0].binding,"PROJECT_DOCUMENTS");
+ assert.equal(Object.hasOwn(wrangler.r2_buckets[0],"bucket_name"),false);
+ assert.match(helper,/PROJECT_DOCUMENTS/);
+ assert.match(helper,/r2StorageMode/);
  assert.match(helper,/new AwsClient/);
  assert.match(helper,/signQuery:true/);
- assert.match(helper,/DOCUMENT_UPLOAD_TTL_SECONDS=180/);
- assert.match(helper,/DOCUMENT_DOWNLOAD_TTL_SECONDS=300/);
+});
+
+test("native R2 path needs no browser credentials and S3-direct provisioning is optional",()=>{
+ const workflow=read(".github/workflows/r2-runtime-provision.yml");
+ const upload=read("functions/api/customer/documents/upload.js");
+ const file=read("functions/api/customer/documents/file.js");
+ assert.match(workflow,/workflow_dispatch/);
+ assert.doesNotMatch(workflow,/push:\s*\n/);
+ assert.match(workflow,/R2_S3_DIRECT_STATUS=OPTIONAL_NOT_CONFIGURED/);
+ assert.match(upload,/putIncomingObject/);
+ assert.match(upload,/TransformStream/);
+ assert.match(file,/getNativeObject/);
  assert.doesNotMatch(read("assets/customer-portal.js"),/R2_ACCESS_KEY_ID|R2_SECRET_ACCESS_KEY/);
  assert.doesNotMatch(read("functions/api/customer/portal.js"),/R2_ACCESS_KEY_ID|R2_SECRET_ACCESS_KEY/);
 });
