@@ -39,6 +39,7 @@ export function normalizeScopeSelections(value){
  return[...new Set(cleaned)].slice(0,120);
 }
 const sameArray=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]);
+const parseScope=value=>{try{const x=JSON.parse(value||"[]");return Array.isArray(x)?x:[];}catch{return[];}};
 
 export async function saveProjectSow(db,{projectId,organizationId,offerNumber,sowStatus,projectStart,validUntil,modules,scopeSelections,actorUserId,now=new Date().toISOString()}){
  await ensureProjectSowSchema(db);
@@ -51,7 +52,7 @@ export async function saveProjectSow(db,{projectId,organizationId,offerNumber,so
  const existing=await db.prepare("SELECT offer_number,sow_status,project_start,valid_until,scope_json,signed_at FROM project_sow WHERE project_id=? LIMIT 1").bind(projectId).first();
  const existingModules=existing?(await db.prepare("SELECT module_code FROM project_modules WHERE project_id=? ORDER BY module_code").bind(projectId).all()).results.map(x=>x.module_code):[];
  if(existing?.sow_status==="signed"){
-  const existingScope=JSON.parse(existing.scope_json||"[]");
+  const existingScope=parseScope(existing.scope_json);
   const idempotent=existing.offer_number===offer&&existing.project_start===start&&existing.valid_until===valid&&sameArray(existingModules,normalizedModules)&&JSON.stringify(existingScope)===JSON.stringify(scope)&&status==="signed";
   if(!idempotent)throw new ApiError(409,"signed_sow_immutable","Ein unterschriebener SOW ist unveränderlich. Änderungen müssen als Change Request erfasst werden.");
   return{project,modules:normalizedModules.map(code=>({code,name:PROJECT_MODULES[code]})),sowStatus:"signed",idempotent:true};
@@ -81,5 +82,5 @@ export async function getProjectSow(db,projectId){
  const sow=await db.prepare("SELECT project_id,organization_id,offer_number,sow_status,project_start,valid_until,scope_json,created_at,updated_at,signed_at FROM project_sow WHERE project_id=? LIMIT 1").bind(projectId).first();
  if(!sow)return null;
  const modules=await db.prepare("SELECT module_code,module_name,selected_at FROM project_modules WHERE project_id=? ORDER BY module_code").bind(projectId).all();
- return{...sow,scopeSelections:JSON.parse(sow.scope_json||"[]"),modules:modules.results||[]};
+ return{...sow,scopeSelections:parseScope(sow.scope_json),modules:modules.results||[]};
 }
