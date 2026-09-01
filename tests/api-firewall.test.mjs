@@ -53,6 +53,7 @@ test("customer protected API requires explicit content entitlement",()=>{
  const policy=classifyApiPath("/api/customer/portal");
  assert.equal(policy.mode,"customer_content");
  assert.equal(policy.contentKey,"project_portal");
+ for(const route of["/api/customer/documents/upload-url","/api/customer/documents/finalize","/api/customer/documents/download"]){const p=classifyApiPath(route);assert.equal(p.mode,"customer_content");assert.equal(p.contentKey,"project_portal");}
  assert.equal(classifyApiPath("/api/customer/internal-debug").mode,"deny");
 });
 
