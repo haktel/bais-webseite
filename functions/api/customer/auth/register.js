@@ -1,6 +1,6 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../../_lib/api.js";
 import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
-import{allocateCustomerNumber,ensureCommercialSchema}from"../../../_lib/commercial.js";
+import{ensureCommercialIdentityForLead,ensureCommercialSchema}from"../../../_lib/commercial.js";
 import{enqueueErpProspectSync,syncPendingErpJobs}from"../../../_lib/erp-sync.js";
 
 const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v4-pbkdf2-100k");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
@@ -46,19 +46,18 @@ export const onRequestPost=async context=>{
   stage="password_hash";
   const credential=await hashPassword(password);
 
-  stage="customer_number";
-  const customerNumber=await allocateCustomerNumber(db,now);
+  stage="customer_identity";
+  const identity=await ensureCommercialIdentityForLead(db,{email,displayName,company,now});
+  const customerNumber=identity.customerNumber;
+  organizationId=identity.organizationId;
 
   stage="identity_prepare";
   userId=crypto.randomUUID();
-  organizationId=crypto.randomUUID();
-  const slug=customerSlug(company,organizationId);
 
   stage="identity_insert";
   await db.batch([
-   db.prepare("INSERT INTO organizations(id,name,slug,billing_email,created_at) VALUES(?,?,?,?,?)").bind(organizationId,company,slug,email,now),
+   db.prepare("UPDATE organizations SET name=?,billing_email=? WHERE id=?").bind(company,email,organizationId),
    db.prepare("INSERT INTO users(id,organization_id,display_name,email,role,status,created_at) VALUES(?,?,?,?,?,?,?)").bind(userId,organizationId,displayName,email,"customer","active",now),
-   db.prepare("INSERT INTO customer_accounts(organization_id,customer_number,account_status,created_at,updated_at) VALUES(?,?,?,?,?)").bind(organizationId,customerNumber,"active",now,now),
    db.prepare("INSERT INTO user_credentials(user_id,password_hash,password_salt,password_algorithm,password_iterations,updated_at) VALUES(?,?,?,?,?,?)").bind(userId,credential.hash,credential.salt,"PBKDF2-SHA-256",credential.iterations,now),
    db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?,?)")
     .bind(crypto.randomUUID(),userId,organizationId,"customer.account.created","user",userId,JSON.stringify({customerNumber,source:"self_registration",defaultAccess:"deny"}),now)
@@ -98,9 +97,15 @@ export const onRequestPost=async context=>{
     await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();
    }
    if(organizationId){
-    await db.prepare("DELETE FROM audit_events WHERE organization_id=?").bind(organizationId).run();
-    await db.prepare("DELETE FROM customer_accounts WHERE organization_id=?").bind(organizationId).run();
-    await db.prepare("DELETE FROM organizations WHERE id=?").bind(organizationId).run();
+    const remaining=await db.prepare("SELECT 1 AS ok FROM users WHERE organization_id=? LIMIT 1").bind(organizationId).first();
+    if(!remaining){
+     const lead=await db.prepare("SELECT 1 AS ok FROM contacts WHERE lower(email)=lower((SELECT billing_email FROM organizations WHERE id=?)) UNION SELECT 1 AS ok FROM enrollment_requests WHERE lower(email)=lower((SELECT billing_email FROM organizations WHERE id=?)) LIMIT 1").bind(organizationId,organizationId).first().catch(()=>null);
+     if(!lead){
+      await db.prepare("DELETE FROM audit_events WHERE organization_id=?").bind(organizationId).run();
+      await db.prepare("DELETE FROM customer_accounts WHERE organization_id=?").bind(organizationId).run();
+      await db.prepare("DELETE FROM organizations WHERE id=?").bind(organizationId).run();
+     }
+    }
    }
   }catch{}
   if(!(error instanceof ApiError))console.error(JSON.stringify({level:"error",area:"customer.register",stage,requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
