@@ -6,9 +6,11 @@ export const onRequestPost=async({request,env})=>{
   assertSameOrigin(request);const db=assertDatabase(env);await ensureAuthSchema(db);const body=await readJson(request),email=normalizeEmail(body.email),password=body.password;
   if(!validEmail(email)||!validPassword(password))throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
   const rateKey=await consumeRateLimit(db,request,"login",email),account=await db.prepare("SELECT u.id,u.display_name,u.email,u.role,u.status,c.password_hash,c.password_salt,c.password_iterations FROM users u JOIN user_credentials c ON c.user_id=u.id WHERE u.email=? LIMIT 1").bind(email).first();
-  if(!account||account.status!=="active")throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
+  if(!account)throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
   const valid=await verifyPassword(password,account);
   if(!valid)throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
+  if(account.status==="invited"&&account.role==="customer")throw new ApiError(403,"email_not_verified","Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.");
+  if(account.status!=="active")throw new ApiError(401,"invalid_credentials","E-Mail oder Passwort ist nicht korrekt.");
   if(Number(account.password_iterations||0)<PASSWORD_HASH_ITERATIONS){
    const upgraded=await hashPassword(password);
    await db.prepare("UPDATE user_credentials SET password_hash=?,password_salt=?,password_iterations=?,updated_at=? WHERE user_id=?")
