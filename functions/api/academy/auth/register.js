@@ -2,6 +2,7 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{academyProgram}from"../../../_lib/academy.js";
 import{assertSameOrigin,ensureAuthSchema,consumeRateLimit,hashPassword,normalizeEmail,randomToken,sessionCookie,sha256,validPassword}from"../../../_lib/auth.js";
 import{ensureCommercialIdentityForUser}from"../../../_lib/commercial.js";
+import{enqueueErpProspectSync,syncPendingErpJobs}from"../../../_lib/erp-sync.js";
 import{consumeRegistrationInvite,resolveRegistrationInvite}from"../../../_lib/invites.js";
 
 async function ensureCourseAndRun(db,slug,title,now){
@@ -125,6 +126,8 @@ export const onRequestPost=async({request,env})=>{
   let commercial;
   try{
    commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company:company||cleanText(invite.company,160),now,intakeName:"Erstprojekt / Intake"});
+   await enqueueErpProspectSync(db,{organizationId:commercial.organizationId,now});
+   await syncPendingErpJobs(db,env,{limit:5}).catch(()=>null);
   }catch(error){
    try{await db.prepare("DELETE FROM users WHERE id=?").bind(userId).run();}catch{}
    throw error;

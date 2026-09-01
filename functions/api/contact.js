@@ -2,6 +2,8 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{buildLeadPayload,callLeadQualificationWebhook,mapLeadResult}from"../_lib/n8n.js";
 import{privacyPolicy,scheduleRetention,runPrivacyCleanup}from"../_lib/privacy.js";
 import{ensureLeadScoringSchema}from"../_lib/lead-scoring-schema.js";
+import{ensureCommercialIdentityForLead}from"../_lib/commercial.js";
+import{enqueueErpProspectSync,syncPendingErpJobs}from"../_lib/erp-sync.js";
 const TOPICS=new Set(["AI Engineering","Cybersecurity","Automation / n8n","BAIS Academy","AI Governance / CAIO","Project Portal","Sonstiges"]);
 
 async function qualifyLead(db,leadId,lead,requestId){
@@ -31,6 +33,9 @@ export const onRequestPost=async({request,env,waitUntil})=>{
   await db.prepare("INSERT INTO contacts(id,name,company,email,phone,topic,timeline,message,status,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
    .bind(leadId,name,company||null,email,phone||null,topic||"Sonstiges",timeline||null,message,"new",createdAt).run();
   await scheduleRetention(db,{entityType:"contact",entityId:leadId,days:privacyPolicy(env).openLeadDays,reason:"open_lead_retention",now:createdAt});
+  const commercial=await ensureCommercialIdentityForLead(db,{email,displayName:name,company,now:createdAt});
+  await enqueueErpProspectSync(db,{organizationId:commercial.organizationId,now:createdAt});
+  waitUntil(syncPendingErpJobs(db,env,{limit:5}).catch(()=>null));
   waitUntil(Promise.resolve().then(()=>console.log(JSON.stringify({level:"info",event:"contact_created",leadId,requestId:id}))));
   waitUntil(runPrivacyCleanup(db,{limit:20}).catch(()=>null));
   waitUntil(qualifyLead(db,leadId,{name,email,company,topic,message},id));
