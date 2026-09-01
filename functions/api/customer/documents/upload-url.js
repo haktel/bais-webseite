@@ -1,7 +1,7 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../../_lib/api.js";
 import{assertSameOrigin,consumeRateLimit,ensureAuthSchema,requireSession}from"../../../_lib/auth.js";
 import{customerContextForSession,hasCustomerContentAccess}from"../../../_lib/customer-access.js";
-import{buildIncomingKey,DOCUMENT_UPLOAD_TTL_SECONDS,ensureDocumentUploadSchema,presignUpload,validateDocumentUpload}from"../../../_lib/r2-documents.js";
+import{buildIncomingKey,DOCUMENT_UPLOAD_TTL_SECONDS,ensureDocumentUploadSchema,presignUpload,r2StorageMode,validateDocumentUpload}from"../../../_lib/r2-documents.js";
 
 export const onRequestPost=async({request,env})=>{
  const traceId=requestId(request);
@@ -27,9 +27,12 @@ export const onRequestPost=async({request,env})=>{
   await db.prepare("INSERT INTO document_uploads(id,organization_id,project_id,incoming_key,original_name,mime_type,declared_size,status,created_by,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)")
    .bind(uploadId,customer.organizationId,projectId,incomingKey,file.name,file.mime,file.size,"pending",session.user_id,createdAt,expiresAt).run();
 
-  let uploadUrl;
+  let uploadUrl,uploadMode;
   try{
-   uploadUrl=await presignUpload(env,{key:incomingKey,mimeType:file.mime});
+   uploadMode=r2StorageMode(env);
+   uploadUrl=uploadMode==="s3"
+    ?await presignUpload(env,{key:incomingKey,mimeType:file.mime})
+    :"/api/customer/documents/upload?id="+encodeURIComponent(uploadId);
   }catch(error){
    await db.prepare("DELETE FROM document_uploads WHERE id=? AND organization_id=?").bind(uploadId,customer.organizationId).run().catch(()=>{});
    throw error;
@@ -46,7 +49,8 @@ export const onRequestPost=async({request,env})=>{
     method:"PUT",
     headers:{"Content-Type":file.mime},
     expiresAt,
-    maxBytes:25*1024*1024
+    maxBytes:25*1024*1024,
+    mode:uploadMode
    },
    requestId:traceId
   },201);
