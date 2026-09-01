@@ -12,7 +12,7 @@ test("production declares native R2 binding while keeping aws4fetch as optional 
  assert.equal(wrangler.d1_databases[0].binding,"DB");
  assert.equal(wrangler.d1_databases[0].database_id,"0f4ed49b-6a7c-4645-9737-750fced2ecb8");
  assert.equal(wrangler.r2_buckets[0].binding,"PROJECT_DOCUMENTS");
- assert.equal(Object.hasOwn(wrangler.r2_buckets[0],"bucket_name"),false);
+ assert.equal(wrangler.r2_buckets[0].bucket_name,"bais-project-documents");
  assert.match(helper,/PROJECT_DOCUMENTS/);
  assert.match(helper,/r2StorageMode/);
  assert.match(helper,/new AwsClient/);
