@@ -48,6 +48,7 @@ async function syncDolibarr(db,env,job,now){
  if(!Number.isInteger(id)||id<1)throw new Error("Dolibarr project upsert returned no valid project id.");
  await db.batch([
   db.prepare("UPDATE project_integration_links SET dolibarr_project_id=?,dolibarr_project_ref=?,dolibarr_sync_status='synced',last_sync_at=?,last_error=NULL,updated_at=? WHERE project_id=?").bind(id,ref,now,now,row.id),
+  db.prepare("UPDATE erp_links SET erp_role='customer',sync_status='synced',last_sync_at=?,last_error=NULL,updated_at=? WHERE organization_id=?").bind(now,now,row.organization_id),
   db.prepare("UPDATE project_sync_jobs SET status='done',last_error=NULL,updated_at=? WHERE id=?").bind(now,job.id)
  ]);
  return{configured:true,id,ref};
