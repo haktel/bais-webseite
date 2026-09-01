@@ -1,7 +1,7 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId}from"../../_lib/api.js";
 import{assertSameOrigin,ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 import{requireAdmin}from"../../_lib/admin.js";
-import{customerContextForSession}from"../../_lib/customer-access.js";
+import{customerContextForSession,hasCustomerContentAccess}from"../../_lib/customer-access.js";
 import{enqueueErpProspectSync,syncPendingErpJobs}from"../../_lib/erp-sync.js";
 import{getProjectSow,saveProjectSow}from"../../_lib/project-sow.js";
 import{enqueueProjectIntegrations,projectIntegrationStatus,syncPendingProjectIntegrations}from"../../_lib/project-sync.js";
@@ -12,12 +12,16 @@ export const onRequestGet=async({request,env})=>{
   const db=assertDatabase(env);await ensureAuthSchema(db);const session=await requireSession(db,request);
   const url=new URL(request.url),projectId=cleanText(url.searchParams.get("projectId"),80);
   if(!projectId)throw new ApiError(422,"project_required","Projekt-ID fehlt.");
-  if(session.role!=="admin"){
+  let isAdmin=false;
+  if(session.role==="admin"){await requireAdmin(db,request);isAdmin=true;}
+  else{
    const customer=await customerContextForSession(db,session);
    const project=await db.prepare("SELECT id FROM projects WHERE id=? AND organization_id=? LIMIT 1").bind(projectId,customer.organizationId).first();
    if(!project)throw new ApiError(404,"project_not_found","Projekt gehört nicht zu diesem Kundenkonto.");
+   if(!await hasCustomerContentAccess(db,{organizationId:customer.organizationId,contentKey:"angebot",projectId}))
+    throw new ApiError(403,"angebot_not_enabled","Das Angebot/SOW ist für dieses Projekt nicht freigeschaltet.");
   }
-  const sow=await getProjectSow(db,projectId),integrations=session.role==="admin"?await projectIntegrationStatus(db,projectId):null;
+  const sow=await getProjectSow(db,projectId),integrations=isAdmin?await projectIntegrationStatus(db,projectId):null;
   return json({ok:true,sow,integrations,requestId:traceId});
  }catch(error){return handleError(error,traceId);}
 };
