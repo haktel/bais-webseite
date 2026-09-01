@@ -122,3 +122,41 @@ test("customer activation requires a hashed expiring email-verification token",(
  assert.match(resend,/Falls ein noch nicht bestätigtes Kundenkonto existiert/);
  assert.match(migration,/token_hash TEXT NOT NULL UNIQUE/);
 });
+
+
+test("R2 customer documents are tenant-scoped, type-limited and finalized before visibility",()=>{
+ const helper=read("functions/_lib/r2-documents.js");
+ const upload=read("functions/api/customer/documents/upload-url.js");
+ const finalize=read("functions/api/customer/documents/finalize.js");
+ const download=read("functions/api/customer/documents/download.js");
+ const portal=read("functions/api/customer/portal.js");
+ const migration=read("migrations/0016_customer_document_uploads.sql");
+ const ui=read("assets/customer-portal.js");
+ assert.match(helper,/AwsClient/);
+ assert.match(helper,/signQuery:true/);
+ assert.match(helper,/DOCUMENT_MAX_BYTES=25\*1024\*1024/);
+ assert.match(helper,/DOCUMENT_UPLOAD_TTL_SECONDS=180/);
+ assert.match(helper,/DOCUMENT_DOWNLOAD_TTL_SECONDS=300/);
+ assert.match(helper,/file_extension_mismatch/);
+ assert.match(upload,/assertSameOrigin/);
+ assert.match(upload,/session\.role!=="customer"/);
+ assert.match(upload,/hasCustomerContentAccess/);
+ assert.match(upload,/organization_id/);
+ assert.match(upload,/consumeRateLimit/);
+ assert.match(finalize,/headObject/);
+ assert.match(finalize,/size_mismatch/);
+ assert.match(finalize,/mime_mismatch/);
+ assert.match(finalize,/copyIncomingToFinal/);
+ assert.match(finalize,/INSERT INTO documents/);
+ assert.match(finalize,/deleteObject/);
+ assert.match(download,/expectedPrefix/);
+ assert.match(download,/p\.organization_id=\?/);
+ assert.match(download,/presignDownload/);
+ assert.doesNotMatch(portal,/r2_key/);
+ assert.match(migration,/FOREIGN KEY\(organization_id\)/);
+ assert.match(migration,/FOREIGN KEY\(project_id\)/);
+ assert.match(ui,/\/api\/customer\/documents\/upload-url/);
+ assert.match(ui,/method:start\.upload\.method/);
+ assert.match(ui,/\/api\/customer\/documents\/finalize/);
+ assert.match(ui,/\/api\/customer\/documents\/download/);
+});
