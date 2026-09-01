@@ -50,8 +50,8 @@ export const onRequestPost=async context=>{
   await db.prepare("UPDATE projects SET starts_at=? WHERE id=? AND organization_id=?")
    .bind(body.projectStart||null,projectId,organizationId).run();
 
-  let queued={queued:false,reason:"sow_not_approved"};
-  if(["approved","signed"].includes(result.sowStatus)){
+  let queued={queued:false,reason:"sow_not_signed"};
+  if(result.sowStatus==="signed"){
    await enqueueErpProspectSync(db,{organizationId,now:new Date().toISOString()});
    queued=await enqueueProjectIntegrations(db,{projectId,now:new Date().toISOString()});
    const task=(async()=>{
