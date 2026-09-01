@@ -101,7 +101,7 @@ export async function queueUnsyncedCustomerProspects(db,{limit=100,now=new Date(
  return queued;
 }
 
-async function dolibarrRequest(config,path,{method="GET",body}={}){
+export async function dolibarrRequest(config,path,{method="GET",body}={}){
  const url=config.baseUrl+"/api/index.php/"+String(path||"").replace(/^\/+/, "");
  const headers={Accept:"application/json",DOLAPIKEY:config.apiKey,"User-Agent":"BAIS-Website-ERP-Sync/1.0"};
  if(config.accessClientId&&config.accessClientSecret){

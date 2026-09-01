@@ -94,3 +94,14 @@ test("customer verification keeps the durable Dolibarr prospect queue while port
  assert.match(verify,/UPDATE users SET status='active'/);
  assert.match(verify,/token_hash=\?/);
 });
+
+
+test("project integration reuses authenticated Dolibarr transport and BAIS custom project endpoint",()=>{
+ const erp=read("functions/_lib/erp-sync.js");
+ const projectSync=read("functions/_lib/project-sync.js");
+ assert.match(erp,/export async function dolibarrRequest/);
+ assert.match(projectSync,/dolibarrRequest/);
+ assert.match(projectSync,/bais\/project\/upsert/);
+ assert.match(projectSync,/customer_ref:row\.customer_number/);
+ assert.match(projectSync,/project_ref:row\.project_number/);
+});

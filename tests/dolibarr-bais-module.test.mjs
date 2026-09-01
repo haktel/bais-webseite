@@ -27,12 +27,15 @@ test("BAIS trigger failures do not roll back Dolibarr core transactions",()=>{
   assert.match(trigger,/return 0;/);
 });
 
-test("BAIS REST API is read-only in phase one",()=>{
+test("BAIS REST API keeps a minimal write surface",()=>{
   const api=read("dolibarr/custom/bais/class/api_bais.class.php");
   assert.match(api,/@url GET \/health/);
   assert.match(api,/@url GET \/reference\/\{type\}\/\{id\}/);
   assert.match(api,/@url GET \/events/);
-  assert.doesNotMatch(api,/@url (POST|PUT|PATCH|DELETE)/);
+  const writes=[...api.matchAll(/@url (POST|PUT|PATCH|DELETE)\s+([^\s*]+)/g)].map(match=>[match[1],match[2]]);
+  assert.deepEqual(writes,[["POST","/project/upsert"]]);
+  assert.match(api,/requireProjectWritePermission/);
+  assert.match(api,/Only a signed SOW/);
 });
 
 test("BAIS server deployer never carries API keys or passwords",()=>{
@@ -71,4 +74,28 @@ test("Dolibarr customer starter pack template family keeps BAIS customer identit
     assert.match(source,/\[KUNDEN_NUMMER\]/);
     assert.match(source,/BAIS/);
   }
+});
+
+
+test("Dolibarr BAIS 0.3 exposes least-privilege idempotent project upsert",()=>{
+ const api=read("dolibarr/custom/bais/class/api_bais.class.php");
+ const mod=read("dolibarr/custom/bais/core/modules/modBAIS.class.php");
+ const trigger=read("dolibarr/custom/bais/core/triggers/interface_99_modBAIS_BAISTrigger.class.php");
+ const provision=read("scripts/server/provision-bais-dolibarr-api-user.sh");
+ assert.match(mod,/version = '0\.3\.0'/);
+ assert.match(mod,/50032103/);
+ assert.match(mod,/project/);
+ assert.match(mod,/write/);
+ assert.match(api,/@url POST \/project\/upsert/);
+ assert.match(api,/requireProjectWritePermission/);
+ assert.match(api,/ref_ext/);
+ assert.match(api,/Societe::PROSPECT/);
+ assert.match(api,/Societe::CUSTOMER_AND_PROSPECT/);
+ assert.match(api,/Only a signed SOW/);
+ assert.match(api,/projectRef/);
+ assert.match(api,/assignReference\('project'.*projectRef, \$projectRef\)/s);
+ assert.match(trigger,/objectType === 'project'/);
+ assert.match(trigger,/preferredRef = \$sourceRef/);
+ assert.match(provision,/50032103/);
+ assert.match(provision,/BAIS Projekt-Upsert/);
 });

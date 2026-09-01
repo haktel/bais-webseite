@@ -48,6 +48,8 @@ class InterfaceBAISTrigger extends DolibarrTriggers
                 $preferredRef = '';
                 if ($objectType === 'customer' && !empty($object->ref_ext) && preg_match('/^KD-\\d{4}-\\d{6}$/', (string) $object->ref_ext)) {
                     $preferredRef = (string) $object->ref_ext;
+                } elseif ($objectType === 'project' && preg_match('/^PR-\\d{4}-\\d{6}$/', $sourceRef)) {
+                    $preferredRef = $sourceRef;
                 }
                 $baisRef = $manager->assignReference($objectType, $objectId, $prefix, $entity, $sourceRef, $preferredRef);
 

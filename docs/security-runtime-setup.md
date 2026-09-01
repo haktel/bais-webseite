@@ -83,3 +83,38 @@ Der produktive Standardpfad verwendet das native Cloudflare-R2-Binding `PROJECT_
 - Fehlen diese optionalen Secrets, ist das **kein Production-Fehler**; das native Binding bleibt der Standardpfad.
 
 Secret-Werte gehören niemals in Git, HTML, Browser-JavaScript, D1-Audit-Metadaten oder Logs.
+
+
+## 7. SOW → Dolibarr → Jira Projektintegration
+
+BAIS D1 ist die fachliche Quelle für Kunden-Nr., Projekt-Nr. und die im SOW beauftragten Basismodule.
+
+**Verbindliche Modul-IDs**
+
+- `MOD-01 – Website-Entwicklung`
+- `MOD-02 – Project Portal`
+- `MOD-03 – Wartung/Hosting-Setup`
+- `MOD-04 – Content-Pflege`
+
+Externe Systeme werden erst synchronisiert, wenn der SOW den Status **Unterschrieben** trägt. Ein unterschriebener SOW ist danach unveränderlich; Scope-Änderungen müssen über einen separaten Change-Request-Prozess erfolgen.
+
+### Dolibarr
+
+Der BAIS Service-User benötigt zusätzlich das Custom-Recht `bais.project.write` (Recht-ID `50032103`). Die BAIS Dolibarr API legt das Projekt idempotent mit derselben sichtbaren BAIS Projekt-Nr. `PR-YYYY-NNNNNN` an bzw. aktualisiert es. Die Kundenverknüpfung erfolgt über die BAIS Kunden-Nr. in `societe.ref_ext`.
+
+Nach Deployment von BAIS Modul 0.3.0 muss `scripts/server/provision-bais-dolibarr-api-user.sh` erneut ausgeführt werden, damit der bestehende Service-User das neue Least-Privilege-Recht erhält.
+
+### Jira Cloud
+
+Für Jira Project-Sync werden serverseitig benötigt:
+
+- `JIRA_BASE_URL` – z. B. `https://<tenant>.atlassian.net`
+- `JIRA_EMAIL` – dedizierter Jira-Service-Account
+- `JIRA_API_TOKEN` – API-Token dieses Service-Accounts
+- `JIRA_PROJECT_KEY` – Zielprojekt, z. B. `BAIS`
+- `JIRA_PROJECT_ISSUE_TYPE` – optional, Standard `Epic`
+- `JIRA_MODULE_ISSUE_TYPE` – optional, Standard `Task`
+
+Der Parent-Work-Item trägt die BAIS Projekt-Nr. im Summary. Jedes beauftragte Basismodul wird genau einmal als Child-Work-Item verknüpft. Remote IDs/Keys werden in D1 gespeichert, damit Retries keine Duplikate erzeugen.
+
+Fehlen Jira-Credentials, bleibt der Jira-Job **pending**; der unterschriebene SOW und der Dolibarr-Sync werden dadurch nicht zurückgerollt. Secrets dürfen nicht in Browser-JavaScript, SOW-JSON, Audit-Metadaten oder Logs geschrieben werden.

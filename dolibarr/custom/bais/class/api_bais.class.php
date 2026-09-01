@@ -6,9 +6,11 @@
 use Luracast\Restler\RestException;
 
 dol_include_once('/bais/class/baismanager.class.php');
+require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
 /**
- * BAIS read-only API.
+ * BAIS integration API.
  *
  * @access protected
  * @class DolibarrApiAccess {@requires user,external}
@@ -26,7 +28,7 @@ class BAISApi extends DolibarrApi
         return array(
             'ok' => true,
             'module' => 'BAIS',
-            'version' => '0.1.0',
+            'version' => '0.3.0',
             'entity' => (int) $conf->entity,
             'time' => dol_now(),
         );
@@ -99,10 +101,173 @@ class BAISApi extends DolibarrApi
         return $rows;
     }
 
+    /**
+     * Create or update the Dolibarr project that belongs to one BAIS project.
+     *
+     * @url POST /project/upsert
+     */
+    public function projectUpsert($request_data = null)
+    {
+        global $db, $conf;
+        $this->requireProjectWritePermission();
+
+        $data = is_array($request_data) ? $request_data : array();
+        $customerRef = trim((string) ($data['customer_ref'] ?? ''));
+        $projectRef = trim((string) ($data['project_ref'] ?? ''));
+        $title = trim((string) ($data['title'] ?? ''));
+        $sowStatus = trim((string) ($data['sow_status'] ?? 'draft'));
+        $offerNumber = trim((string) ($data['offer_number'] ?? ''));
+        $projectStart = trim((string) ($data['project_start'] ?? ''));
+        $modules = isset($data['modules']) && is_array($data['modules']) ? $data['modules'] : array();
+
+        if (!preg_match('/^KD-\d{4}-\d{6}$/', $customerRef)) {
+            throw new RestException(400, 'Invalid BAIS customer reference');
+        }
+        if (!preg_match('/^PR-\d{4}-\d{6}$/', $projectRef)) {
+            throw new RestException(400, 'Invalid BAIS project reference');
+        }
+        if ($title === '' || strlen($title) > 180) {
+            throw new RestException(400, 'Invalid project title');
+        }
+        if ($sowStatus !== 'signed') {
+            throw new RestException(400, 'Only a signed SOW may create or update a Dolibarr project');
+        }
+
+        $allowedModules = array(
+            'MOD-01' => 'Website-Entwicklung',
+            'MOD-02' => 'Project Portal',
+            'MOD-03' => 'Wartung/Hosting-Setup',
+            'MOD-04' => 'Content-Pflege',
+        );
+        $normalizedModules = array();
+        foreach ($modules as $module) {
+            $code = trim((string) (is_array($module) ? ($module['code'] ?? '') : ''));
+            if (!isset($allowedModules[$code])) {
+                throw new RestException(400, 'Unsupported BAIS module');
+            }
+            $normalizedModules[$code] = $allowedModules[$code];
+        }
+        if (empty($normalizedModules)) {
+            throw new RestException(400, 'At least one BAIS module is required');
+        }
+
+        $sql = "SELECT rowid FROM ".$db->prefix()."societe";
+        $sql .= " WHERE entity=".((int) $conf->entity);
+        $sql .= " AND ref_ext='".$db->escape($customerRef)."'";
+        $sql .= " AND status=1 AND client IN (1,2,3) ORDER BY rowid ASC LIMIT 1";
+        $resql = $db->query($sql);
+        if (!$resql) {
+            throw new RestException(500, 'Unable to resolve BAIS customer');
+        }
+        $soc = $db->fetch_object($resql);
+        if (!$soc) {
+            throw new RestException(409, 'BAIS customer is not synchronized to Dolibarr yet');
+        }
+        $socid = (int) $soc->rowid;
+
+        $company = new Societe($db);
+        if ($company->fetch($socid) <= 0) {
+            throw new RestException(500, 'Unable to load BAIS customer');
+        }
+        if ((int) $company->client === Societe::PROSPECT) {
+            $company->client = Societe::CUSTOMER_AND_PROSPECT;
+            if (empty($company->code_client)) $company->code_client = '-1';
+            $promoted = $company->update($socid, $this->user, 1, 1, 0, 'update', 1);
+            if ($promoted <= 0) {
+                throw new RestException(500, 'Unable to promote BAIS prospect to customer: '.$company->error);
+            }
+        }
+
+        $project = new Project($db);
+        $found = $project->fetch(0, $projectRef);
+        $created = false;
+        if ($found < 0) {
+            throw new RestException(500, 'Unable to search Dolibarr project');
+        }
+
+        $lines = array();
+        foreach ($normalizedModules as $code => $name) {
+            $lines[] = $code.' - '.$name;
+        }
+        $block = "[BAIS-SOW]\n";
+        $block .= "Kunden-Nr.: ".$customerRef."\n";
+        $block .= "Projekt-Nr.: ".$projectRef."\n";
+        $block .= "SOW-Status: ".$sowStatus."\n";
+        if ($offerNumber !== '') $block .= "Angebot: ".$offerNumber."\n";
+        $block .= "Module: ".implode(', ', $lines)."\n";
+        $block .= "[/BAIS-SOW]";
+        $existingNote = $found > 0 ? (string) $project->note_private : '';
+        $existingNote = trim((string) preg_replace('/\[BAIS-SOW\].*?\[\/BAIS-SOW\]/s', '', $existingNote));
+        $note = trim($existingNote.($existingNote !== '' ? "\n\n" : '').$block);
+
+        if ($found > 0) {
+            $project->title = $title;
+            $project->socid = $socid;
+            $project->note_private = $note;
+            $project->public = 0;
+            $project->usage_task = 1;
+            if ($projectStart !== '') $project->date_start = dol_stringtotime($projectStart.' 12:00:00');
+            if (in_array($sowStatus, array('approved','signed'), true) && (int) $project->status === 0) $project->status = 1;
+            $result = $project->update($this->user);
+            if ($result < 0) throw new RestException(500, 'Unable to update Dolibarr project: '.$project->error);
+        } else {
+            $project = new Project($db);
+            $project->ref = $projectRef;
+            $project->title = $title;
+            $project->socid = $socid;
+            $project->description = 'BAIS Project '.$projectRef;
+            $project->note_private = $note;
+            $project->public = 0;
+            $project->usage_task = 1;
+            $project->status = in_array($sowStatus, array('approved','signed'), true) ? 1 : 0;
+            if ($projectStart !== '') $project->date_start = dol_stringtotime($projectStart.' 12:00:00');
+            $id = $project->create($this->user);
+            if ($id <= 0) throw new RestException(500, 'Unable to create Dolibarr project: '.$project->error);
+            $project->id = $id;
+            $created = true;
+        }
+
+        $manager = new BAISManager($db);
+        $baisRef = $manager->assignReference('project', (int) $project->id, 'PR', (int) $conf->entity, $projectRef, $projectRef);
+        $manager->enqueueEvent(
+            'BAIS_SOW_PROJECT_UPSERT',
+            'project',
+            (int) $project->id,
+            $baisRef,
+            array(
+                'customer_ref' => $customerRef,
+                'project_ref' => $projectRef,
+                'sow_status' => $sowStatus,
+                'offer_number' => $offerNumber,
+                'modules' => array_keys($normalizedModules),
+                'created' => $created,
+            ),
+            (int) $conf->entity
+        );
+
+        return array(
+            'ok' => true,
+            'id' => (int) $project->id,
+            'ref' => $projectRef,
+            'bais_ref' => $baisRef,
+            'customer_ref' => $customerRef,
+            'customer_role' => ((int) $company->client === Societe::CUSTOMER ? 'customer' : 'customer_and_prospect'),
+            'created' => $created,
+            'modules' => array_keys($normalizedModules),
+        );
+    }
+
     private function requireReadPermission()
     {
         if (!$this->user || (!$this->user->admin && !$this->user->hasRight('bais', 'reference', 'read'))) {
             throw new RestException(403, 'BAIS read permission required');
+        }
+    }
+
+    private function requireProjectWritePermission()
+    {
+        if (!$this->user || (!$this->user->admin && !$this->user->hasRight('bais', 'project', 'write'))) {
+            throw new RestException(403, 'BAIS project write permission required');
         }
     }
 }

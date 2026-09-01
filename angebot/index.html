@@ -133,9 +133,10 @@
 <section class="sec"><div class="c offerWrap">
 <div class="offerTools screenOnly">
 <button class="primary" type="button" id="printOffer">Drucken / als PDF speichern</button>
+<button type="button" id="saveSowProject" data-admin-sow-save hidden>SOW mit Projekt verknüpfen</button>
 <button type="button" id="clearForm">Formular leeren</button>
 <label class="toolCheck"><input id="hideUnchecked" type="checkbox" checked> Nicht ausgewählte Leistungen im PDF ausblenden</label>
-<span class="saveState" id="saveState">Lokal gespeichert</span>
+<span class="saveState" id="saveState">Lokal gespeichert</span><span class="saveState" id="sowSyncStatus" aria-live="polite"></span>
 </div>
 
 <form id="offerForm" autocomplete="off">
@@ -151,6 +152,9 @@
 <div class="formField"><label for="offerDate">Angebotsdatum</label><input id="offerDate" name="offerDate" type="date"></div>
 <div class="formField"><label for="validUntil">Gültig bis</label><input id="validUntil" name="validUntil" type="date"></div>
 <div class="formField"><label for="projectStart">Geplanter Projektstart</label><input id="projectStart" name="projectStart" type="date"></div>
+</div>
+<div class="fieldGrid" style="margin-top:12px">
+<div class="formField"><label for="sowStatus">SOW-Status</label><select id="sowStatus" name="sowStatus"><option value="draft">Entwurf</option><option value="approved">Freigegeben</option><option value="signed">Unterschrieben</option></select><span class="help">Dolibarr/Jira Sync startet erst nach Status „Unterschrieben“.</span></div>
 </div>
 
 <div class="partyGrid">
@@ -175,6 +179,14 @@
 <div class="ey">01 · LEISTUNGSAUSWAHL</div>
 <h2>Welche Leistungen werden gewünscht?</h2>
 <p class="sectionHint"><strong>Nur ausgewählte und im Scope konkretisierte Leistungen werden Vertragsbestandteil.</strong></p>
+<h3>BAIS Vertragsmodule · System of Record</h3>
+<div class="checkGrid" id="canonicalModules">
+<div class="checkItem"><input id="mod01" name="mod01" type="checkbox" data-sow-module="MOD-01"><label for="mod01"><strong>MOD-01</strong> · Website-Entwicklung</label></div>
+<div class="checkItem"><input id="mod02" name="mod02" type="checkbox" data-sow-module="MOD-02"><label for="mod02"><strong>MOD-02</strong> · Project Portal</label></div>
+<div class="checkItem"><input id="mod03" name="mod03" type="checkbox" data-sow-module="MOD-03"><label for="mod03"><strong>MOD-03</strong> · Wartung/Hosting-Setup</label></div>
+<div class="checkItem"><input id="mod04" name="mod04" type="checkbox" data-sow-module="MOD-04"><label for="mod04"><strong>MOD-04</strong> · Content-Pflege</label></div>
+</div>
+<p class="sectionHint">Diese vier Modul-IDs werden serverseitig am ausgewählten BAIS Projekt gespeichert und für Onboarding, Portal, Dolibarr und Jira wiederverwendet.</p>
 
 <h3>Website & UX</h3>
 <div class="checkGrid">
@@ -425,6 +437,6 @@ window.addEventListener("afterprint",()=>document.body.classList.remove("printHi
 restore();calculate();
 })();
 </script>
-<script src="/assets/commercial-document-context.js?v=1.2" defer></script>
+<script src="/assets/commercial-document-context.js?v=1.3" defer></script>
 </body>
 </html>
