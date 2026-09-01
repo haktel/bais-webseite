@@ -34,13 +34,27 @@ const status=message=>{const el=byId("commercialStatus");if(el)el.textContent=me
 const setProjectCreationVisible=visible=>{document.querySelectorAll("[data-admin-project-create],[data-admin-sow-save]").forEach(el=>{el.hidden=!visible;});};
 
 let adminData=null,currentData=null;
+const detailedScopeInputs=()=>[...document.querySelectorAll('#offerForm input[type="checkbox"]')].filter(input=>!input.dataset.sowModule&&(/^(w|p|a|ai|s|o|h)\d+$/.test(input.name||"")||/^scope[A-Z]/.test(input.name||"")));
+const resetSowProjectFields=()=>{
+ document.querySelectorAll("[data-sow-module]").forEach(input=>{input.checked=false;});
+ detailedScopeInputs().forEach(input=>{input.checked=false;});
+ document.querySelectorAll('#offerForm input[name^="scope"][name$="Text"]').forEach(input=>{input.value="";});
+ set("offerNo","");set("projectStart","");set("validUntil","");set("sowStatus","draft");
+};
 async function loadSow(projectId){
  if(!byId("saveSowProject")||!projectId)return;
+ resetSowProjectFields();
  const result=await request("/api/commercial/sow?projectId="+encodeURIComponent(projectId),{method:"GET",headers:{}});
  const target=byId("sowSyncStatus");
  if(!result.response.ok){if(target)target.textContent="SOW nicht geladen";return}
  const sow=result.data?.sow;
  document.querySelectorAll("[data-sow-module]").forEach(input=>{input.checked=Boolean(sow?.modules?.some(m=>m.module_code===input.dataset.sowModule));});
+ for(const item of sow?.scopeSelections||[]){
+  const input=document.querySelector('#offerForm input[type="checkbox"][name="'+CSS.escape(item.key||"")+'"]');
+  if(input)input.checked=true;
+  const text=document.querySelector('#offerForm input[name="'+CSS.escape((item.key||"")+"Text")+'"]');
+  if(text&&item.description)text.value=item.description;
+ }
  if(sow){
   set("offerNo",sow.offer_number);set("projectStart",sow.project_start);set("validUntil",sow.valid_until);set("sowStatus",sow.sow_status);
   if(target){const d=result.data?.integrations?.link;target.textContent=d?("Dolibarr: "+(d.dolibarr_sync_status||"—")+" · Jira: "+(d.jira_sync_status||"—")):"SOW gespeichert";}
@@ -99,7 +113,11 @@ async function refresh(){
   adminData=admin.data;providerFill(adminData.provider);setProjectCreationVisible(true);populateAdmin();
  }else{adminData=null;setProjectCreationVisible(false);populateCurrent();}
 }
-const detailedScopeSelections=()=>[...document.querySelectorAll('#offerForm input[type="checkbox"]:checked')].filter(input=>!input.dataset.sowModule&&/^(w|p|a|ai|s|o|c|h)\d+$/.test(input.name||"")).map(input=>document.querySelector('label[for="'+CSS.escape(input.id)+'"]')?.textContent?.trim()||input.name).filter(Boolean);
+const detailedScopeSelections=()=>detailedScopeInputs().filter(input=>input.checked).map(input=>{
+ const row=input.closest(".scopeRow"),label=row?.querySelector("td:first-child")?.textContent?.trim()||document.querySelector('label[for="'+CSS.escape(input.id)+'"]')?.textContent?.trim()||input.name;
+ const description=row?.querySelector('input[name="'+CSS.escape(input.name+"Text")+'"]')?.value?.trim()||"";
+ return{key:input.name,label,description};
+});
 async function saveSow(){
  if(!adminData){status("SOW kann nur durch BAIS gespeichert werden.");return}
  const projectId=byId("projectPicker")?.value||"",organizationId=byId("customerPicker")?.value||"",button=byId("saveSowProject"),sync=byId("sowSyncStatus");
