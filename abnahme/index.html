@@ -70,7 +70,7 @@
 <div class="formField"><label for="acceptanceDate">Datum der Abnahme</label><input id="acceptanceDate" name="acceptanceDate" type="date"></div>
 </div>
 <div class="fieldGrid">
-<div class="formField"><label for="newProjectName">Neues Projekt</label><input id="newProjectName" type="text" placeholder="Projektname eingeben"><button id="createProject" type="button" style="margin-top:6px;padding:9px;border:1px solid #bfd0d5;border-radius:9px;background:#fff;font-weight:800;cursor:pointer">Projekt anlegen</button></div>
+<div class="formField" data-admin-project-create hidden><label for="newProjectName">Neues Projekt</label><input id="newProjectName" type="text" placeholder="Projektname eingeben"><button id="createProject" type="button" style="margin-top:6px;padding:9px;border:1px solid #bfd0d5;border-radius:9px;background:#fff;font-weight:800;cursor:pointer">Projekt anlegen</button></div>
 <div class="formField"><label for="acceptancePlace">Abnahmeort / Format</label><input id="acceptancePlace" name="acceptancePlace" type="text" placeholder="z. B. Dortmund / Remote"></div>
 <div class="formField"><label for="projectPhase">Projekt / Phase</label><input id="projectPhase" name="projectPhase" type="text"></div>
 <div class="formField"><label for="handoverDate">Handover-Datum</label><input id="handoverDate" name="handoverDate" type="date"></div>
@@ -278,6 +278,6 @@ window.addEventListener("beforeprint",applyPrint);window.addEventListener("after
 restore();
 })();
 </script>
-<script src="/assets/commercial-document-context.js?v=1.1" defer></script>
+<script src="/assets/commercial-document-context.js?v=1.2" defer></script>
 </body>
 </html>
