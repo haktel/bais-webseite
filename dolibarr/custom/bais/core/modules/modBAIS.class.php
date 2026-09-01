@@ -19,7 +19,7 @@ class modBAIS extends DolibarrModules
         $this->descriptionlong = 'BAIS customer/project identifiers, audit events and integration endpoints.';
         $this->editor_name = 'BAIS - Bünyamin Atik - IT Solutions';
         $this->editor_url = 'https://bais-solutions.de';
-        $this->version = '0.2.0';
+        $this->version = '0.3.0';
         $this->const_name = 'MAIN_MODULE_BAIS';
         $this->picto = 'building';
         $this->module_parts = array(
@@ -43,6 +43,11 @@ class modBAIS extends DolibarrModules
         $this->rights[$r][0] = 50032102;
         $this->rights[$r][1] = 'Manage BAIS integration settings';
         $this->rights[$r][4] = 'settings';
+        $this->rights[$r][5] = 'write';
+        $r++;
+        $this->rights[$r][0] = 50032103;
+        $this->rights[$r][1] = 'Create or update BAIS projects from signed SOW';
+        $this->rights[$r][4] = 'project';
         $this->rights[$r][5] = 'write';
     }
 
