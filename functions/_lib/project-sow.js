@@ -35,8 +35,18 @@ export function normalizeSowStatus(value){
 }
 export function normalizeScopeSelections(value){
  if(!Array.isArray(value))return[];
- const cleaned=value.map(x=>String(x||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,160)).filter(Boolean);
- return[...new Set(cleaned)].slice(0,120);
+ const seen=new Set(),cleaned=[];
+ for(const item of value){
+  const raw=typeof item==="string"?{key:item,label:item,description:""}:(item&&typeof item==="object"?item:null);
+  if(!raw)continue;
+  const key=String(raw.key||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,80);
+  const label=String(raw.label||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,180);
+  const description=String(raw.description||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,1000);
+  if(!key||!label||seen.has(key))continue;
+  seen.add(key);cleaned.push({key,label,description});
+  if(cleaned.length>=120)break;
+ }
+ return cleaned;
 }
 const sameArray=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]);
 const parseScope=value=>{try{const x=JSON.parse(value||"[]");return Array.isArray(x)?x:[];}catch{return[];}};
