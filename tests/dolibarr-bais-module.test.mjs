@@ -86,6 +86,9 @@ test("Dolibarr BAIS 0.3 exposes least-privilege idempotent project upsert",()=>{
  assert.match(api,/@url POST \/project\/upsert/);
  assert.match(api,/requireProjectWritePermission/);
  assert.match(api,/ref_ext/);
+ assert.match(api,/Societe::PROSPECT/);
+ assert.match(api,/Societe::CUSTOMER_AND_PROSPECT/);
+ assert.match(api,/Only a signed SOW/);
  assert.match(api,/projectRef/);
  assert.match(api,/assignReference\('project'.*projectRef, \$projectRef\)/s);
  assert.match(trigger,/objectType === 'project'/);
