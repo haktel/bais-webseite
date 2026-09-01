@@ -1,6 +1,7 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../../_lib/api.js";
 import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{allocateCustomerNumber,ensureCommercialSchema}from"../../../_lib/commercial.js";
+import{enqueueErpProspectSync,syncPendingErpJobs}from"../../../_lib/erp-sync.js";
 
 const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v4-pbkdf2-100k");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
 
@@ -9,7 +10,8 @@ const customerSlug=(company,organizationId)=>{
  return base+"-"+organizationId.slice(0,8);
 };
 
-export const onRequestPost=async({request,env})=>{
+export const onRequestPost=async context=>{
+ const{request,env}=context;
  const traceId=requestId(request);
  let stage="start",userId=null,organizationId=null,rateKey=null;
  try{
@@ -61,6 +63,15 @@ export const onRequestPost=async({request,env})=>{
    db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?,?)")
     .bind(crypto.randomUUID(),userId,organizationId,"customer.account.created","user",userId,JSON.stringify({customerNumber,source:"self_registration",defaultAccess:"deny"}),now)
   ]);
+
+  stage="erp_enqueue";
+  try{
+   await enqueueErpProspectSync(db,{organizationId,now});
+   const task=syncPendingErpJobs(db,env,{limit:5}).catch(error=>console.error(JSON.stringify({level:"error",area:"erp.sync",requestId:traceId,message:error instanceof Error?error.message:"unknown"})));
+   if(typeof context.waitUntil==="function")context.waitUntil(task);else void task;
+  }catch(error){
+   console.error(JSON.stringify({level:"error",area:"erp.enqueue",requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
+  }
 
   stage="session";
   const session=await createSession(db,userId,request);
