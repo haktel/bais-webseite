@@ -28,7 +28,7 @@ export function classifyApiPath(path){
  if(PUBLIC_EXACT.has(p)||/^\/api\/certificates\/[^/]+$/.test(p))return{mode:"public"};
  if(p==="/api/admin/mfa"||p==="/api/admin/bootstrap")return{mode:"admin_session"};
  if(p.startsWith("/api/admin/"))return{mode:"admin_mfa"};
- if(p==="/api/customer/portal"||p==="/api/customer/documents/upload-url"||p==="/api/customer/documents/finalize"||p==="/api/customer/documents/download")return{mode:"customer_content",contentKey:"project_portal"};
+ if(p==="/api/customer/portal"||p==="/api/customer/documents/upload-url"||p==="/api/customer/documents/upload"||p==="/api/customer/documents/finalize"||p==="/api/customer/documents/download"||p==="/api/customer/documents/file")return{mode:"customer_content",contentKey:"project_portal"};
  if(/^\/api\/n8n-module-(0[1-9]|1[0-2])$/.test(p)||p==="/api/academy/auth-lab-resource")return{mode:"course",courseSlug:"n8n-bootcamp"};
  if(/^\/api\/kif-module-0[1-6]$/.test(p))return{mode:"course",courseSlug:"ki-fuehrerschein"};
  if(SESSION_EXACT.has(p))return{mode:"session"};
