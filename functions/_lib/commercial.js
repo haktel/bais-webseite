@@ -52,12 +52,39 @@ export async function getBusinessProfile(db){
  return await db.prepare("SELECT legal_name,brand_name,owner_name,street_address,postal_code,city,country_code,vat_id,email FROM business_profile WHERE id='default' LIMIT 1").first();
 }
 
-export async function ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now=new Date().toISOString(),intakeName="Erstprojekt / Intake"}){
+export async function removeLegacyEmptyIntakeProjects(db,{organizationId}){
+ const org=String(organizationId||"").trim();
+ if(!org)return 0;
+ const rows=await db.prepare("SELECT id FROM projects WHERE organization_id=? AND name='Erstprojekt / Intake' AND status='planned'").bind(org).all();
+ let removed=0;
+ for(const row of rows.results||[]){
+  const projectId=row.id;
+  const checks=[
+   db.prepare("SELECT 1 AS present FROM milestones WHERE project_id=? LIMIT 1").bind(projectId).first(),
+   db.prepare("SELECT 1 AS present FROM documents WHERE project_id=? LIMIT 1").bind(projectId).first(),
+   db.prepare("SELECT 1 AS present FROM approvals WHERE project_id=? LIMIT 1").bind(projectId).first()
+  ];
+  let upload=null;
+  try{upload=await db.prepare("SELECT 1 AS present FROM document_uploads WHERE project_id=? LIMIT 1").bind(projectId).first();}catch{}
+  const [milestone,document,approval]=await Promise.all(checks);
+  if(milestone||document||approval||upload)continue;
+  try{await db.prepare("DELETE FROM customer_access_grants WHERE organization_id=? AND project_id=?").bind(org,projectId).run();}catch{}
+  await db.batch([
+   db.prepare("DELETE FROM project_members WHERE project_id=?").bind(projectId),
+   db.prepare("DELETE FROM project_registry WHERE project_id=?").bind(projectId),
+   db.prepare("DELETE FROM projects WHERE id=? AND organization_id=? AND name='Erstprojekt / Intake' AND status='planned'").bind(projectId,org)
+  ]);
+  removed++;
+ }
+ return removed;
+}
+
+export async function ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now=new Date().toISOString()}){
  await ensureCommercialSchema(db);
  const user=await db.prepare("SELECT id,organization_id,display_name,email FROM users WHERE id=? LIMIT 1").bind(userId).first();
  if(!user)throw new ApiError(404,"user_not_found","Benutzerkonto nicht gefunden.");
 
- let organizationId=user.organization_id||null,createdOrganization=false,createdProjectId=null;
+ let organizationId=user.organization_id||null,createdOrganization=false;
  try{
   if(!organizationId){
    const identity=await ensureCommercialIdentityForLead(db,{email:email||user.email,displayName:displayName||user.display_name,company,now});
@@ -74,29 +101,9 @@ export async function ensureCommercialIdentityForUser(db,{userId,displayName,ema
    customer={customer_number:customerNumber};
   }
 
-  let project=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status,p.created_at FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? ORDER BY p.created_at ASC LIMIT 1").bind(organizationId).first();
-  if(!project){
-   const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
-   await db.batch([
-    db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,organizationId,intakeName,"planned",now),
-    db.prepare("INSERT INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(projectId,projectNumber,now),
-    db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,userId,"customer")
-   ]);
-   createdProjectId=projectId;
-   project={id:projectId,project_number:projectNumber,name:intakeName,status:"planned",created_at:now};
-  }else{
-   await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(project.id,userId,"customer").run();
-   if(!project.project_number){
-    const projectNumber=await allocateProjectNumber(db,now);
-    await db.prepare("INSERT OR IGNORE INTO project_registry(project_id,project_number,created_at) VALUES(?,?,?)").bind(project.id,projectNumber,now).run();
-    const registry=await db.prepare("SELECT project_number FROM project_registry WHERE project_id=? LIMIT 1").bind(project.id).first();
-    project.project_number=registry?.project_number||projectNumber;
-   }
-  }
-
-  return{organizationId,customerNumber:customer.customer_number,project};
+  await removeLegacyEmptyIntakeProjects(db,{organizationId});
+  return{organizationId,customerNumber:customer.customer_number};
  }catch(error){
-  if(createdProjectId)try{await db.prepare("DELETE FROM projects WHERE id=?").bind(createdProjectId).run();}catch{}
   if(createdOrganization){
    try{await db.prepare("UPDATE users SET organization_id=NULL WHERE id=?").bind(userId).run();}catch{}
    try{await db.prepare("DELETE FROM customer_accounts WHERE organization_id=?").bind(organizationId).run();}catch{}
@@ -113,15 +120,6 @@ export async function createProjectForOrganization(db,{organizationId,name,actor
  const projectName=String(name||"").trim().slice(0,180);
  if(projectName.length<2)throw new ApiError(422,"validation_failed","Ein Projektname ist erforderlich.");
 
- const intake=await db.prepare("SELECT p.id,pr.project_number,p.name,p.status FROM projects p LEFT JOIN project_registry pr ON pr.project_id=p.id WHERE p.organization_id=? AND p.name='Erstprojekt / Intake' AND p.status='planned' ORDER BY p.created_at ASC LIMIT 1")
-  .bind(organizationId).first();
- if(intake){
-  await db.prepare("UPDATE projects SET name=? WHERE id=?").bind(projectName,intake.id).run();
-  await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) SELECT ?,id,'customer' FROM users WHERE organization_id=? AND status='active' AND role IN('student','customer')").bind(intake.id,organizationId).run();
-  if(actorUserId)await db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(intake.id,actorUserId,"admin").run();
-  return{id:intake.id,projectNumber:intake.project_number,name:projectName,status:"planned",reusedIntake:true,organizationId};
- }
-
  const projectId=crypto.randomUUID(),projectNumber=await allocateProjectNumber(db,now);
  const statements=[
   db.prepare("INSERT INTO projects(id,organization_id,name,status,created_at) VALUES(?,?,?,?,?)").bind(projectId,organizationId,projectName,"planned",now),
@@ -130,7 +128,7 @@ export async function createProjectForOrganization(db,{organizationId,name,actor
  ];
  if(actorUserId)statements.push(db.prepare("INSERT OR IGNORE INTO project_members(project_id,user_id,role) VALUES(?,?,?)").bind(projectId,actorUserId,"admin"));
  await db.batch(statements);
- return{id:projectId,projectNumber,name:projectName,status:"planned",reusedIntake:false,organizationId};
+ return{id:projectId,projectNumber,name:projectName,status:"planned",organizationId};
 }
 
 export async function createProjectForUser(db,{userId,name,now=new Date().toISOString()}){

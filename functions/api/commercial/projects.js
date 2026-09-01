@@ -33,7 +33,7 @@ export const onRequestPost=async({request,env})=>{
    project=await createProjectForUser(db,{userId:session.user_id,name,now:new Date().toISOString()});
   }
   await db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) SELECT ?,u.id,u.organization_id,?,?,?,?,? FROM users u WHERE u.id=?")
-   .bind(crypto.randomUUID(),"project.created","project",project.id,JSON.stringify({projectNumber:project.projectNumber,reusedIntake:project.reusedIntake===true}),new Date().toISOString(),session.user_id).run();
+   .bind(crypto.randomUUID(),"project.created","project",project.id,JSON.stringify({projectNumber:project.projectNumber}),new Date().toISOString(),session.user_id).run();
   return json({ok:true,project,requestId:traceId},201);
  }catch(error){return handleError(error,traceId);}
 };

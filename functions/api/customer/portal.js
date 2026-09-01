@@ -1,6 +1,7 @@
 import{ApiError,assertDatabase,handleError,json,requestId}from"../../_lib/api.js";
 import{ensureAuthSchema,requireSession}from"../../_lib/auth.js";
 import{customerContextForSession}from"../../_lib/customer-access.js";
+import{removeLegacyEmptyIntakeProjects}from"../../_lib/commercial.js";
 import{ensureDocumentUploadSchema}from"../../_lib/r2-documents.js";
 
 export const onRequestGet=async({request,env})=>{
@@ -10,6 +11,7 @@ export const onRequestGet=async({request,env})=>{
   const session=await requireSession(db,request);
   if(session.role==="admin"||session.role==="trainer")throw new ApiError(403,"customer_context_required","Das Kundenportal ist auf Kundenkonten beschränkt.");
   const customer=await customerContextForSession(db,session),org=customer.organizationId;
+  await removeLegacyEmptyIntakeProjects(db,{organizationId:org});
 
   const [organization,projects,milestones,documents,approvals]=await Promise.all([
    db.prepare("SELECT id,name,billing_email FROM organizations WHERE id=? LIMIT 1").bind(org).first(),
