@@ -13,6 +13,9 @@ test("SOW uses exactly the four canonical BAIS modules",()=>{
   "MOD-04":"Content-Pflege"
  });
  assert.deepEqual(normalizeProjectModules(["mod-04","MOD-02","MOD-02"]),["MOD-02","MOD-04"]);
+ const sowLib=read("functions/_lib/project-sow.js");
+ assert.match(sowLib,/description.*slice\(0,1000\)/s);
+ assert.match(sowLib,/scopeSelections:parseScope/);
  assert.throws(()=>normalizeProjectModules(["MOD-99"]));
 });
 
@@ -75,6 +78,7 @@ test("customer Project Portal receives contracted modules but not integration id
  assert.match(ui,/Beauftragte Module/);
  assert.match(ui,/module_code/);
  assert.match(ui,/module_name/);
+ assert.match(api,/s\.sow_status=\'signed\'/);
  assert.doesNotMatch(api,/jira_parent_key/);
  assert.doesNotMatch(api,/dolibarr_project_id/);
 });
@@ -97,4 +101,15 @@ test("signed Dolibarr project sync promotes the existing prospect instead of cre
  assert.match(api,/\$company->update\(\$socid, \$this->user/);
  assert.match(api,/ref_ext/);
  assert.match(sync,/UPDATE erp_links SET erp_role='customer'/);
+});
+
+
+test("Angebot persists and reloads structured deliverable scope per project",()=>{
+ const ui=read("assets/commercial-document-context.js");
+ assert.match(ui,/detailedScopeInputs/);
+ assert.match(ui,/\^scope\[A-Z\]/);
+ assert.match(ui,/description/);
+ assert.match(ui,/scopeSelections/);
+ assert.match(ui,/resetSowProjectFields/);
+ assert.match(ui,/sow\?\.scopeSelections/);
 });
