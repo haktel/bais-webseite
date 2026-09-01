@@ -17,5 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24.19.0"
+      - name: Install runtime dependencies
+        run: npm install --ignore-scripts --no-package-lock
       - name: Run platform tests
         run: npm test
+      - name: Build Cloudflare Pages Functions
+        run: npm run cf:dry-run
