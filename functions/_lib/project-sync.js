@@ -113,21 +113,33 @@ async function upsertJiraParent(db,config,row,now){
 }
 
 async function upsertJiraModules(db,config,row,parent,now){
+ const projectLabel=projectJiraLabel(row);
  for(const module of row.modules){
   const existing=await db.prepare("SELECT jira_issue_id,jira_issue_key FROM project_module_integration_links WHERE project_id=? AND module_code=? LIMIT 1").bind(row.id,module.module_code).first();
-  const summary=module.module_code+" · "+module.module_name+" · "+row.project_number;
-  const fields={summary,description:adf("Vertragsmodul aus BAIS SOW: "+module.module_code+" – "+module.module_name+" | "+row.project_number),labels:["bais",module.module_code.toLowerCase(),"sow-module"]};
-  if(existing?.jira_issue_key){
-   await jiraRequest(config,"issue/"+encodeURIComponent(existing.jira_issue_key),{method:"PUT",body:{fields}});
-   continue;
+  const summary=module.module_code+" · "+module.module_name+" · "+row.project_number,moduleLabel=moduleJiraLabel(module.module_code);
+  const fields={summary,description:adf("Vertragsmodul aus BAIS SOW: "+module.module_code+" – "+module.module_name+" | "+row.project_number),labels:["bais","sow-module",projectLabel,moduleLabel]};
+  let id=String(existing?.jira_issue_id||""),key=String(existing?.jira_issue_key||"");
+  if(!key){
+   const jql="project = "+jiraJqlString(config.projectKey)+" AND parent = "+jiraJqlString(parent.key)+" AND labels = "+jiraJqlString(projectLabel)+" AND labels = "+jiraJqlString(moduleLabel);
+   const matches=await jiraSearch(config,jql);
+   if(matches.length>1)throw new Error("Jira contains multiple BAIS module issues for "+row.project_number+" "+module.module_code);
+   if(matches.length===1){id=jiraId(matches[0]);key=jiraKey(matches[0]);}
   }
-  fields.project={key:config.projectKey};fields.issuetype={name:config.moduleIssueType};fields.parent={key:parent.key};
-  const created=await jiraRequest(config,"issue",{method:"POST",body:{fields}}),key=jiraKey(created),id=jiraId(created);
-  if(!key)throw new Error("Jira module issue returned no key for "+module.module_code);
+  if(key){
+   await jiraRequest(config,"issue/"+encodeURIComponent(key),{method:"PUT",body:{fields}});
+  }else{
+   fields.project={key:config.projectKey};
+   fields.issuetype={name:config.moduleIssueType};
+   fields.parent={key:parent.key};
+   const created=await jiraRequest(config,"issue",{method:"POST",body:{fields}});
+   key=jiraKey(created);id=jiraId(created);
+   if(!key)throw new Error("Jira module issue returned no key for "+module.module_code);
+  }
   await db.prepare("INSERT INTO project_module_integration_links(project_id,module_code,jira_issue_id,jira_issue_key,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(project_id,module_code) DO UPDATE SET jira_issue_id=excluded.jira_issue_id,jira_issue_key=excluded.jira_issue_key,updated_at=excluded.updated_at")
    .bind(row.id,module.module_code,id||null,key,now).run();
  }
 }
+
 async function syncJira(db,env,job,now){
  const config=jiraConfig(env);if(!config.configured)return{configured:false};
  const row=await projectSnapshot(db,job.project_id),parent=await upsertJiraParent(db,config,row,now);
