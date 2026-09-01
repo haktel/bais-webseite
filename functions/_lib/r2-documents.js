@@ -5,18 +5,19 @@ export const DOCUMENT_MAX_BYTES=25*1024*1024;
 export const DOCUMENT_UPLOAD_TTL_SECONDS=180;
 export const DOCUMENT_DOWNLOAD_TTL_SECONDS=300;
 
-const ALLOWED_MIME_TYPES=new Set([
- "application/pdf",
- "image/png",
- "image/jpeg",
- "image/webp",
- "text/plain",
- "text/csv",
- "application/zip",
- "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
- "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
- "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+const EXTENSIONS_BY_MIME=new Map([
+ ["application/pdf",["pdf"]],
+ ["image/png",["png"]],
+ ["image/jpeg",["jpg","jpeg"]],
+ ["image/webp",["webp"]],
+ ["text/plain",["txt","log","md"]],
+ ["text/csv",["csv"]],
+ ["application/zip",["zip"]],
+ ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",["docx"]],
+ ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",["xlsx"]],
+ ["application/vnd.openxmlformats-officedocument.presentationml.presentation",["pptx"]]
 ]);
+const ALLOWED_MIME_TYPES=new Set(EXTENSIONS_BY_MIME.keys());
 
 const normalizeMime=value=>String(value||"").split(";")[0].trim().toLowerCase();
 const encodePath=value=>String(value).split("/").map(part=>encodeURIComponent(part)).join("/");
@@ -33,6 +34,8 @@ export function sanitizeDocumentName(value){
 export function validateDocumentUpload({fileName,mimeType,sizeBytes}){
  const name=sanitizeDocumentName(fileName),mime=normalizeMime(mimeType),size=Number(sizeBytes);
  if(!ALLOWED_MIME_TYPES.has(mime))throw new ApiError(415,"unsupported_file_type","Dieser Dateityp ist für das Project Portal nicht freigegeben.");
+ const extension=(name.includes(".")?name.split(".").pop():"").toLowerCase();
+ if(!EXTENSIONS_BY_MIME.get(mime)?.includes(extension))throw new ApiError(415,"file_extension_mismatch","Dateiendung und Dateityp passen nicht zusammen.");
  if(!Number.isInteger(size)||size<1||size>DOCUMENT_MAX_BYTES)throw new ApiError(413,"file_too_large","Dateien dürfen maximal 25 MiB groß sein.");
  return{name,mime,size};
 }
