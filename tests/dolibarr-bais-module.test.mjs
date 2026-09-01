@@ -27,12 +27,15 @@ test("BAIS trigger failures do not roll back Dolibarr core transactions",()=>{
   assert.match(trigger,/return 0;/);
 });
 
-test("BAIS REST API is read-only in phase one",()=>{
+test("BAIS REST API keeps a minimal write surface",()=>{
   const api=read("dolibarr/custom/bais/class/api_bais.class.php");
   assert.match(api,/@url GET \/health/);
   assert.match(api,/@url GET \/reference\/\{type\}\/\{id\}/);
   assert.match(api,/@url GET \/events/);
-  assert.doesNotMatch(api,/@url (POST|PUT|PATCH|DELETE)/);
+  const writes=[...api.matchAll(/@url (POST|PUT|PATCH|DELETE)\s+([^\s*]+)/g)].map(match=>[match[1],match[2]]);
+  assert.deepEqual(writes,[["POST","/project/upsert"]]);
+  assert.match(api,/requireProjectWritePermission/);
+  assert.match(api,/Only a signed SOW/);
 });
 
 test("BAIS server deployer never carries API keys or passwords",()=>{
