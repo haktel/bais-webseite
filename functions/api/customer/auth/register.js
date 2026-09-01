@@ -1,9 +1,9 @@
 import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,validEmail,verifyTurnstile}from"../../../_lib/api.js";
-import{assertSameOrigin,consumeRateLimit,createSession,ensureAuthSchema,hashPassword,normalizeEmail,validPassword}from"../../../_lib/auth.js";
+import{assertSameOrigin,consumeRateLimit,ensureAuthSchema,hashPassword,issueCustomerEmailVerification,normalizeEmail,validPassword}from"../../../_lib/auth.js";
 import{ensureCommercialIdentityForLead,ensureCommercialSchema}from"../../../_lib/commercial.js";
-import{enqueueErpProspectSync,syncPendingErpJobs}from"../../../_lib/erp-sync.js";
+import{sendCustomerVerificationEmail}from"../../../_lib/mail.js";
 
-const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-only-v4-pbkdf2-100k");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
+const withRegistrationVersion=response=>{const headers=new Headers(response.headers);headers.set("x-bais-customer-register","identity-v5-email-verification");return new Response(response.body,{status:response.status,statusText:response.statusText,headers});};
 
 const customerSlug=(company,organizationId)=>{
  const base=String(company||"kunde").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,42)||"kunde";
@@ -57,23 +57,20 @@ export const onRequestPost=async context=>{
   stage="identity_insert";
   await db.batch([
    db.prepare("UPDATE organizations SET name=?,billing_email=? WHERE id=?").bind(company,email,organizationId),
-   db.prepare("INSERT INTO users(id,organization_id,display_name,email,role,status,created_at) VALUES(?,?,?,?,?,?,?)").bind(userId,organizationId,displayName,email,"customer","active",now),
+   db.prepare("INSERT INTO users(id,organization_id,display_name,email,role,status,created_at) VALUES(?,?,?,?,?,?,?)").bind(userId,organizationId,displayName,email,"customer","invited",now),
    db.prepare("INSERT INTO user_credentials(user_id,password_hash,password_salt,password_algorithm,password_iterations,updated_at) VALUES(?,?,?,?,?,?)").bind(userId,credential.hash,credential.salt,"PBKDF2-SHA-256",credential.iterations,now),
    db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?,?)")
-    .bind(crypto.randomUUID(),userId,organizationId,"customer.account.created","user",userId,JSON.stringify({customerNumber,source:"self_registration",defaultAccess:"deny"}),now)
+    .bind(crypto.randomUUID(),userId,organizationId,"customer.account.pending_verification","user",userId,JSON.stringify({customerNumber,source:"self_registration",defaultAccess:"deny"}),now)
   ]);
 
-  stage="erp_enqueue";
-  try{
-   await enqueueErpProspectSync(db,{organizationId,now});
-   const task=syncPendingErpJobs(db,env,{limit:5}).catch(error=>console.error(JSON.stringify({level:"error",area:"erp.sync",requestId:traceId,message:error instanceof Error?error.message:"unknown"})));
-   if(typeof context.waitUntil==="function")context.waitUntil(task);else void task;
-  }catch(error){
-   console.error(JSON.stringify({level:"error",area:"erp.enqueue",requestId:traceId,message:error instanceof Error?error.message:"unknown"}));
-  }
+  stage="verification_token";
+  const verification=await issueCustomerEmailVerification(db,userId,new Date(now));
 
-  stage="session";
-  const session=await createSession(db,userId,request);
+  stage="verification_email";
+  await sendCustomerVerificationEmail({
+   env,to:email,name:displayName,verificationToken:verification.token,expiresAt:verification.expiresAt,
+   idempotencyKey:"customer-verify:"+userId+":"+verification.expiresAt
+  });
 
   stage="rate_limit_cleanup";
   await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();
@@ -81,12 +78,12 @@ export const onRequestPost=async context=>{
   stage="complete";
   return withRegistrationVersion(json({
    ok:true,
-   user:{displayName,email,role:"customer"},
+   verificationRequired:true,
    commercial:{customerNumber},
    contentAccess:[],
-   message:"Kundenkonto erstellt. Geschützte Inhalte werden erst nach ausdrücklicher Freigabe sichtbar.",
+   message:"Registrierung gespeichert. Bitte bestätigen Sie jetzt Ihre E-Mail-Adresse. Erst danach wird das Kundenkonto aktiviert.",
    requestId:traceId
-  },201,{"set-cookie":session.cookie}));
+  },202));
  }catch(error){
   if(rateKey&&!(error instanceof ApiError))try{const db=assertDatabase(env);await db.prepare("DELETE FROM auth_rate_limits WHERE id=?").bind(rateKey).run();}catch{}
   if(userId||organizationId)try{
