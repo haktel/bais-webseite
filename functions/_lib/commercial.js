@@ -31,6 +31,22 @@ async function nextNumber(db,prefix,kind,now){
 export const allocateCustomerNumber=(db,now=new Date().toISOString())=>nextNumber(db,"KD","customer",now);
 export const allocateProjectNumber=(db,now=new Date().toISOString())=>nextNumber(db,"PR","project",now);
 
+export async function ensureCommercialIdentityForLead(db,{email,displayName,company,now=new Date().toISOString()}){
+ await ensureCommercialSchema(db);
+ const normalizedEmail=String(email||"").trim().toLowerCase();
+ if(!normalizedEmail)throw new ApiError(422,"email_required","E-Mail ist für die Kundenidentität erforderlich.");
+ let existing=await db.prepare("SELECT o.id AS organization_id,ca.customer_number FROM organizations o JOIN customer_accounts ca ON ca.organization_id=o.id WHERE lower(o.billing_email)=lower(?) AND ca.account_status='active' ORDER BY ca.created_at ASC LIMIT 1").bind(normalizedEmail).first();
+ if(existing)return{organizationId:existing.organization_id,customerNumber:existing.customer_number,reused:true};
+ const organizationId=crypto.randomUUID(),customerNumber=await allocateCustomerNumber(db,now);
+ const organizationName=String(company||displayName||normalizedEmail||"Kunde").trim().slice(0,160);
+ const slug=safeSlug(organizationName)+"-"+organizationId.slice(0,8);
+ await db.batch([
+  db.prepare("INSERT INTO organizations(id,name,slug,billing_email,created_at) VALUES(?,?,?,?,?)").bind(organizationId,organizationName,slug,normalizedEmail,now),
+  db.prepare("INSERT INTO customer_accounts(organization_id,customer_number,account_status,created_at,updated_at) VALUES(?,?,?,?,?)").bind(organizationId,customerNumber,"active",now,now)
+ ]);
+ return{organizationId,customerNumber,reused:false};
+}
+
 export async function getBusinessProfile(db){
  await ensureCommercialSchema(db);
  return await db.prepare("SELECT legal_name,brand_name,owner_name,street_address,postal_code,city,country_code,vat_id,email FROM business_profile WHERE id='default' LIMIT 1").first();
@@ -44,13 +60,10 @@ export async function ensureCommercialIdentityForUser(db,{userId,displayName,ema
  let organizationId=user.organization_id||null,createdOrganization=false,createdProjectId=null;
  try{
   if(!organizationId){
-   organizationId=crypto.randomUUID();
-   const organizationName=String(company||displayName||email||"Kunde").trim().slice(0,160);
-   const slug=safeSlug(organizationName)+"-"+organizationId.slice(0,8);
-   await db.prepare("INSERT INTO organizations(id,name,slug,billing_email,created_at) VALUES(?,?,?,?,?)")
-    .bind(organizationId,organizationName,slug,email||user.email||null,now).run();
+   const identity=await ensureCommercialIdentityForLead(db,{email:email||user.email,displayName:displayName||user.display_name,company,now});
+   organizationId=identity.organizationId;
+   createdOrganization=!identity.reused;
    await db.prepare("UPDATE users SET organization_id=? WHERE id=?").bind(organizationId,userId).run();
-   createdOrganization=true;
   }
 
   let customer=await db.prepare("SELECT customer_number FROM customer_accounts WHERE organization_id=? LIMIT 1").bind(organizationId).first();
