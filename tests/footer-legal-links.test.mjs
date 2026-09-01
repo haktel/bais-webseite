@@ -4,6 +4,7 @@ import fs from"node:fs";
 
 const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 const pages=[
+ "index.html",
  "agb/index.html","avv/index.html","sla/index.html","preise/index.html",
  "referenzen/index.html","kontakt/index.html","impressum/index.html",
  "datenschutz/index.html","referenzen/n8n-live-demo/index.html",
