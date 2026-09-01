@@ -123,28 +123,34 @@ async function syncJira(db,env,job,now){
 
 export async function syncPendingProjectIntegrations(db,env,{limit=10,now=new Date().toISOString()}={}){
  await ensureProjectSyncSchema(db);
+ const staleBefore=new Date(Date.parse(now)-10*60_000).toISOString();
+ await db.prepare("UPDATE project_sync_jobs SET status='pending',next_attempt_at=?,updated_at=? WHERE status='processing' AND updated_at<=?").bind(now,now,staleBefore).run();
  const jobs=(await db.prepare("SELECT id,project_id,target,attempts FROM project_sync_jobs WHERE status IN('pending','failed') AND next_attempt_at<=? ORDER BY created_at ASC LIMIT ?")
   .bind(now,Math.max(1,Math.min(50,Number(limit)||10))).all()).results||[];
- let synced=0,failed=0,deferred=0;
+ let synced=0,failed=0,deferred=0,claimed=0;
  for(const job of jobs){
-  await db.prepare("UPDATE project_sync_jobs SET status='processing',updated_at=? WHERE id=?").bind(new Date().toISOString(),job.id).run();
+  const claim=await db.prepare("UPDATE project_sync_jobs SET status='processing',updated_at=? WHERE id=? AND status IN('pending','failed') AND next_attempt_at<=?")
+   .bind(new Date().toISOString(),job.id,now).run();
+  if(Number(claim?.meta?.changes||0)!==1)continue;
+  claimed++;
   try{
    const result=job.target==="dolibarr"?await syncDolibarr(db,env,job,new Date().toISOString()):job.target==="jira"?await syncJira(db,env,job,new Date().toISOString()):null;
    if(!result)throw new Error("Unsupported project sync target: "+job.target);
    if(result.configured===false){
     deferred++;
-    await db.prepare("UPDATE project_sync_jobs SET status='pending',next_attempt_at=?,updated_at=? WHERE id=?").bind(new Date(Date.parse(now)+15*60_000).toISOString(),new Date().toISOString(),job.id).run();
+    await db.prepare("UPDATE project_sync_jobs SET status='pending',next_attempt_at=?,updated_at=? WHERE id=? AND status='processing'")
+     .bind(new Date(Date.parse(now)+15*60_000).toISOString(),new Date().toISOString(),job.id).run();
    }else synced++;
   }catch(error){
    failed++;
    const attempts=Number(job.attempts||0)+1,err=cleanError(error instanceof Error?error.message:error),updatedAt=new Date().toISOString();
    await db.batch([
-    db.prepare("UPDATE project_sync_jobs SET status='failed',attempts=?,next_attempt_at=?,last_error=?,updated_at=? WHERE id=?").bind(attempts,retryAt(attempts,now),err,updatedAt,job.id),
+    db.prepare("UPDATE project_sync_jobs SET status='failed',attempts=?,next_attempt_at=?,last_error=?,updated_at=? WHERE id=? AND status='processing'").bind(attempts,retryAt(attempts,now),err,updatedAt,job.id),
     db.prepare("UPDATE project_integration_links SET "+(job.target==="jira"?"jira_sync_status":"dolibarr_sync_status")+"='failed',last_error=?,updated_at=? WHERE project_id=?").bind(err,updatedAt,job.project_id)
    ]);
   }
  }
- return{processed:jobs.length,synced,failed,deferred};
+ return{processed:jobs.length,claimed,synced,failed,deferred};
 }
 
 export async function projectIntegrationStatus(db,projectId){
