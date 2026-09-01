@@ -129,7 +129,13 @@ chmod 600 "$KEY_FILE"
 
 HTTP_CODE="$(curl -sS -o /tmp/bais-api-test.json -w '%{http_code}' --max-time 15   -H "DOLAPIKEY: $API_KEY"   "http://127.0.0.1:8085/api/index.php/thirdparties?sortfield=t.rowid&sortorder=ASC&limit=1" || true)"
 
-if [ "$HTTP_CODE" != "200" ]; then
+if [ "$HTTP_CODE" = "200" ]; then
+  API_TEST_RESULT="HTTP 200"
+elif [ "$HTTP_CODE" = "404" ] && grep -q '"message": "Not Found: No third parties found"' /tmp/bais-api-test.json; then
+  # Dolibarr returns 404 for an authenticated third-party list request when the table is empty.
+  # This still proves that the API key is valid and the service user can reach the endpoint.
+  API_TEST_RESULT="HTTP 404 (API authentifiziert, noch keine Dritten vorhanden)"
+else
   echo "FEHLER: Dolibarr API-Test ergab HTTP $HTTP_CODE" >&2
   sed -n '1,8p' /tmp/bais-api-test.json >&2 || true
   exit 1
@@ -142,7 +148,7 @@ echo "Service user : bais-api"
 echo "Admin        : NEIN"
 echo "Rechte       : Dritte lesen + erstellen/aktualisieren"
 echo "Löschen      : NEIN"
-echo "API-Test     : HTTP 200"
+echo "API-Test     : $API_TEST_RESULT"
 echo "API-Key      : sicher gespeichert, nicht ausgegeben"
 echo "Datei        : $KEY_FILE"
 echo
