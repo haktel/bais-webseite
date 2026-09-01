@@ -42,3 +42,33 @@ test("BAIS server deployer never carries API keys or passwords",()=>{
   assert.match(deploy,/php -l/);
   assert.match(deploy,/activateModule/);
 });
+
+
+test("new Dolibarr customer automatically receives one idempotent BAIS starter pack",()=>{
+  const manager=read("dolibarr/custom/bais/class/baismanager.class.php");
+  const trigger=read("dolibarr/custom/bais/core/triggers/interface_99_modBAIS_BAISTrigger.class.php");
+  const sql=read("dolibarr/custom/bais/sql/llx_bais_customer_onboarding.sql");
+  assert.match(manager,/ensureCustomerStarterPack/);
+  assert.match(manager,/UNIQUE KEY uk_bais_customer_onboarding/);
+  assert.match(manager,/kundenstammblatt-v1/);
+  assert.match(manager,/welcome-onboarding-v1/);
+  assert.match(manager,/avv-dsgvo-check-v1/);
+  assert.match(trigger,/CUSTOMER_STARTER_PACK_PREPARED/);
+  assert.match(trigger,/\$action === 'COMPANY_CREATE'/);
+  assert.match(sql,/UNIQUE KEY uk_bais_customer_onboarding/);
+});
+
+test("Dolibarr customer starter pack template family keeps BAIS customer identity explicit",()=>{
+  for(const path of[
+    "dolibarr/custom/bais/templates/kundenstammblatt-v1.md",
+    "dolibarr/custom/bais/templates/welcome-onboarding-v1.md",
+    "dolibarr/custom/bais/templates/angebot-sow-check-v1.md",
+    "dolibarr/custom/bais/templates/avv-dsgvo-check-v1.md",
+    "dolibarr/custom/bais/templates/projekt-kickoff-v1.md",
+    "dolibarr/custom/bais/templates/abnahme-vorbereitung-v1.md"
+  ]){
+    const source=read(path);
+    assert.match(source,/\[KUNDEN_NUMMER\]/);
+    assert.match(source,/BAIS/);
+  }
+});

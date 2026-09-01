@@ -50,6 +50,24 @@ class InterfaceBAISTrigger extends DolibarrTriggers
                     $preferredRef = (string) $object->ref_ext;
                 }
                 $baisRef = $manager->assignReference($objectType, $objectId, $prefix, $entity, $sourceRef, $preferredRef);
+
+                if ($objectType === 'customer' && $action === 'COMPANY_CREATE') {
+                    $templates = $manager->ensureCustomerStarterPack($objectId, $baisRef, $entity);
+                    $manager->enqueueEvent(
+                        'CUSTOMER_STARTER_PACK_PREPARED',
+                        'customer',
+                        $objectId,
+                        $baisRef,
+                        array(
+                            'action' => $action,
+                            'dolibarr_ref' => $sourceRef,
+                            'templates' => $templates,
+                            'template_version' => 'v1',
+                            'user_id' => (int) $user->id,
+                        ),
+                        $entity
+                    );
+                }
             }
 
             $trackedActions = array(

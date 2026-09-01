@@ -100,6 +100,70 @@ class BAISManager
         throw new RuntimeException('Unable to allocate BAIS sequence after retries');
     }
 
+    private function ensureCustomerOnboardingSchema()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS ".$this->db->prefix()."bais_customer_onboarding (";
+        $sql .= "rowid integer AUTO_INCREMENT PRIMARY KEY, ";
+        $sql .= "entity integer NOT NULL DEFAULT 1, ";
+        $sql .= "fk_soc integer NOT NULL, ";
+        $sql .= "bais_ref varchar(32) NOT NULL, ";
+        $sql .= "status varchar(32) NOT NULL DEFAULT 'prepared', ";
+        $sql .= "template_version varchar(16) NOT NULL DEFAULT 'v1', ";
+        $sql .= "template_manifest text NULL, ";
+        $sql .= "datec datetime NULL, tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ";
+        $sql .= "UNIQUE KEY uk_bais_customer_onboarding (entity, fk_soc), ";
+        $sql .= "KEY idx_bais_customer_onboarding_ref (entity, bais_ref)";
+        $sql .= ")";
+        if (!$this->db->query($sql)) {
+            throw new RuntimeException('Unable to ensure BAIS customer onboarding schema: '.$this->db->lasterror());
+        }
+    }
+
+    public function ensureCustomerStarterPack($thirdpartyId, $baisRef, $entity = 1)
+    {
+        $this->ensureCustomerOnboardingSchema();
+        $templates = array(
+            'kundenstammblatt-v1',
+            'welcome-onboarding-v1',
+            'angebot-sow-check-v1',
+            'avv-dsgvo-check-v1',
+            'projekt-kickoff-v1',
+            'abnahme-vorbereitung-v1'
+        );
+        $manifest = json_encode($templates, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($manifest === false) $manifest = '[]';
+
+        $sql = "INSERT INTO ".$this->db->prefix()."bais_customer_onboarding";
+        $sql .= " (entity, fk_soc, bais_ref, status, template_version, template_manifest, datec, tms) VALUES (";
+        $sql .= ((int) $entity).", ".((int) $thirdpartyId).", '".$this->db->escape((string) $baisRef)."', 'prepared', 'v1', '".$this->db->escape($manifest)."', NOW(), NOW())";
+        $sql .= " ON DUPLICATE KEY UPDATE bais_ref=VALUES(bais_ref), template_version='v1', template_manifest=VALUES(template_manifest), tms=NOW()";
+        if (!$this->db->query($sql)) {
+            throw new RuntimeException('Unable to prepare BAIS customer starter pack: '.$this->db->lasterror());
+        }
+        return $templates;
+    }
+
+    public function getCustomerStarterPack($thirdpartyId, $entity = 1)
+    {
+        $this->ensureCustomerOnboardingSchema();
+        $sql = "SELECT bais_ref,status,template_version,template_manifest,datec,tms FROM ".$this->db->prefix()."bais_customer_onboarding";
+        $sql .= " WHERE entity=".((int) $entity)." AND fk_soc=".((int) $thirdpartyId)." LIMIT 1";
+        $resql = $this->db->query($sql);
+        if (!$resql) return null;
+        $obj = $this->db->fetch_object($resql);
+        if (!$obj) return null;
+        $templates = json_decode((string) $obj->template_manifest, true);
+        if (!is_array($templates)) $templates = array();
+        return array(
+            'bais_ref' => (string) $obj->bais_ref,
+            'status' => (string) $obj->status,
+            'template_version' => (string) $obj->template_version,
+            'templates' => $templates,
+            'datec' => (string) $obj->datec,
+            'tms' => (string) $obj->tms,
+        );
+    }
+
     public function enqueueEvent($eventName, $objectType, $objectId, $baisRef, array $payload = array(), $entity = 1)
     {
         $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
