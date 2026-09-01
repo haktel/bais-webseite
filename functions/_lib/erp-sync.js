@@ -159,7 +159,7 @@ async function syncProspect(db,config,job,now){
  if(!id)throw new Error("Dolibarr did not return a valid thirdparty id.");
 
  await db.batch([
-  db.prepare("INSERT INTO erp_links(organization_id,bais_customer_number,dolibarr_thirdparty_id,erp_role,sync_status,remote_ref,last_sync_at,last_error,created_at,updated_at) VALUES(?,?,?,'prospect','synced',?,?,NULL,?,?) ON CONFLICT(organization_id) DO UPDATE SET bais_customer_number=excluded.bais_customer_number,dolibarr_thirdparty_id=excluded.dolibarr_thirdparty_id,erp_role='prospect',sync_status='synced',remote_ref=excluded.remote_ref,last_sync_at=excluded.last_sync_at,last_error=NULL,updated_at=excluded.updated_at").bind(job.organization_id,row.customer_number,id,row.customer_number,now,now,now,now),
+  db.prepare("INSERT INTO erp_links(organization_id,bais_customer_number,dolibarr_thirdparty_id,erp_role,sync_status,remote_ref,last_sync_at,last_error,created_at,updated_at) VALUES(?,?,?,'prospect','synced',?,?,NULL,?,?) ON CONFLICT(organization_id) DO UPDATE SET bais_customer_number=excluded.bais_customer_number,dolibarr_thirdparty_id=excluded.dolibarr_thirdparty_id,erp_role='prospect',sync_status='synced',remote_ref=excluded.remote_ref,last_sync_at=excluded.last_sync_at,last_error=NULL,updated_at=excluded.updated_at").bind(job.organization_id,row.customer_number,id,row.customer_number,now,now,now),
   db.prepare("UPDATE erp_sync_jobs SET status='done',last_error=NULL,updated_at=? WHERE id=?").bind(now,job.id)
  ]);
  return{id,customerNumber:row.customer_number};
