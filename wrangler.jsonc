@@ -1,0 +1,17 @@
+{
+  "$schema":"./node_modules/wrangler/config-schema.json",
+  "name":"bais-webseite",
+  "pages_build_output_dir":".",
+  "compatibility_date":"2026-08-27",
+  "compatibility_flags":["nodejs_compat"],
+  "observability":{"enabled":true,"head_sampling_rate":1},
+  "d1_databases":[{
+    "binding":"DB",
+    "database_name":"bais-platform",
+    "database_id":"0f4ed49b-6a7c-4645-9737-750fced2ecb8",
+    "migrations_dir":"migrations"
+  }],
+  "r2_buckets":[{
+    "binding":"PROJECT_DOCUMENTS"
+  }]
+}
