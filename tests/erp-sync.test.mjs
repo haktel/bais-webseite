@@ -46,3 +46,16 @@ test("Dolibarr BAIS trigger accepts an existing KD reference from ref_ext",()=>{
  assert.match(manager,/preferredRef/);
  assert.match(manager,/ensureSequenceAtLeast/);
 });
+
+
+test("empty Dolibarr third-party lookup is treated as not found rather than sync failure",()=>{
+ const erp=read("functions/_lib/erp-sync.js");
+ assert.match(erp,/error\?\.status\)===404/);
+ assert.match(erp,/return null;/);
+});
+
+test("provisioning accepts authenticated empty third-party list",()=>{
+ const script=read("scripts/server/provision-bais-dolibarr-api-user.sh");
+ assert.match(script,/HTTP_CODE" = "404"/);
+ assert.match(script,/No third parties found/);
+});
