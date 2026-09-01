@@ -20,8 +20,8 @@ export const onRequestGet=async({request,env})=>{
    db.prepare("SELECT m.id,m.project_id,m.title,m.status,m.due_at,m.position FROM milestones m JOIN projects p ON p.id=m.project_id WHERE p.organization_id=? ORDER BY m.project_id,m.position,m.due_at").bind(org).all(),
    db.prepare("SELECT d.id,d.project_id,d.name,d.version,d.created_at,du.mime_type,du.actual_size AS size_bytes FROM documents d JOIN projects p ON p.id=d.project_id LEFT JOIN document_uploads du ON du.id=d.id WHERE p.organization_id=? ORDER BY d.project_id,d.created_at DESC").bind(org).all(),
    db.prepare("SELECT a.id,a.project_id,a.subject,a.status,a.decided_at,a.created_at FROM approvals a JOIN projects p ON p.id=a.project_id WHERE p.organization_id=? ORDER BY a.project_id,a.created_at DESC").bind(org).all(),
-   db.prepare("SELECT pm.project_id,pm.module_code,pm.module_name FROM project_modules pm JOIN projects p ON p.id=pm.project_id WHERE p.organization_id=? ORDER BY pm.project_id,pm.module_code").bind(org).all(),
-   db.prepare("SELECT s.project_id,s.offer_number,s.sow_status,s.project_start,s.signed_at FROM project_sow s JOIN projects p ON p.id=s.project_id WHERE p.organization_id=?").bind(org).all()
+   db.prepare("SELECT pm.project_id,pm.module_code,pm.module_name FROM project_modules pm JOIN projects p ON p.id=pm.project_id JOIN project_sow s ON s.project_id=pm.project_id AND s.sow_status='signed' WHERE p.organization_id=? ORDER BY pm.project_id,pm.module_code").bind(org).all(),
+   db.prepare("SELECT s.project_id,s.offer_number,s.sow_status,s.project_start,s.signed_at FROM project_sow s JOIN projects p ON p.id=s.project_id WHERE p.organization_id=? AND s.sow_status='signed'").bind(org).all()
   ]);
 
   const ms=milestones.results||[],docs=documents.results||[],apps=approvals.results||[],mods=modules.results||[],sowRows=sows.results||[];
