@@ -37,9 +37,10 @@ test("privacy notice discloses RepoCloud n8n and data minimization",()=>{
  assert.match(html,/AVV \/ DPA/i);
 });
 
-test("homepage and sitemap surface the AVV",()=>{
- const home=read("index.html");
- const sitemap=read("sitemap.xml");
- assert.match(home,/avv\/index\.html[^>]*>AVV \/ DPA/i);
+test("AVV is discoverable contextually without being a global homepage footer link",()=>{
+ const home=read("index.html"),privacy=read("datenschutz/index.html"),offer=read("angebot/index.html"),sitemap=read("sitemap.xml");
+ assert.doesNotMatch(home,/avv\/index\.html[^>]*>AVV \/ DPA/i);
+ assert.match(privacy,/AVV \/ DPA/i);
+ assert.match(offer,/href="\.\.\/avv\/"[^>]*>AVV \/ DPA/i);
  assert.match(sitemap,/https:\/\/bais-solutions\.de\/avv\//i);
 });
