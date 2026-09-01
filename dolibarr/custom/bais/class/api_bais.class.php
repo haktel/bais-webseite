@@ -7,6 +7,7 @@ use Luracast\Restler\RestException;
 
 dol_include_once('/bais/class/baismanager.class.php');
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
 /**
  * BAIS integration API.
@@ -128,8 +129,8 @@ class BAISApi extends DolibarrApi
         if ($title === '' || strlen($title) > 180) {
             throw new RestException(400, 'Invalid project title');
         }
-        if (!in_array($sowStatus, array('draft', 'approved', 'signed'), true)) {
-            throw new RestException(400, 'Invalid SOW status');
+        if ($sowStatus !== 'signed') {
+            throw new RestException(400, 'Only a signed SOW may create or update a Dolibarr project');
         }
 
         $allowedModules = array(
@@ -163,6 +164,19 @@ class BAISApi extends DolibarrApi
             throw new RestException(409, 'BAIS customer is not synchronized to Dolibarr yet');
         }
         $socid = (int) $soc->rowid;
+
+        $company = new Societe($db);
+        if ($company->fetch($socid) <= 0) {
+            throw new RestException(500, 'Unable to load BAIS customer');
+        }
+        if ((int) $company->client === Societe::PROSPECT) {
+            $company->client = Societe::CUSTOMER_AND_PROSPECT;
+            if (empty($company->code_client)) $company->code_client = '-1';
+            $promoted = $company->update($socid, $this->user, 1, 1, 0, 'update', 1);
+            if ($promoted <= 0) {
+                throw new RestException(500, 'Unable to promote BAIS prospect to customer: '.$company->error);
+            }
+        }
 
         $project = new Project($db);
         $found = $project->fetch(0, $projectRef);
@@ -237,6 +251,7 @@ class BAISApi extends DolibarrApi
             'ref' => $projectRef,
             'bais_ref' => $baisRef,
             'customer_ref' => $customerRef,
+            'customer_role' => ((int) $company->client === Societe::CUSTOMER ? 'customer' : 'customer_and_prospect'),
             'created' => $created,
             'modules' => array_keys($normalizedModules),
         );
