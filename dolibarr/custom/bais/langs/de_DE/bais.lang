@@ -1,0 +1,8 @@
+ModuleBAISName=BAIS
+ModuleBAISDesc=BAIS Integration und Workflow
+BAISDashboard=BAIS Dashboard
+BAISObjectType=Objekttyp
+BAISPendingEvents=Ausstehende Integrationsereignisse
+BAISRecentReferences=Letzte BAIS-Referenzen
+BAISReference=BAIS-Referenz
+SourceRef=Dolibarr-Referenz
