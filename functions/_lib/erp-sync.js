@@ -10,6 +10,7 @@ const b64url=bytes=>{let s="";for(const b of bytes)s+=String.fromCharCode(b);ret
 const fromB64url=value=>{const s=String(value||"").replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-String(value||"").length%4)%4),bin=atob(s);return Uint8Array.from(bin,c=>c.charCodeAt(0));};
 const cleanError=value=>String(value||"ERP sync failed").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,MAX_ERROR);
 const normalizeBaseUrl=value=>String(value||ERP_DEFAULT_BASE_URL).trim().replace(/\/+$/,"");
+const normalizeCredential=(value,headerName="")=>{let v=String(value||"").trim();if(!v)return"";v=v.replace(/^[\"\']|[\"\']$/g,"").trim();if(headerName){const prefix=String(headerName).toLowerCase()+":";if(v.toLowerCase().startsWith(prefix))v=v.slice(prefix.length).trim();}return v;};
 const retryAt=(attempts,now)=>new Date(Date.parse(now)+Math.min(60,2**Math.min(6,Math.max(0,attempts)))*60_000).toISOString();
 
 const rootSecrets=env=>{
@@ -56,9 +57,9 @@ async function configRow(db){
 export async function getErpIntegrationConfig(db,env,{includeSecrets=false}={}){
  const row=await configRow(db);
  const baseUrl=normalizeBaseUrl(env?.ERP_BASE_URL||row?.base_url||ERP_DEFAULT_BASE_URL);
- const apiKey=String(env?.ERP_DOLAPIKEY||"")||await decryptSecret(row?.api_key_ciphertext,row?.api_key_iv,env);
- const accessClientId=String(env?.ERP_CF_ACCESS_CLIENT_ID||"")||await decryptSecret(row?.cf_access_client_id_ciphertext,row?.cf_access_client_id_iv,env);
- const accessClientSecret=String(env?.ERP_CF_ACCESS_CLIENT_SECRET||"")||await decryptSecret(row?.cf_access_client_secret_ciphertext,row?.cf_access_client_secret_iv,env);
+ const apiKey=normalizeCredential(String(env?.ERP_DOLAPIKEY||"")||await decryptSecret(row?.api_key_ciphertext,row?.api_key_iv,env),"DOLAPIKEY");
+ const accessClientId=normalizeCredential(String(env?.ERP_CF_ACCESS_CLIENT_ID||"")||await decryptSecret(row?.cf_access_client_id_ciphertext,row?.cf_access_client_id_iv,env),"CF-Access-Client-Id");
+ const accessClientSecret=normalizeCredential(String(env?.ERP_CF_ACCESS_CLIENT_SECRET||"")||await decryptSecret(row?.cf_access_client_secret_ciphertext,row?.cf_access_client_secret_iv,env),"CF-Access-Client-Secret");
  const enabled=Boolean(Number(row?.enabled??1));
  const status={enabled,baseUrl,apiKeyConfigured:Boolean(apiKey),accessConfigured:Boolean(accessClientId&&accessClientSecret),configured:Boolean(enabled&&apiKey)};
  return includeSecrets?{...status,apiKey,accessClientId,accessClientSecret}:status;
@@ -73,9 +74,9 @@ export async function saveErpIntegrationConfig(db,env,{baseUrl,apiKey,accessClie
   clientIdCiphertext:current?.cf_access_client_id_ciphertext||null,clientIdIv:current?.cf_access_client_id_iv||null,
   clientSecretCiphertext:current?.cf_access_client_secret_ciphertext||null,clientSecretIv:current?.cf_access_client_secret_iv||null
  };
- if(String(apiKey||"").trim()){const x=await encryptSecret(String(apiKey).trim(),env);updates.apiKeyCiphertext=x.ciphertext;updates.apiKeyIv=x.iv;}
- if(String(accessClientId||"").trim()){const x=await encryptSecret(String(accessClientId).trim(),env);updates.clientIdCiphertext=x.ciphertext;updates.clientIdIv=x.iv;}
- if(String(accessClientSecret||"").trim()){const x=await encryptSecret(String(accessClientSecret).trim(),env);updates.clientSecretCiphertext=x.ciphertext;updates.clientSecretIv=x.iv;}
+ if(String(apiKey||"").trim()){const x=await encryptSecret(normalizeCredential(apiKey,"DOLAPIKEY"),env);updates.apiKeyCiphertext=x.ciphertext;updates.apiKeyIv=x.iv;}
+ if(String(accessClientId||"").trim()){const x=await encryptSecret(normalizeCredential(accessClientId,"CF-Access-Client-Id"),env);updates.clientIdCiphertext=x.ciphertext;updates.clientIdIv=x.iv;}
+ if(String(accessClientSecret||"").trim()){const x=await encryptSecret(normalizeCredential(accessClientSecret,"CF-Access-Client-Secret"),env);updates.clientSecretCiphertext=x.ciphertext;updates.clientSecretIv=x.iv;}
  await db.prepare("UPDATE erp_integration_config SET base_url=?,api_key_ciphertext=?,api_key_iv=?,cf_access_client_id_ciphertext=?,cf_access_client_id_iv=?,cf_access_client_secret_ciphertext=?,cf_access_client_secret_iv=?,enabled=?,updated_at=? WHERE id='default'")
   .bind(updates.baseUrl,updates.apiKeyCiphertext,updates.apiKeyIv,updates.clientIdCiphertext,updates.clientIdIv,updates.clientSecretCiphertext,updates.clientSecretIv,updates.enabled,now).run();
  return getErpIntegrationConfig(db,env);
@@ -113,7 +114,7 @@ async function dolibarrRequest(config,path,{method="GET",body}={}){
  let data=null;
  if(text){try{data=JSON.parse(text);}catch{}}
  if(!response.ok){const error=new Error("Dolibarr HTTP "+response.status+": "+cleanError(data?.error?.message||data?.error||text||response.statusText));error.status=response.status;throw error;}
- if(!contentType.includes("json")&&data===null)throw new Error("Dolibarr API returned non-JSON content; Cloudflare Access service authentication may be missing.");
+ if(!contentType.includes("json")&&data===null){const finalUrl=response.url||url;const accessHint=/cloudflareaccess\.com|\/cdn-cgi\/access/i.test(finalUrl+" "+text)?" Cloudflare Access login page detected.":"";throw new Error("Dolibarr API returned non-JSON content (HTTP "+response.status+", final URL: "+finalUrl+")."+accessHint);}
  return data;
 }
 
