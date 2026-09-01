@@ -52,6 +52,33 @@ export async function getBusinessProfile(db){
  return await db.prepare("SELECT legal_name,brand_name,owner_name,street_address,postal_code,city,country_code,vat_id,email FROM business_profile WHERE id='default' LIMIT 1").first();
 }
 
+export async function removeLegacyEmptyIntakeProjects(db,{organizationId}){
+ const org=String(organizationId||"").trim();
+ if(!org)return 0;
+ const rows=await db.prepare("SELECT id FROM projects WHERE organization_id=? AND name='Erstprojekt / Intake' AND status='planned'").bind(org).all();
+ let removed=0;
+ for(const row of rows.results||[]){
+  const projectId=row.id;
+  const checks=[
+   db.prepare("SELECT 1 AS present FROM milestones WHERE project_id=? LIMIT 1").bind(projectId).first(),
+   db.prepare("SELECT 1 AS present FROM documents WHERE project_id=? LIMIT 1").bind(projectId).first(),
+   db.prepare("SELECT 1 AS present FROM approvals WHERE project_id=? LIMIT 1").bind(projectId).first()
+  ];
+  let upload=null;
+  try{upload=await db.prepare("SELECT 1 AS present FROM document_uploads WHERE project_id=? LIMIT 1").bind(projectId).first();}catch{}
+  const [milestone,document,approval]=await Promise.all(checks);
+  if(milestone||document||approval||upload)continue;
+  try{await db.prepare("DELETE FROM customer_access_grants WHERE organization_id=? AND project_id=?").bind(org,projectId).run();}catch{}
+  await db.batch([
+   db.prepare("DELETE FROM project_members WHERE project_id=?").bind(projectId),
+   db.prepare("DELETE FROM project_registry WHERE project_id=?").bind(projectId),
+   db.prepare("DELETE FROM projects WHERE id=? AND organization_id=? AND name='Erstprojekt / Intake' AND status='planned'").bind(projectId,org)
+  ]);
+  removed++;
+ }
+ return removed;
+}
+
 export async function ensureCommercialIdentityForUser(db,{userId,displayName,email,company,now=new Date().toISOString()}){
  await ensureCommercialSchema(db);
  const user=await db.prepare("SELECT id,organization_id,display_name,email FROM users WHERE id=? LIMIT 1").bind(userId).first();
@@ -74,6 +101,7 @@ export async function ensureCommercialIdentityForUser(db,{userId,displayName,ema
    customer={customer_number:customerNumber};
   }
 
+  await removeLegacyEmptyIntakeProjects(db,{organizationId});
   return{organizationId,customerNumber:customer.customer_number};
  }catch(error){
   if(createdOrganization){
