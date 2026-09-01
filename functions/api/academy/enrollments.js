@@ -2,6 +2,8 @@ import{ApiError,assertDatabase,cleanText,handleError,json,readJson,requestId,val
 import{buildLeadPayload,callLeadQualificationWebhook,mapLeadResult}from"../../_lib/n8n.js";
 import{privacyPolicy,scheduleRetention,runPrivacyCleanup}from"../../_lib/privacy.js";
 import{ensureLeadScoringSchema}from"../../_lib/lead-scoring-schema.js";
+import{ensureCommercialIdentityForLead}from"../../_lib/commercial.js";
+import{enqueueErpProspectSync,syncPendingErpJobs}from"../../_lib/erp-sync.js";
 const PROGRAMS={"ki-fuehrerschein":"KI-Führerschein Essentials","ki-leadership":"KI-Führerschein Leadership","ki-it-security":"KI-Führerschein IT & Security","data-literacy":"Datenkompetenz für AI","prompt-engineering":"Prompt Engineering Professional","secure-ai-rag":"Secure AI & RAG","ai-agents":"AI Agents & Workflow Labs","enterprise-tools":"ChatGPT, Copilot & Gemini","n8n-bootcamp":"n8n Automation Bootcamp","ai-coding":"AI-gestützte Softwareentwicklung","api-integration":"APIs, Webhooks & Systemintegration","knowledge-assistant-lab":"Knowledge Assistant Lab","ai-governance":"AI Governance Essentials","eu-ai-act":"AI Literacy & EU AI Act Awareness","caio-masterguide":"CAIO Masterguide","policy-enablement":"AI Policy Enablement","ai-for-sales":"AI for Sales & B2B Vertrieb","ai-customer-service":"AI im Kundenservice","prozessanalyse-automation":"Prozessanalyse & Automation Discovery","it-projektmanagement-ai-delivery":"IT-Projektmanagement & AI Delivery","ki-health":"KI Health Essentials","ki-health-pflege":"KI Health Pflege","ki-health-klinik":"KI Health Klinik & Arzt"};
 
 async function qualifyEnrollment(db,enrollmentId,lead,traceId){
@@ -33,6 +35,9 @@ export const onRequestPost=async({request,env,waitUntil})=>{
   const enrollmentId=crypto.randomUUID();
   await db.prepare("INSERT INTO enrollment_requests(id,course_id,name,email,company,note,status,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(enrollmentId,course.id,name,email,company||null,note||null,"new",now).run();
   await scheduleRetention(db,{entityType:"enrollment_request",entityId:enrollmentId,days:privacyPolicy(env).openLeadDays,reason:"open_enrollment_retention",now});
+  const commercial=await ensureCommercialIdentityForLead(db,{email,displayName:name,company,now});
+  await enqueueErpProspectSync(db,{organizationId:commercial.organizationId,now});
+  waitUntil(syncPendingErpJobs(db,env,{limit:5}).catch(()=>null));
   waitUntil(qualifyEnrollment(db,enrollmentId,{name,email,company,topic:PROGRAMS[courseSlug],message:note||`Anmeldung für ${PROGRAMS[courseSlug]}`},traceId));
   waitUntil(runPrivacyCleanup(db,{limit:20}).catch(()=>null));
   return json({ok:true,id:enrollmentId,message:"Ihre Academy-Anmeldung wurde übermittelt. Wir melden uns persönlich bei Ihnen.",requestId:traceId},201);
