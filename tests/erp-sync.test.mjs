@@ -63,7 +63,7 @@ test("provisioning accepts authenticated empty third-party list",()=>{
 
 test("ERP sync D1 upsert has one binding per SQL placeholder",()=>{
  const erp=read("functions/_lib/erp-sync.js");
- const m=erp.match(/INSERT INTO erp_links\([^"]+VALUES\(([^"]+)\)[^"]*"\)\.bind\(([^)]+)\)/);
+ const m=erp.match(/INSERT INTO erp_links\(organization_id,bais_customer_number,dolibarr_thirdparty_id,[^"]+VALUES\(([^"]+)\)[^"]*"\)\.bind\(([^)]+)\)/);
  assert.ok(m,"ERP link upsert SQL not found");
  assert.equal((m[1].match(/\?/g)||[]).length,m[2].split(",").length);
 });
