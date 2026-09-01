@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS document_uploads(
  declared_size INTEGER NOT NULL CHECK(declared_size>0),
  actual_size INTEGER,
  etag TEXT,
- status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN('pending','ready','rejected')),
+ status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN('pending','finalizing','ready','rejected')),
  created_by TEXT NOT NULL,
  created_at TEXT NOT NULL,
  expires_at TEXT NOT NULL,
