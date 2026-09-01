@@ -24,14 +24,21 @@ class BAISManager
         return $obj ? (string) $obj->bais_ref : '';
     }
 
-    public function assignReference($objectType, $objectId, $prefix, $entity = 1, $sourceRef = '')
+    public function assignReference($objectType, $objectId, $prefix, $entity = 1, $sourceRef = '', $preferredRef = '')
     {
         $existing = $this->getReference($objectType, $objectId, $entity);
         if ($existing !== '') return $existing;
 
         $year = (int) date('Y');
-        $sequence = $this->nextSequence($objectType, $year, $entity);
-        $baisRef = sprintf('%s-%04d-%06d', $prefix, $year, $sequence);
+        $baisRef = '';
+        $pattern = '/^'.preg_quote($prefix, '/').'-(\\d{4})-(\\d{6})$/';
+        if ($preferredRef !== '' && preg_match($pattern, $preferredRef, $matches)) {
+            $baisRef = $preferredRef;
+            $this->ensureSequenceAtLeast($objectType, (int) $matches[1], ((int) $matches[2]) + 1, $entity);
+        } else {
+            $sequence = $this->nextSequence($objectType, $year, $entity);
+            $baisRef = sprintf('%s-%04d-%06d', $prefix, $year, $sequence);
+        }
 
         $sql = "INSERT INTO ".$this->db->prefix()."bais_object_ref";
         $sql .= " (entity, object_type, fk_object, bais_ref, source_ref, datec, tms) VALUES (";
@@ -42,6 +49,16 @@ class BAISManager
             throw new RuntimeException('Unable to store BAIS reference: '.$this->db->lasterror());
         }
         return $baisRef;
+    }
+
+    private function ensureSequenceAtLeast($scope, $year, $nextValue, $entity)
+    {
+        $sql = "INSERT INTO ".$this->db->prefix()."bais_sequence (entity, scope, seq_year, next_value, datec, tms) VALUES (";
+        $sql .= ((int) $entity).", '".$this->db->escape($scope)."', ".((int) $year).", ".((int) $nextValue).", NOW(), NOW())";
+        $sql .= " ON DUPLICATE KEY UPDATE next_value=GREATEST(next_value, VALUES(next_value)), tms=NOW()";
+        if (!$this->db->query($sql)) {
+            throw new RuntimeException('Unable to align BAIS sequence: '.$this->db->lasterror());
+        }
     }
 
     private function nextSequence($scope, $year, $entity)
