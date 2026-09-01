@@ -10,8 +10,7 @@ Im Repository unter **Settings → Secrets and variables → Actions** müssen v
 
 - `CLOUDFLARE_API_TOKEN` – Cloudflare API Token mit Zugriff auf das BAIS Pages-Projekt und Berechtigung zum Ändern der Pages-Projektkonfiguration.
 - `RESEND_API_KEY` – Resend API Key für transaktionale Einladungsmails.
-- `R2_ACCESS_KEY_ID` – S3 Access Key eines dedizierten R2-Tokens mit Object Read & Write auf `bais-project-documents`.
-- `R2_SECRET_ACCESS_KEY` – zugehöriges R2 S3 Secret; niemals als normale Variable oder im Frontend ablegen.
+- `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` – **optional**. Nur für den zusätzlichen aws4fetch/S3-Direct-Modus; der normale Project-Portal-Betrieb verwendet das native `PROJECT_DOCUMENTS` R2-Binding ohne S3-Schlüssel im Runtime-Code.
 
 Alternativ erkennt der Workflow für Cloudflare auch `CF_API_TOKEN` oder `CLOUDFLARE_TOKEN`; bevorzugt wird `CLOUDFLARE_API_TOKEN`.
 
@@ -71,27 +70,16 @@ Nach erfolgreicher Provisionierung:
 
 ## 6. Project Portal – R2 Dokumentenspeicher
 
-Der Workflow `.github/workflows/r2-runtime-provision.yml` richtet den privaten Project-Portal-Speicher ein:
+Der produktive Standardpfad verwendet das native Cloudflare-R2-Binding `PROJECT_DOCUMENTS`, das in `wrangler.jsonc` deklariert ist. Für diesen Laufzeitpfad werden keine R2-S3-Schlüssel an Browser oder Pages Function übergeben.
 
-- Bucket: `bais-project-documents`
-- Bucket bleibt privat; es wird kein Public Bucket aktiviert.
-- Production-CORS erlaubt nur `https://bais-solutions.de`.
-- Browser-Uploads verwenden nur kurzlebige presigned PUT-URLs mit signiertem `Content-Type`.
-- Upload-URLs gelten 180 Sekunden, Download-URLs 300 Sekunden.
-- Temporäre Objekte unter `incoming/customer-documents/` werden per Lifecycle spätestens nach einem Tag bereinigt.
-- Pages Runtime erhält nur `R2_ACCOUNT_ID`, `R2_BUCKET_NAME` sowie die zwei R2-S3-Credentials.
-- Ein Upload wird erst nach serverseitigem HEAD-Check (MIME + tatsächliche Größe) und CopyObject in den finalen tenant-scoped Pfad als Dokument registriert.
-- Finale Pfade folgen `customers/<organization_id>/projects/<project_id>/documents/<document_id>/...`.
-- HTML, SVG, JavaScript, ausführbare Dateien und nicht passende MIME-/Dateiendungs-Kombinationen werden nicht freigegeben.
 - Maximalgröße: 25 MiB pro Datei.
+- Erlaubte Dateitypen werden über MIME-Typ **und** Dateiendung geprüft.
+- Uploads laufen authentifiziert und projekt-/mandantenbezogen.
+- Vor der Registrierung wird die tatsächliche R2-Größe und der gespeicherte MIME-Typ geprüft.
+- Der Übergang `pending → finalizing → ready` verhindert parallele Finalisierung.
+- Die finale Ablage folgt `customers/<organization_id>/projects/<project_id>/documents/<document_id>/...`.
+- Downloads werden erneut gegen Kunde, Organisation, Projekt und `project_portal`-Freigabe geprüft und mit `private, no-store` ausgeliefert.
+- `aws4fetch` bleibt als optionaler S3-Direct-Modus erhalten. Dieser Modus benötigt `R2_ACCESS_KEY_ID` und `R2_SECRET_ACCESS_KEY`; das manuelle Workflow `.github/workflows/r2-runtime-provision.yml` konfiguriert ihn nur, wenn die Secrets vorhanden sind.
+- Fehlen diese optionalen Secrets, ist das **kein Production-Fehler**; das native Binding bleibt der Standardpfad.
 
-Die R2-S3-Credentials sollen ausschließlich auf diesen Bucket beschränkt sein. Der allgemeine Cloudflare API Token wird **nicht** in die Pages Runtime kopiert.
-
-Nach erfolgreicher Provisionierung muss der Workflow ausgeben:
-
-```text
-R2_STATUS=PROJECT_PORTAL_STORAGE_PROVISIONED
-R2_BUCKET=bais-project-documents
-R2_CORS=PRODUCTION_ORIGIN_ONLY
-R2_INCOMING_CLEANUP=86400_SECONDS
-```
+Secret-Werte gehören niemals in Git, HTML, Browser-JavaScript, D1-Audit-Metadaten oder Logs.
