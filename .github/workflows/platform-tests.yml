@@ -21,5 +21,7 @@ jobs:
         run: npm install --ignore-scripts --no-package-lock
       - name: Run platform tests
         run: npm test
+      - name: Check platform contract
+        run: npm run check
       - name: Build Cloudflare Pages Functions
         run: npm run cf:dry-run
