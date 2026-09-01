@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "id": "bais-project-portal",
+      "allowed": {
+        "origins": ["https://bais-solutions.de"],
+        "methods": ["PUT", "GET", "HEAD"],
+        "headers": ["Content-Type"]
+      },
+      "exposeHeaders": ["ETag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

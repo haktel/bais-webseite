@@ -29,6 +29,11 @@ if [ "$code" = "400" ] && grep -qi '^x-bais-customer-register: identity-v5-email
 code="$(status "${BASE}/api/customer/portal" || true)"
 [ "$code" = "401" ] && pass "customer portal API blocks anonymous access" || fail "customer portal API expected 401, got ${code}"
 
+for route in /api/customer/documents/upload-url /api/customer/documents/finalize /api/customer/documents/download; do
+  code="$(status "${BASE}${route}" || true)"
+  [ "$code" = "401" ] && pass "${route} blocks anonymous access" || fail "${route} expected 401, got ${code}"
+done
+
 code="$(status "${BASE}/api/admin/customer-access" || true)"
 [ "$code" = "401" ] && pass "customer access admin API blocks anonymous access" || fail "customer access admin API expected 401, got ${code}"
 

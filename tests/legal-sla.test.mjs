@@ -32,8 +32,9 @@ test("SLA connects security incidents to the AVV and covers third parties",()=>{
  assert.match(html,/Drittanbieter und externe Abhängigkeiten/i);
 });
 
-test("pricing, homepage and sitemap expose the SLA",()=>{
+test("SLA is exposed in pricing and contractual context, not the global homepage footer",()=>{
  assert.match(read("preise/index.html"),/SLA &amp; Support-Rahmen ansehen/i);
- assert.match(read("index.html"),/sla\/index\.html[^>]*>SLA/i);
+ assert.doesNotMatch(read("index.html"),/sla\/index\.html[^>]*>SLA/i);
+ assert.match(read("angebot/index.html"),/href="\.\.\/sla\/"[^>]*>SLA/i);
  assert.match(read("sitemap.xml"),/https:\/\/bais-solutions\.de\/sla\//i);
 });

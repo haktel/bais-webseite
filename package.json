@@ -8,5 +8,6 @@
     "cf:types":"wrangler types",
     "cf:dry-run":"wrangler pages functions build --outdir .wrangler-build"
   },
+  "dependencies":{"aws4fetch":"^1.0.20"},
   "devDependencies":{"@cloudflare/workers-types":"^5.20260827.1","wrangler":"^4.0.0"}
 }
