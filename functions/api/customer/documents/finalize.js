@@ -51,12 +51,29 @@ export const onRequestPost=async({request,env})=>{
    throw new ApiError(415,"uploaded_type_invalid","Der tatsächlich hochgeladene Dateityp entspricht nicht der Freigabe.");
   }
 
+  const lock=await db.prepare("UPDATE document_uploads SET status='finalizing' WHERE id=? AND organization_id=? AND status='pending'")
+   .bind(row.id,customer.organizationId).run();
+  if(Number(lock?.meta?.changes||0)!==1){
+   const latest=await db.prepare("SELECT status FROM document_uploads WHERE id=? AND organization_id=? LIMIT 1").bind(row.id,customer.organizationId).first();
+   if(latest?.status==="ready"){
+    const existing=await db.prepare("SELECT id,project_id,name,version,created_at FROM documents WHERE id=? LIMIT 1").bind(row.id).first();
+    if(existing)return json({ok:true,document:existing,alreadyFinalized:true,requestId:traceId});
+   }
+   throw new ApiError(409,"upload_finalizing","Dieser Upload wird bereits abgeschlossen.");
+  }
+
   const finalKey=buildFinalKey({organizationId:customer.organizationId,projectId:row.project_id,documentId:row.id,fileName:row.original_name});
-  await copyIncomingToFinal(env,{incomingKey:row.incoming_key,finalKey,mimeType:row.mime_type,fileName:row.original_name});
+  try{
+   await copyIncomingToFinal(env,{incomingKey:row.incoming_key,finalKey,mimeType:row.mime_type,fileName:row.original_name});
+  }catch(error){
+   await db.prepare("UPDATE document_uploads SET status='pending' WHERE id=? AND organization_id=? AND status='finalizing'").bind(row.id,customer.organizationId).run().catch(()=>{});
+   throw error;
+  }
 
   const finalObject=await headObject(env,finalKey);
   if(!finalObject||finalObject.size!==object.size||normalizedMime(finalObject.mimeType)!==normalizedMime(row.mime_type)){
    try{await deleteObject(env,finalKey);}catch{}
+   await db.prepare("UPDATE document_uploads SET status='pending' WHERE id=? AND organization_id=? AND status='finalizing'").bind(row.id,customer.organizationId).run().catch(()=>{});
    throw new ApiError(502,"r2_finalize_verification_failed","Die finale Dokumentkopie konnte nicht verifiziert werden.");
   }
 
@@ -67,13 +84,14 @@ export const onRequestPost=async({request,env})=>{
    await db.batch([
     db.prepare("INSERT INTO documents(id,project_id,name,r2_key,version,uploaded_by,created_at) VALUES(?,?,?,?,?,?,?)")
      .bind(row.id,row.project_id,row.original_name,finalKey,version,session.user_id,now),
-    db.prepare("UPDATE document_uploads SET final_key=?,actual_size=?,etag=?,status='ready',finalized_at=?,rejection_reason=NULL WHERE id=? AND organization_id=? AND status='pending'")
+    db.prepare("UPDATE document_uploads SET final_key=?,actual_size=?,etag=?,status='ready',finalized_at=?,rejection_reason=NULL WHERE id=? AND organization_id=? AND status='finalizing'")
      .bind(finalKey,finalObject.size,finalObject.etag||object.etag||null,now,row.id,customer.organizationId),
     db.prepare("INSERT INTO audit_events(id,actor_user_id,organization_id,event_type,entity_type,entity_id,metadata_json,created_at) VALUES(?,?,?,?,?,?,?,?)")
      .bind(crypto.randomUUID(),session.user_id,customer.organizationId,"customer.document.uploaded","document",row.id,JSON.stringify({projectId:row.project_id,mimeType:row.mime_type,sizeBytes:finalObject.size,version}),now)
    ]);
   }catch(error){
    try{await deleteObject(env,finalKey);}catch{}
+   await db.prepare("UPDATE document_uploads SET status='pending' WHERE id=? AND organization_id=? AND status='finalizing'").bind(row.id,customer.organizationId).run().catch(()=>{});
    throw error;
   }
 
