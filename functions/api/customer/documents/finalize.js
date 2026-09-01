@@ -64,7 +64,7 @@ export const onRequestPost=async({request,env})=>{
 
   const finalKey=buildFinalKey({organizationId:customer.organizationId,projectId:row.project_id,documentId:row.id,fileName:row.original_name});
   try{
-   await copyIncomingToFinal(env,{incomingKey:row.incoming_key,finalKey,mimeType:row.mime_type,fileName:row.original_name});
+   await copyIncomingToFinal(env,{incomingKey:row.incoming_key,finalKey,mimeType:row.mime_type,fileName:row.original_name,sourceEtag:object.etag});
   }catch(error){
    await db.prepare("UPDATE document_uploads SET status='pending' WHERE id=? AND organization_id=? AND status='finalizing'").bind(row.id,customer.organizationId).run().catch(()=>{});
    throw error;
