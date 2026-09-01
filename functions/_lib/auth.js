@@ -1,5 +1,5 @@
 import{ApiError}from"./api.js";
-const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8;export const PASSWORD_HASH_ITERATIONS=100000;
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8,EMAIL_VERIFICATION_SECONDS=60*60*24;export const PASSWORD_HASH_ITERATIONS=100000;
 
 const bytesToBase64Url=bytes=>{
  let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
@@ -76,6 +76,20 @@ export async function requireSession(db,request){
  await db.prepare("UPDATE user_sessions SET last_seen_at=? WHERE id=?").bind(now,session.session_id).run();
  return session;
 }
+export async function issueCustomerEmailVerification(db,userId,now=new Date()){
+ const token=randomToken(32),tokenHash=await sha256(token),createdAt=now.toISOString(),expiresAt=new Date(now.getTime()+EMAIL_VERIFICATION_SECONDS*1000).toISOString();
+ await db.prepare("INSERT INTO customer_email_verifications(user_id,token_hash,created_at,expires_at,verified_at) VALUES(?,?,?,?,NULL) ON CONFLICT(user_id) DO UPDATE SET token_hash=excluded.token_hash,created_at=excluded.created_at,expires_at=excluded.expires_at,verified_at=NULL")
+  .bind(userId,tokenHash,createdAt,expiresAt).run();
+ return{token,expiresAt};
+}
+export async function findCustomerEmailVerification(db,token){
+ const value=String(token||"").trim();
+ if(value.length<32||value.length>200)return null;
+ const tokenHash=await sha256(value);
+ const row=await db.prepare("SELECT v.user_id,v.token_hash,v.expires_at,v.verified_at,u.display_name,u.email,u.role,u.status,u.organization_id FROM customer_email_verifications v JOIN users u ON u.id=v.user_id WHERE v.token_hash=? LIMIT 1").bind(tokenHash).first();
+ return row?{...row,tokenHash}:null;
+}
+
 export async function deleteSession(db,request){
  const token=parseCookies(request)[SESSION_COOKIE];if(!token)return;
  await db.prepare("DELETE FROM user_sessions WHERE token_hash=?").bind(await sha256(token)).run();
@@ -86,6 +100,8 @@ export async function ensureAuthSchema(db){
   db.prepare("CREATE TABLE IF NOT EXISTS user_credentials(user_id TEXT PRIMARY KEY,password_hash TEXT NOT NULL,password_salt TEXT NOT NULL,password_algorithm TEXT NOT NULL,password_iterations INTEGER NOT NULL,updated_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS user_sessions(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,token_hash TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,last_seen_at TEXT NOT NULL,expires_at TEXT NOT NULL,user_agent_hash TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS auth_rate_limits(id TEXT PRIMARY KEY,attempts INTEGER NOT NULL,window_started_at TEXT NOT NULL,updated_at TEXT NOT NULL)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS customer_email_verifications(user_id TEXT PRIMARY KEY,token_hash TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,verified_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
+  db.prepare("CREATE INDEX IF NOT EXISTS idx_customer_email_verifications_token ON customer_email_verifications(token_hash,expires_at)"),
   db.prepare("CREATE TABLE IF NOT EXISTS course_progress(user_id TEXT NOT NULL,course_id TEXT NOT NULL,progress_percent INTEGER NOT NULL DEFAULT 0 CHECK(progress_percent BETWEEN 0 AND 100),status TEXT NOT NULL DEFAULT 'not_started' CHECK(status IN('not_started','in_progress','completed')),updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS academy_module_progress(user_id TEXT NOT NULL,course_id TEXT NOT NULL,module_slug TEXT NOT NULL,completed_lessons_json TEXT NOT NULL DEFAULT '[]',lab_cases_json TEXT NOT NULL DEFAULT '[]',assessment_best INTEGER NOT NULL DEFAULT 0 CHECK(assessment_best BETWEEN 0 AND 100),module_percent INTEGER NOT NULL DEFAULT 0 CHECK(module_percent BETWEEN 0 AND 100),updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id,module_slug),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS academy_lesson_sessions(user_id TEXT NOT NULL,course_id TEXT NOT NULL,module_slug TEXT NOT NULL,lesson_id TEXT NOT NULL,started_at TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id,module_slug,lesson_id),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)")

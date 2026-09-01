@@ -83,3 +83,14 @@ test("all public lead registrations reuse one BAIS customer master and queue Dol
  assert.match(customer,/ensureCommercialIdentityForLead/);
  assert.doesNotMatch(customer,/allocateCustomerNumber/);
 });
+
+
+test("customer verification keeps the durable Dolibarr prospect queue while portal activation waits for email proof",()=>{
+ const register=read("functions/api/customer/auth/register.js");
+ const verify=read("functions/api/customer/auth/verify.js");
+ assert.match(register,/enqueueErpProspectSync/);
+ assert.match(register,/"customer","invited"/);
+ assert.doesNotMatch(register,/createSession/);
+ assert.match(verify,/UPDATE users SET status='active'/);
+ assert.match(verify,/token_hash=\?/);
+});

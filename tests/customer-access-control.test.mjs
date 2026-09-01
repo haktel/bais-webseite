@@ -64,8 +64,11 @@ test("customer self-registration creates identity but grants no protected conten
  assert.match(source,/verifyTurnstile/);
  assert.match(source,/consumeRateLimit/);
  assert.match(source,/customer-register-v2/);
+ assert.match(source,/issueCustomerEmailVerification/);
+ assert.match(source,/sendCustomerVerificationEmail/);
  assert.match(source,/DELETE FROM auth_rate_limits/);
- assert.match(source,/"customer","active"/);
+ assert.match(source,/"customer","invited"/);
+ assert.doesNotMatch(source,/createSession/);
  assert.match(source,/ensureCommercialSchema/);
  assert.match(source,/ensureCommercialIdentityForLead/);
  assert.match(source,/INSERT INTO organizations/);
@@ -97,4 +100,25 @@ test("customer access schema uses stable tenant-scoped primary key and indexes",
  assert.match(sql,/FOREIGN KEY\(organization_id\) REFERENCES organizations/);
  assert.match(sql,/idx_customer_access_lookup/);
  assert.match(sql,/status IN\('active','revoked'\)/);
+});
+
+
+test("customer activation requires a hashed expiring email-verification token",()=>{
+ const auth=read("functions/_lib/auth.js");
+ const verify=read("functions/api/customer/auth/verify.js");
+ const resend=read("functions/api/customer/auth/resend-verification.js");
+ const migration=read("migrations/0015_customer_email_verification.sql");
+ assert.match(auth,/customer_email_verifications/);
+ assert.match(auth,/sha256\(value\)/);
+ assert.match(auth,/EMAIL_VERIFICATION_SECONDS=60\*60\*24/);
+ const ui=read("assets/academy-account.js"),mail=read("functions/_lib/mail.js");
+ assert.match(ui,/location\.hash/);
+ assert.match(ui,/get\("verify"\)/);
+ assert.match(mail,/url\.hash="verify="/);
+ assert.match(verify,/UPDATE users SET status='active'/);
+ assert.match(verify,/customer\.email\.verified/);
+ assert.match(verify,/enqueueErpProspectSync/);
+ assert.match(resend,/customer-verification-resend/);
+ assert.match(resend,/Falls ein noch nicht bestätigtes Kundenkonto existiert/);
+ assert.match(migration,/token_hash TEXT NOT NULL UNIQUE/);
 });
