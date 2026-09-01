@@ -11,6 +11,9 @@ test("production supports native R2 binding while retaining aws4fetch S3 mode",(
  assert.match(helper,/PROJECT_DOCUMENTS/);
  assert.match(helper,/r2StorageMode/);
  assert.match(helper,/new AwsClient/);
+ assert.match(helper,/\.\.\/_vendor\/aws4fetch\.js/);
+ assert.match(read("functions/_vendor/aws4fetch.js"),/@license MIT/);
+ assert.match(read("functions/_vendor/aws4fetch.LICENSE.txt"),/MIT License/);
  assert.match(helper,/signQuery:true/);
  assert.match(helper,/putIncomingObject/);
  assert.match(helper,/getNativeObject/);
