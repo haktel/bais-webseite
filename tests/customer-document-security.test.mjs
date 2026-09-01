@@ -24,12 +24,14 @@ test("commercial context never exposes customer context anonymously",()=>{
  assert.doesNotMatch(source,/authenticated:false/);
 });
 
-test("customer project API is scoped to the authenticated customer's organization",()=>{
+test("customer project reads stay tenant-scoped while project creation is admin-only",()=>{
  const source=read("functions/api/commercial/projects.js");
  assert.match(source,/ensureCommercialIdentityForUser/);
  assert.match(source,/WHERE p\.organization_id=\?/);
- assert.match(source,/Nur Administratoren dürfen Projekte für andere Kunden anlegen/);
  assert.match(source,/Dieser Endpoint ist auf das eigene Kundenkonto beschränkt/);
+ assert.match(source,/requireAdmin\(db,request\)/);
+ assert.match(source,/createProjectForOrganization/);
+ assert.doesNotMatch(source,/createProjectForUser/);
 });
 
 test("public project flow does not link directly to protected customer documents",()=>{

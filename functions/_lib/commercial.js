@@ -130,11 +130,3 @@ export async function createProjectForOrganization(db,{organizationId,name,actor
  await db.batch(statements);
  return{id:projectId,projectNumber,name:projectName,status:"planned",organizationId};
 }
-
-export async function createProjectForUser(db,{userId,name,now=new Date().toISOString()}){
- await ensureCommercialSchema(db);
- const user=await db.prepare("SELECT id,organization_id,display_name,email FROM users WHERE id=? LIMIT 1").bind(userId).first();
- if(!user)throw new ApiError(404,"user_not_found","Benutzerkonto nicht gefunden.");
- const identity=await ensureCommercialIdentityForUser(db,{userId,displayName:user.display_name,email:user.email,now});
- return createProjectForOrganization(db,{organizationId:identity.organizationId,name,actorUserId:userId,now});
-}

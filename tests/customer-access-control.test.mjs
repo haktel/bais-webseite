@@ -82,17 +82,19 @@ test("customer self-registration creates identity but grants no protected conten
  assert.match(source,/DELETE FROM customer_accounts/);
 });
 
-test("customer account renders only effective entitlements and project creation stays portal-gated",()=>{
+test("customer account renders only effective entitlements and cannot create projects",()=>{
  const context=read("functions/api/commercial/context.js");
  const account=read("assets/academy-account.js");
+ const accountHtml=read("academy/konto/index.html");
  const projects=read("functions/api/commercial/projects.js");
  assert.match(context,/filter\(item=>item\.effective\)/);
  assert.match(context,/canSeeProjects/);
  assert.match(account,/data-customer-content/);
  assert.match(account,/hasContentAccess\(data,"project_portal"\)/);
- assert.match(account,/newProjectForm\.hidden=!hasContentAccess/);
+ assert.doesNotMatch(accountHtml,/data-new-project-form/);
+ assert.doesNotMatch(account,/\/api\/commercial\/projects/);
+ assert.match(projects,/requireAdmin\(db,request\)/);
  assert.match(projects,/project_portal_not_enabled/);
- assert.match(projects,/hasCustomerContentAccess/);
 });
 
 test("customer access schema uses stable tenant-scoped primary key and indexes",()=>{

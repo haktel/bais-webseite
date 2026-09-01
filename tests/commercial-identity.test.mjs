@@ -51,7 +51,9 @@ test("commercial APIs expose context, project creation and admin customer select
  const admin=read("functions/api/admin/customers.js");
  assert.match(context,/customerNumber/);
  assert.match(context,/project_registry/);
- assert.match(projects,/createProjectForUser/);
+ assert.match(projects,/requireAdmin\(db,request\)/);
+ assert.match(projects,/createProjectForOrganization/);
+ assert.doesNotMatch(projects,/createProjectForUser/);
  assert.match(projects,/project\.created/);
  assert.match(admin,/requireAdmin/);
  assert.match(admin,/customer_accounts/);
@@ -66,7 +68,8 @@ test("Angebot and Abnahme use readonly DB identifiers and shared autofill",()=>{
   assert.match(html,/id="customerPicker"/);
   assert.match(html,/id="projectPicker"/);
   assert.match(html,/id="createProject"/);
-  assert.match(html,/commercial-document-context\.js\?v=1\.1/);
+  assert.match(html,/data-admin-project-create hidden/);
+  assert.match(html,/commercial-document-context\.js\?v=1\.2/);
   assert.match(html,/id="providerCompany"[^>]*readonly/);
   assert.match(html,/id="providerContact"[^>]*readonly/);
  }
@@ -77,9 +80,10 @@ test("account dashboard renders a real empty project state",()=>{
  const js=read("assets/academy-account.js");
  assert.match(html,/KUNDENKONTO · AUTOMATISCHE KUNDEN-NR\./);
  assert.match(html,/data-commercial-identity/);
- assert.match(html,/data-new-project-form/);
+ assert.doesNotMatch(html,/data-new-project-form/);
+ assert.match(html,/Projekte werden nach Freigabe des Angebots\/SOW durch BAIS angelegt/);
  assert.match(js,/\/api\/commercial\/context/);
- assert.match(js,/\/api\/commercial\/projects/);
+ assert.doesNotMatch(js,/\/api\/commercial\/projects/);
  assert.match(js,/Noch kein Projekt/);
  assert.doesNotMatch(html,/Das erste Intake-Projekt/);
 });
@@ -100,4 +104,19 @@ test("legacy empty intake placeholders are removed without deleting projects tha
  assert.match(migration,/NOT EXISTS\(SELECT 1 FROM documents/);
  assert.match(migration,/NOT EXISTS\(SELECT 1 FROM approvals/);
  assert.match(migration,/NOT EXISTS\(SELECT 1 FROM document_uploads/);
+});
+
+
+test("project creation is an admin/MFA sales operation only",()=>{
+ const endpoint=read("functions/api/commercial/projects.js");
+ const helper=read("functions/_lib/commercial.js");
+ const sales=read("assets/commercial-document-context.js");
+ assert.match(endpoint,/requireAdmin\(db,request\)/);
+ assert.match(endpoint,/organizationId=cleanText\(body\.organizationId,80\)/);
+ assert.match(endpoint,/customer_required/);
+ assert.match(endpoint,/source:"admin_sales_flow"/);
+ assert.doesNotMatch(endpoint,/createProjectForUser/);
+ assert.doesNotMatch(helper,/export async function createProjectForUser/);
+ assert.match(sales,/setProjectCreationVisible\(false\)/);
+ assert.match(sales,/if\(!adminData\)\{status\("Projekte können nur durch BAIS angelegt werden\."/);
 });
