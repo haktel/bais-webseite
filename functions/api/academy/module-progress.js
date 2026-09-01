@@ -11,7 +11,10 @@ const LESSONS_PER_MODULE={
   "ki-leadership":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6},
   "ki-it-security":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6},
   "eu-ai-act":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6},
-  "secure-ai-rag":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6}
+  "secure-ai-rag":{"modul-01":6,"modul-02":6,"modul-03":6,"modul-04":6,"modul-05":6,"modul-06":6},
+  "ki-health":{"modul-01":3,"modul-02":3,"modul-03":3,"modul-04":3,"modul-05":3,"modul-06":3},
+  "ki-health-pflege":{"modul-01":3,"modul-02":3,"modul-03":3,"modul-04":3,"modul-05":3,"modul-06":3},
+  "ki-health-klinik":{"modul-01":3,"modul-02":3,"modul-03":3,"modul-04":3,"modul-05":3,"modul-06":3}
 };
 const LAB_CASES={
   "n8n-bootcamp":{"modul-01":["qualified","standard","invalid"],"modul-02":["single","batch","invalid"],"modul-03":["get","post","invalid"],"modul-04":["api-key","bearer","forbidden","expired"],"modul-05":["mixed","high","fallback","invalid"],"modul-06":["success","client","rate","server"],"modul-07":["create","update","event-first","event-repeat"],"modul-08":["csv","unicode","json","unsafe","invalid"],"modul-09":["grounded","unknown","injection","cost"],"modul-10":["standard","messy","extra","invalid"],"modul-11":["trusted","tampered","pii","ssrf","destructive"],"modul-12":["happy","high","invalid","security","weakroi"]},
@@ -19,7 +22,10 @@ const LAB_CASES={
   "ki-leadership":{"modul-01":["scale","pilot","observe","stop"],"modul-02":["scale","pilot","observe","stop"],"modul-03":["scale","pilot","observe","stop"],"modul-04":["scale","pilot","observe","stop"],"modul-05":["scale","pilot","observe","stop"],"modul-06":["scale","pilot","observe","stop"]},
   "ki-it-security":{"modul-01":["input","inject","tool","exfil","monitor"],"modul-02":["input","inject","tool","exfil","monitor"],"modul-03":["input","inject","tool","exfil","monitor"],"modul-04":["input","inject","tool","exfil","monitor"],"modul-05":["input","inject","tool","exfil","monitor"],"modul-06":["input","inject","tool","exfil","monitor"]},
   "eu-ai-act":{"modul-01":["minimal","transparency","high","prohibited"],"modul-02":["minimal","transparency","high","prohibited"],"modul-03":["minimal","transparency","high","prohibited"],"modul-04":["minimal","transparency","high","prohibited"],"modul-05":["minimal","transparency","high","prohibited"],"modul-06":["minimal","transparency","high","prohibited"]},
-  "secure-ai-rag":{"modul-01":["identity","data","prompt","evidence"],"modul-02":["identity","data","prompt","evidence"],"modul-03":["identity","data","prompt","evidence"],"modul-04":["identity","data","prompt","evidence"],"modul-05":["identity","data","prompt","evidence"],"modul-06":["identity","data","prompt","evidence"]}
+  "secure-ai-rag":{"modul-01":["identity","data","prompt","evidence"],"modul-02":["identity","data","prompt","evidence"],"modul-03":["identity","data","prompt","evidence"],"modul-04":["identity","data","prompt","evidence"],"modul-05":["identity","data","prompt","evidence"],"modul-06":["identity","data","prompt","evidence"]},
+  "ki-health":{"modul-01":["documentation","support","diagnosis"],"modul-02":["documentation","support","diagnosis"],"modul-03":["documentation","support","diagnosis"],"modul-04":["documentation","support","diagnosis"],"modul-05":["documentation","support","diagnosis"],"modul-06":["documentation","support","diagnosis"]},
+  "ki-health-pflege":{"modul-01":["uebergabe","aufklaerung","eskalation"],"modul-02":["uebergabe","aufklaerung","eskalation"],"modul-03":["uebergabe","aufklaerung","eskalation"],"modul-04":["uebergabe","aufklaerung","eskalation"],"modul-05":["uebergabe","aufklaerung","eskalation"],"modul-06":["uebergabe","aufklaerung","eskalation"]},
+  "ki-health-klinik":{"modul-01":["evidenz","entscheidung","arztbrief"],"modul-02":["evidenz","entscheidung","arztbrief"],"modul-03":["evidenz","entscheidung","arztbrief"],"modul-04":["evidenz","entscheidung","arztbrief"],"modul-05":["evidenz","entscheidung","arztbrief"],"modul-06":["evidenz","entscheidung","arztbrief"]}
 };
 
 const parseArray=value=>{
