@@ -71,8 +71,9 @@ test("customer self-registration creates identity but grants no protected conten
  assert.doesNotMatch(source,/createSession/);
  assert.match(source,/ensureCommercialSchema/);
  assert.match(source,/ensureCommercialIdentityForLead/);
- assert.match(source,/INSERT INTO organizations/);
- assert.match(source,/INSERT INTO customer_accounts/);
+ const commercial=read("functions/_lib/commercial.js");
+ assert.match(commercial,/INSERT INTO organizations/);
+ assert.match(commercial,/INSERT INTO customer_accounts/);
  assert.match(source,/commercial:\{customerNumber\}/);
  assert.match(source,/contentAccess:\[\]/);
  assert.match(source,/defaultAccess:"deny"/);
