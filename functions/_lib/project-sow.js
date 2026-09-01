@@ -82,5 +82,5 @@ export async function getProjectSow(db,projectId){
  const sow=await db.prepare("SELECT project_id,organization_id,offer_number,sow_status,project_start,valid_until,scope_json,created_at,updated_at,signed_at FROM project_sow WHERE project_id=? LIMIT 1").bind(projectId).first();
  if(!sow)return null;
  const modules=await db.prepare("SELECT module_code,module_name,selected_at FROM project_modules WHERE project_id=? ORDER BY module_code").bind(projectId).all();
- return{...sow,scopeSelections:parseScope(sow.scope_json),modules:modules.results||[]};
+ return{project_id:sow.project_id,organization_id:sow.organization_id,offer_number:sow.offer_number,sow_status:sow.sow_status,project_start:sow.project_start,valid_until:sow.valid_until,created_at:sow.created_at,updated_at:sow.updated_at,signed_at:sow.signed_at,scopeSelections:parseScope(sow.scope_json),modules:modules.results||[]};
 }
