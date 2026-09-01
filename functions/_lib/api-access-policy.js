@@ -20,6 +20,7 @@ const SESSION_EXACT=new Set([
  "/api/academy/progress",
  "/api/commercial/context",
  "/api/commercial/projects",
+ "/api/commercial/sow",
  "/api/privacy/me"
 ]);
 const normalize=path=>{const p=String(path||"").replace(/\/+$/,"");return p||"/";};
