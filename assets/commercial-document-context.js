@@ -31,6 +31,7 @@ const projectOption=project=>{
  return option;
 };
 const status=message=>{const el=byId("commercialStatus");if(el)el.textContent=message};
+const setProjectCreationVisible=visible=>{document.querySelectorAll("[data-admin-project-create]").forEach(el=>{el.hidden=!visible;});};
 
 let adminData=null,currentData=null;
 function populateProjects(projects,selectedId){
@@ -83,20 +84,22 @@ async function refresh(){
  if(!currentData){status("Auftragnehmer geladen · für Kunden-/Projekt-Nr. bitte anmelden.");return}
  const admin=await request("/api/admin/customers",{method:"GET",headers:{}});
  if(admin.response.ok&&admin.data?.ok){
-  adminData=admin.data;providerFill(adminData.provider);populateAdmin();
- }else populateCurrent();
+  adminData=admin.data;providerFill(adminData.provider);setProjectCreationVisible(true);populateAdmin();
+ }else{adminData=null;setProjectCreationVisible(false);populateCurrent();}
 }
 async function createProject(){
+ if(!adminData){status("Projekte können nur durch BAIS angelegt werden.");return;}
  const input=byId("newProjectName"),button=byId("createProject");
  const name=String(input?.value||"").trim();
  if(name.length<2){status("Bitte zuerst einen Projektnamen eingeben.");input?.focus();return}
  button.disabled=true;status("Projekt wird angelegt …");
  try{
-  const organizationId=adminData?byId("customerPicker")?.value||"":"";
-  const result=await request("/api/commercial/projects",{method:"POST",body:JSON.stringify({name,organizationId:organizationId||undefined})});
+  const organizationId=byId("customerPicker")?.value||"";
+  if(!organizationId)throw new Error("Bitte zuerst einen Kunden auswählen.");
+  const result=await request("/api/commercial/projects",{method:"POST",body:JSON.stringify({name,organizationId})});
   if(!result.response.ok)throw new Error(result.data?.error?.message||"Projekt konnte nicht angelegt werden.");
   input.value="";await refresh();
-  if(adminData&&organizationId){
+  if(organizationId){
    const customerPicker=byId("customerPicker");if(customerPicker)customerPicker.value=organizationId;
    applyAdminCustomer(organizationId,result.data?.project?.id);
   }else{
@@ -106,6 +109,7 @@ async function createProject(){
  }catch(error){status(error.message||"Projekt konnte nicht angelegt werden.")}finally{button.disabled=false}
 }
 document.addEventListener("DOMContentLoaded",()=>{
+ setProjectCreationVisible(false);
  byId("createProject")?.addEventListener("click",createProject);
  refresh().catch(()=>status("DB-Kontext konnte nicht geladen werden."));
 });
