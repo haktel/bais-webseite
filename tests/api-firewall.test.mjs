@@ -69,3 +69,9 @@ test("unknown future API routes fail closed",()=>{
  assert.equal(classifyApiPath("/api/new-secret-backdoor").mode,"deny");
  assert.equal(classifyApiPath("/api/internal/debug").mode,"deny");
 });
+
+
+test("SOW and integration control plane have explicit firewall policies",()=>{
+ assert.equal(classifyApiPath("/api/commercial/sow").mode,"session");
+ assert.equal(classifyApiPath("/api/admin/project-integrations").mode,"admin_mfa");
+});
