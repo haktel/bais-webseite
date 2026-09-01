@@ -1,12 +1,6 @@
-name: BAIS R2 Project Portal Provisioning
+name: BAIS R2 Optional S3 Direct Provisioning
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/r2-runtime-provision.yml"
-      - "config/r2/**"
-      - "functions/_lib/r2-documents.js"
   workflow_dispatch:
 
 permissions:
@@ -24,19 +18,15 @@ jobs:
       R2_BUCKET_NAME: bais-project-documents
     steps:
       - uses: actions/checkout@v4
-
-      - name: Provision private R2 bucket, policies and Pages runtime
+      - name: Configure optional aws4fetch S3-direct mode
         shell: bash
         run: |
           set -euo pipefail
           CF_TOKEN="${CF_TOKEN_PRIMARY:-${CF_TOKEN_ALT:-${CF_TOKEN_ALT2:-}}}"
-          if [ -z "${CF_TOKEN}" ]; then
-            echo "R2_STATUS=CLOUDFLARE_TOKEN_MISSING"
-            exit 1
-          fi
-          if [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ]; then
-            echo "R2_STATUS=S3_CREDENTIALS_MISSING"
-            exit 1
+          if [ -z "${CF_TOKEN}" ] || [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ]; then
+            echo "R2_S3_DIRECT_STATUS=OPTIONAL_NOT_CONFIGURED"
+            echo "Native PROJECT_DOCUMENTS binding remains the production path."
+            exit 0
           fi
 
           echo "::add-mask::${R2_ACCESS_KEY_ID}"
@@ -54,42 +44,17 @@ jobs:
 
           CORS="$(curl -fsS -X PUT "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/r2/buckets/${R2_BUCKET_NAME}/cors" --data-binary @config/r2/project-documents-cors.json)"
           echo "${CORS}" | jq -e '.success == true' >/dev/null
-
           LIFECYCLE="$(curl -fsS -X PUT "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/r2/buckets/${R2_BUCKET_NAME}/lifecycle" --data-binary @config/r2/project-documents-lifecycle.json)"
           echo "${LIFECYCLE}" | jq -e '.success == true' >/dev/null
 
           PROJECT_JSON="$(curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}")"
-          echo "${PROJECT_JSON}" | jq -e '.success == true' >/dev/null
           PROD="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.production.env_vars // {}')"
           PREVIEW="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.preview.env_vars // {}')"
 
-          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '
-            $old + {
-              R2_ACCOUNT_ID:{type:"plain_text",value:$account},
-              R2_BUCKET_NAME:{type:"plain_text",value:$bucket},
-              R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},
-              R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}
-            }')"
-          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '
-            $old + {
-              R2_ACCOUNT_ID:{type:"plain_text",value:$account},
-              R2_BUCKET_NAME:{type:"plain_text",value:$bucket},
-              R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},
-              R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}
-            }')"
+          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
+          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
 
           PATCH="$(jq -nc --argjson prod "${PROD_MERGED}" --argjson preview "${PREVIEW_MERGED}" '{deployment_configs:{production:{env_vars:$prod},preview:{env_vars:$preview}}}')"
           RESPONSE="$(curl -fsS -X PATCH "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}" --data "${PATCH}")"
           echo "${RESPONSE}" | jq -e '.success == true' >/dev/null
-
-          VERIFY="$(curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}")"
-          echo "${VERIFY}" | jq -e '.result.deployment_configs.production.env_vars | has("R2_ACCOUNT_ID") and has("R2_BUCKET_NAME") and has("R2_ACCESS_KEY_ID") and has("R2_SECRET_ACCESS_KEY")' >/dev/null
-          echo "${VERIFY}" | jq -e '.result.deployment_configs.preview.env_vars | has("R2_ACCOUNT_ID") and has("R2_BUCKET_NAME") and has("R2_ACCESS_KEY_ID") and has("R2_SECRET_ACCESS_KEY")' >/dev/null
-
-          curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/r2/buckets/${R2_BUCKET_NAME}/cors" | jq -e '.success == true' >/dev/null
-          curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/r2/buckets/${R2_BUCKET_NAME}/lifecycle" | jq -e '.success == true' >/dev/null
-
-          echo "R2_STATUS=PROJECT_PORTAL_STORAGE_PROVISIONED"
-          echo "R2_BUCKET=${R2_BUCKET_NAME}"
-          echo "R2_CORS=PRODUCTION_ORIGIN_ONLY"
-          echo "R2_INCOMING_CLEANUP=86400_SECONDS"
+          echo "R2_S3_DIRECT_STATUS=CONFIGURED"

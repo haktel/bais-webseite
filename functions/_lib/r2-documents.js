@@ -1,4 +1,4 @@
-import{AwsClient}from"aws4fetch";
+import{AwsClient}from"../_vendor/aws4fetch.js";
 import{ApiError}from"./api.js";
 
 export const DOCUMENT_MAX_BYTES=25*1024*1024;
@@ -26,6 +26,14 @@ const ALLOWED_MIME_TYPES=new Set(EXTENSIONS_BY_MIME.keys());
 const normalizeMime=value=>String(value||"").split(";")[0].trim().toLowerCase();
 const encodePath=value=>String(value).split("/").map(part=>encodeURIComponent(part)).join("/");
 const normalizeEtag=value=>String(value||"").trim().replace(/^W\//,"").replace(/^"|"$/g,"");
+const nativeBucket=env=>env?.PROJECT_DOCUMENTS&&typeof env.PROJECT_DOCUMENTS.get==="function"&&typeof env.PROJECT_DOCUMENTS.put==="function"?env.PROJECT_DOCUMENTS:null;
+const hasS3Config=env=>Boolean(String(env?.R2_ACCOUNT_ID||"").trim()&&String(env?.R2_BUCKET_NAME||"").trim()&&String(env?.R2_ACCESS_KEY_ID||"").trim()&&String(env?.R2_SECRET_ACCESS_KEY||"").trim());
+
+export function r2StorageMode(env){
+ if(nativeBucket(env))return"binding";
+ if(hasS3Config(env))return"s3";
+ throw new ApiError(503,"r2_not_configured","Dokumentenspeicher ist noch nicht vollständig konfiguriert.");
+}
 
 export function sanitizeDocumentName(value){
  const raw=String(value||"").normalize("NFKC").replace(/[\u0000-\u001F\u007F]/g," ").trim();
@@ -52,61 +60,74 @@ export function ensureDocumentUploadSchema(db){
  ]);
 }
 
-function r2Config(env){
- const accountId=String(env?.R2_ACCOUNT_ID||"").trim(),
-  bucket=String(env?.R2_BUCKET_NAME||"").trim(),
-  accessKeyId=String(env?.R2_ACCESS_KEY_ID||"").trim(),
-  secretAccessKey=String(env?.R2_SECRET_ACCESS_KEY||"").trim();
- if(!accountId||!bucket||!accessKeyId||!secretAccessKey)throw new ApiError(503,"r2_not_configured","Dokumentenspeicher ist noch nicht vollständig konfiguriert.");
+function s3Config(env){
+ const accountId=String(env?.R2_ACCOUNT_ID||"").trim(),bucket=String(env?.R2_BUCKET_NAME||"").trim(),
+  accessKeyId=String(env?.R2_ACCESS_KEY_ID||"").trim(),secretAccessKey=String(env?.R2_SECRET_ACCESS_KEY||"").trim();
+ if(!accountId||!bucket||!accessKeyId||!secretAccessKey)throw new ApiError(503,"r2_s3_not_configured","R2 S3 Direct-Mode ist nicht konfiguriert.");
  if(!/^[a-f0-9]{32}$/i.test(accountId))throw new ApiError(503,"r2_invalid_account","Dokumentenspeicher ist falsch konfiguriert.");
  if(!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(bucket))throw new ApiError(503,"r2_invalid_bucket","Dokumentenspeicher ist falsch konfiguriert.");
  return{accountId,bucket,client:new AwsClient({accessKeyId,secretAccessKey,service:"s3",region:"auto"})};
 }
+function objectUrl(config,key){return new URL("https://"+config.accountId+".r2.cloudflarestorage.com/"+encodeURIComponent(config.bucket)+"/"+encodePath(key));}
 
-function objectUrl(config,key){
- return new URL("https://"+config.accountId+".r2.cloudflarestorage.com/"+encodeURIComponent(config.bucket)+"/"+encodePath(key));
-}
-
-export function buildIncomingKey(uploadId){
- return"incoming/customer-documents/"+String(uploadId);
-}
-
+export function buildIncomingKey(uploadId){return"incoming/customer-documents/"+String(uploadId);}
 export function buildFinalKey({organizationId,projectId,documentId,fileName}){
  return"customers/"+String(organizationId)+"/projects/"+String(projectId)+"/documents/"+String(documentId)+"/"+sanitizeDocumentName(fileName);
 }
 
 export async function presignUpload(env,{key,mimeType,expires=DOCUMENT_UPLOAD_TTL_SECONDS}){
- const config=r2Config(env),url=objectUrl(config,key);
- url.searchParams.set("X-Amz-Expires",String(expires));
+ const config=s3Config(env),url=objectUrl(config,key);url.searchParams.set("X-Amz-Expires",String(expires));
  const request=new Request(url,{method:"PUT",headers:{"Content-Type":normalizeMime(mimeType)}});
  const signed=await config.client.sign(request,{aws:{signQuery:true}});
  return signed.url.toString();
 }
 
 export async function presignDownload(env,{key,expires=DOCUMENT_DOWNLOAD_TTL_SECONDS}){
- const config=r2Config(env),url=objectUrl(config,key);
- url.searchParams.set("X-Amz-Expires",String(expires));
+ const config=s3Config(env),url=objectUrl(config,key);url.searchParams.set("X-Amz-Expires",String(expires));
  const signed=await config.client.sign(new Request(url,{method:"GET"}),{aws:{signQuery:true}});
  return signed.url.toString();
 }
 
+export async function putIncomingObject(env,{key,body,mimeType}){
+ const bucket=nativeBucket(env);
+ if(!bucket)throw new ApiError(503,"r2_binding_not_configured","Native R2-Binding ist nicht konfiguriert.");
+ if(!body)throw new ApiError(400,"empty_file","Die Datei enthält keine übertragbaren Daten.");
+ const result=await bucket.put(key,body,{httpMetadata:{contentType:normalizeMime(mimeType)},customMetadata:{purpose:"customer-document-incoming"}});
+ if(!result)throw new ApiError(502,"r2_put_failed","Die Datei konnte nicht in R2 gespeichert werden.");
+ return{size:Number(result.size||0),mimeType:normalizeMime(result.httpMetadata?.contentType||mimeType),etag:normalizeEtag(result.etag)};
+}
+
 export async function headObject(env,key){
- const config=r2Config(env),response=await config.client.fetch(objectUrl(config,key).toString(),{method:"HEAD"});
+ const bucket=nativeBucket(env);
+ if(bucket){
+  const object=await bucket.head(key);
+  if(!object)return null;
+  return{size:Number(object.size||0),mimeType:normalizeMime(object.httpMetadata?.contentType),etag:normalizeEtag(object.etag)};
+ }
+ const config=s3Config(env),response=await config.client.fetch(objectUrl(config,key).toString(),{method:"HEAD"});
  if(response.status===404)return null;
  if(!response.ok)throw new ApiError(502,"r2_head_failed","Die hochgeladene Datei konnte im Dokumentenspeicher nicht geprüft werden.");
- return{
-  size:Number(response.headers.get("content-length")||0),
-  mimeType:normalizeMime(response.headers.get("content-type")),
-  etag:normalizeEtag(response.headers.get("etag"))
- };
+ return{size:Number(response.headers.get("content-length")||0),mimeType:normalizeMime(response.headers.get("content-type")),etag:normalizeEtag(response.headers.get("etag"))};
 }
 
 export async function copyIncomingToFinal(env,{incomingKey,finalKey,mimeType,fileName,sourceEtag}){
- const config=r2Config(env),source="/"+encodeURIComponent(config.bucket)+"/"+encodePath(incomingKey);
  if(!sourceEtag)throw new ApiError(502,"r2_etag_missing","Upload-Integrität konnte nicht geprüft werden.");
+ const bucket=nativeBucket(env);
+ if(bucket){
+  const source=await bucket.get(incomingKey,{onlyIf:{etagMatches:normalizeEtag(sourceEtag)}});
+  if(!source)throw new ApiError(404,"r2_source_missing","Die temporäre Upload-Datei ist nicht mehr vorhanden.");
+  if(!("body"in source))throw new ApiError(409,"upload_changed_during_finalize","Die Upload-Datei wurde während der Prüfung verändert. Bitte erneut hochladen.");
+  const result=await bucket.put(finalKey,source.body,{
+   httpMetadata:{contentType:normalizeMime(mimeType),contentDisposition:"attachment; filename*=UTF-8''"+encodeURIComponent(sanitizeDocumentName(fileName))},
+   customMetadata:{sourceEtag:normalizeEtag(sourceEtag),purpose:"customer-document"}
+  });
+  if(!result)throw new ApiError(502,"r2_copy_failed","Die Datei konnte nicht sicher in den Dokumentbereich übernommen werden.");
+  return result;
+ }
+ const config=s3Config(env),source="/"+encodeURIComponent(config.bucket)+"/"+encodePath(incomingKey);
  const headers={
   "x-amz-copy-source":source,
-  "x-amz-copy-source-if-match":"\""+String(sourceEtag).replace(/^"|"$/g,"")+"\"",
+  "x-amz-copy-source-if-match":"\""+normalizeEtag(sourceEtag)+"\"",
   "x-amz-metadata-directive":"REPLACE",
   "content-type":normalizeMime(mimeType),
   "content-disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(sanitizeDocumentName(fileName))
@@ -118,8 +139,19 @@ export async function copyIncomingToFinal(env,{incomingKey,finalKey,mimeType,fil
 }
 
 export async function deleteObject(env,key){
- const config=r2Config(env),response=await config.client.fetch(objectUrl(config,key).toString(),{method:"DELETE"});
+ const bucket=nativeBucket(env);
+ if(bucket){await bucket.delete(key);return;}
+ const config=s3Config(env),response=await config.client.fetch(objectUrl(config,key).toString(),{method:"DELETE"});
  if(!response.ok&&response.status!==404)throw new ApiError(502,"r2_delete_failed","Temporäre Upload-Datei konnte nicht bereinigt werden.");
+}
+
+export async function getNativeObject(env,key){
+ const bucket=nativeBucket(env);
+ if(!bucket)throw new ApiError(503,"r2_binding_not_configured","Native R2-Binding ist nicht konfiguriert.");
+ const object=await bucket.get(key);
+ if(!object)return null;
+ if(!("body"in object))return null;
+ return object;
 }
 
 export function normalizedMime(value){return normalizeMime(value);}
