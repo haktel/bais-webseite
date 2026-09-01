@@ -69,7 +69,7 @@ test("Angebot and Abnahme use readonly DB identifiers and shared autofill",()=>{
   assert.match(html,/id="projectPicker"/);
   assert.match(html,/id="createProject"/);
   assert.match(html,/data-admin-project-create hidden/);
-  assert.match(html,/commercial-document-context\.js\?v=1\.2/);
+  assert.match(html,/commercial-document-context\.js\?v=1\.3/);
   assert.match(html,/id="providerCompany"[^>]*readonly/);
   assert.match(html,/id="providerContact"[^>]*readonly/);
  }
@@ -119,4 +119,17 @@ test("project creation is an admin/MFA sales operation only",()=>{
  assert.doesNotMatch(helper,/export async function createProjectForUser/);
  assert.match(sales,/setProjectCreationVisible\(false\)/);
  assert.match(sales,/if\(!adminData\)\{status\("Projekte können nur durch BAIS angelegt werden\."/);
+});
+
+
+test("Angebot binds canonical SOW modules to the real selected BAIS project",()=>{
+ const html=read("angebot/index.html");
+ const js=read("assets/commercial-document-context.js");
+ for(const code of["MOD-01","MOD-02","MOD-03","MOD-04"])assert.match(html,new RegExp('data-sow-module="'+code+'"'));
+ assert.match(html,/id="saveSowProject"/);
+ assert.match(html,/id="sowStatus"/);
+ assert.match(js,/\/api\/commercial\/sow/);
+ assert.match(js,/projectPicker/);
+ assert.match(js,/customerPicker/);
+ assert.match(js,/scopeSelections:detailedScopeSelections\(\)/);
 });
