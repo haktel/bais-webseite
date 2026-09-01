@@ -72,3 +72,24 @@ test("Dolibarr customer starter pack template family keeps BAIS customer identit
     assert.match(source,/BAIS/);
   }
 });
+
+
+test("Dolibarr BAIS 0.3 exposes least-privilege idempotent project upsert",()=>{
+ const api=read("dolibarr/custom/bais/class/api_bais.class.php");
+ const mod=read("dolibarr/custom/bais/core/modules/modBAIS.class.php");
+ const trigger=read("dolibarr/custom/bais/core/triggers/interface_99_modBAIS_BAISTrigger.class.php");
+ const provision=read("scripts/server/provision-bais-dolibarr-api-user.sh");
+ assert.match(mod,/version = '0\.3\.0'/);
+ assert.match(mod,/50032103/);
+ assert.match(mod,/project/);
+ assert.match(mod,/write/);
+ assert.match(api,/@url POST \/project\/upsert/);
+ assert.match(api,/requireProjectWritePermission/);
+ assert.match(api,/ref_ext/);
+ assert.match(api,/projectRef/);
+ assert.match(api,/assignReference\('project'.*projectRef, \$projectRef\)/s);
+ assert.match(trigger,/objectType === 'project'/);
+ assert.match(trigger,/preferredRef = \$sourceRef/);
+ assert.match(provision,/50032103/);
+ assert.match(provision,/BAIS Projekt-Upsert/);
+});
