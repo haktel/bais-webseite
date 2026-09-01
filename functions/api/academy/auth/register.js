@@ -125,7 +125,7 @@ export const onRequestPost=async({request,env})=>{
   stage="commercial_identity";
   let commercial;
   try{
-   commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company:company||cleanText(invite.company,160),now,intakeName:"Erstprojekt / Intake"});
+   commercial=await ensureCommercialIdentityForUser(db,{userId,displayName,email,company:company||cleanText(invite.company,160),now});
    await enqueueErpProspectSync(db,{organizationId:commercial.organizationId,now});
    await syncPendingErpJobs(db,env,{limit:5}).catch(()=>null);
   }catch(error){
@@ -143,7 +143,7 @@ export const onRequestPost=async({request,env})=>{
   return json({
    ok:true,
    user:{displayName,email,role:"student"},
-   commercial:{customerNumber:commercial.customerNumber,projectNumber:commercial.project.project_number,projectName:commercial.project.name},
+   commercial:{customerNumber:commercial.customerNumber},
    access:{courseSlug:slug,status:accessStatus},
    message:"Ihr Academy-Konto wurde erstellt. Der freigegebene Kurszugang ist aktiv.",
    requestId:traceId
