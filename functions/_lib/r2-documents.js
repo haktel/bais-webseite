@@ -58,7 +58,8 @@ function r2Config(env){
   accessKeyId=String(env?.R2_ACCESS_KEY_ID||"").trim(),
   secretAccessKey=String(env?.R2_SECRET_ACCESS_KEY||"").trim();
  if(!accountId||!bucket||!accessKeyId||!secretAccessKey)throw new ApiError(503,"r2_not_configured","Dokumentenspeicher ist noch nicht vollständig konfiguriert.");
- if(!/^[a-z0-9][a-z0-9.-]{1,62}$/i.test(bucket))throw new ApiError(503,"r2_invalid_bucket","Dokumentenspeicher ist falsch konfiguriert.");
+ if(!/^[a-f0-9]{32}$/i.test(accountId))throw new ApiError(503,"r2_invalid_account","Dokumentenspeicher ist falsch konfiguriert.");
+ if(!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(bucket))throw new ApiError(503,"r2_invalid_bucket","Dokumentenspeicher ist falsch konfiguriert.");
  return{accountId,bucket,client:new AwsClient({accessKeyId,secretAccessKey,service:"s3",region:"auto"})};
 }
 
