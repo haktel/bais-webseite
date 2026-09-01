@@ -27,7 +27,7 @@ class BAISApi extends DolibarrApi
         return array(
             'ok' => true,
             'module' => 'BAIS',
-            'version' => '0.1.0',
+            'version' => '0.3.0',
             'entity' => (int) $conf->entity,
             'time' => dol_now(),
         );
