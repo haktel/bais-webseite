@@ -1,6 +1,6 @@
 import{ApiError}from"./api.js";
 import{dolibarrRequest,getErpIntegrationConfig}from"./erp-sync.js";
-import{ensureProjectSowSchema,PROJECT_MODULES}from"./project-sow.js";
+import{ensureProjectSowSchema}from"./project-sow.js";
 
 const MAX_ERROR=700;
 const cleanError=value=>String(value||"Project sync failed").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,MAX_ERROR);
@@ -12,7 +12,7 @@ export async function enqueueProjectIntegrations(db,{projectId,now=new Date().to
  await ensureProjectSyncSchema(db);
  const row=await db.prepare("SELECT sow_status FROM project_sow WHERE project_id=? LIMIT 1").bind(projectId).first();
  if(!row)throw new ApiError(404,"sow_not_found","Für dieses Projekt ist noch kein SOW gespeichert.");
- if(!["approved","signed"].includes(row.sow_status))return{queued:false,reason:"sow_not_approved"};
+ if(row.sow_status!=="signed")return{queued:false,reason:"sow_not_signed"};
  await db.batch([
   db.prepare("INSERT INTO project_sync_jobs(id,project_id,target,status,attempts,next_attempt_at,last_error,created_at,updated_at) VALUES(?,?,'dolibarr','pending',0,?,NULL,?,?) ON CONFLICT(project_id,target) DO UPDATE SET status='pending',next_attempt_at=excluded.next_attempt_at,last_error=NULL,updated_at=excluded.updated_at").bind(crypto.randomUUID(),projectId,now,now,now),
   db.prepare("INSERT INTO project_sync_jobs(id,project_id,target,status,attempts,next_attempt_at,last_error,created_at,updated_at) VALUES(?,?,'jira','pending',0,?,NULL,?,?) ON CONFLICT(project_id,target) DO UPDATE SET status='pending',next_attempt_at=excluded.next_attempt_at,last_error=NULL,updated_at=excluded.updated_at").bind(crypto.randomUUID(),projectId,now,now,now)
