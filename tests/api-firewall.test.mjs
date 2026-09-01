@@ -28,6 +28,8 @@ test("public API surface stays intentionally small and hardened",async()=>{
   ["functions/api/academy/enrollments.js",/verifyTurnstile/],
   ["functions/api/academy/auth/register.js",/verifyTurnstile/],
   ["functions/api/customer/auth/register.js",/verifyTurnstile/],
+  ["functions/api/customer/auth/verify.js",/assertSameOrigin/],
+  ["functions/api/customer/auth/resend-verification.js",/consumeRateLimit/],
   ["functions/api/academy/auth/login.js",/consumeRateLimit/],
   ["functions/api/n8n-demo.js",/synthetisch|synthetic/i],
   ["functions/api/n8n-signature-verify.js",/verifyN8nSignature/],
