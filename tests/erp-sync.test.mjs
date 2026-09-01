@@ -59,3 +59,11 @@ test("provisioning accepts authenticated empty third-party list",()=>{
  assert.match(script,/HTTP_CODE" = "404"/);
  assert.match(script,/No third parties found/);
 });
+
+
+test("ERP sync D1 upsert has one binding per SQL placeholder",()=>{
+ const erp=read("functions/_lib/erp-sync.js");
+ const m=erp.match(/INSERT INTO erp_links\([^"]+VALUES\(([^"]+)\)[^"]*"\)\.bind\(([^)]+)\)/);
+ assert.ok(m,"ERP link upsert SQL not found");
+ assert.equal((m[1].match(/\?/g)||[]).length,m[2].split(",").length);
+});
