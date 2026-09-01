@@ -131,7 +131,7 @@ HTTP_CODE="$(curl -sS -o /tmp/bais-api-test.json -w '%{http_code}' --max-time 15
 
 if [ "$HTTP_CODE" = "200" ]; then
   API_TEST_RESULT="HTTP 200"
-elif [ "$HTTP_CODE" = "404" ] && grep -q '"message": "Not Found: No third parties found"' /tmp/bais-api-test.json; then
+elif [ "$HTTP_CODE" = "404" ] && grep -q 'No third parties found' /tmp/bais-api-test.json; then
   # Dolibarr returns 404 for an authenticated third-party list request when the table is empty.
   # This still proves that the API key is valid and the service user can reach the endpoint.
   API_TEST_RESULT="HTTP 404 (API authentifiziert, noch keine Dritten vorhanden)"
