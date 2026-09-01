@@ -147,6 +147,8 @@ test("R2 customer documents are tenant-scoped, type-limited and finalized before
  assert.match(finalize,/size_mismatch/);
  assert.match(finalize,/mime_mismatch/);
  assert.match(finalize,/copyIncomingToFinal/);
+ assert.match(finalize,/status=\'finalizing\'/);
+ assert.match(helper,/x-amz-copy-source-if-match/);
  assert.match(finalize,/INSERT INTO documents/);
  assert.match(finalize,/deleteObject/);
  assert.match(download,/expectedPrefix/);
