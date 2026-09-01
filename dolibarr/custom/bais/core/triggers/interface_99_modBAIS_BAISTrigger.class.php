@@ -45,7 +45,11 @@ class InterfaceBAISTrigger extends DolibarrTriggers
 
             if ($objectType !== '') {
                 $sourceRef = !empty($object->ref) ? (string) $object->ref : '';
-                $baisRef = $manager->assignReference($objectType, $objectId, $prefix, $entity, $sourceRef);
+                $preferredRef = '';
+                if ($objectType === 'customer' && !empty($object->ref_ext) && preg_match('/^KD-\\d{4}-\\d{6}$/', (string) $object->ref_ext)) {
+                    $preferredRef = (string) $object->ref_ext;
+                }
+                $baisRef = $manager->assignReference($objectType, $objectId, $prefix, $entity, $sourceRef, $preferredRef);
             }
 
             $trackedActions = array(
