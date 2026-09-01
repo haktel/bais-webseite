@@ -9,8 +9,8 @@ DOLAPIKEY="$(cat "$KEY_FILE")"
 
 echo "===== BAIS CLOUDFLARE ACCESS DIREKTTEST ====="
 echo "Die Werte werden NICHT gespeichert und NICHT ausgegeben."
-read -r -p "Cloudflare Client ID einfügen: " CF_ID
-read -r -s -p "Cloudflare Client Secret einfügen: " CF_SECRET
+read -r -p "Cloudflare Client ID einfügen: " CF_ID </dev/tty
+read -r -s -p "Cloudflare Client Secret einfügen: " CF_SECRET </dev/tty
 echo
 
 CF_ID="${CF_ID#CF-Access-Client-Id:}"
