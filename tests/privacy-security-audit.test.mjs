@@ -103,6 +103,8 @@ test("privacy notices match actual customer platform processing",()=>{
   "LÖSCHLEBENSZYKLUS",
   "KUNDEN-/PROJEKTIDENTITÄT",
   "GESCHÜTZTE DOKUMENTE",
+  "Cloudflare-R2-Objektspeicher",
+  "kurzlebige, objektbezogene Signaturen",
   "ZERTIFIKATSPRÜFUNG",
   "BETROFFENENRECHTE",
   "365 Tage",
