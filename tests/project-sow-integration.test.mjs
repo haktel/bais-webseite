@@ -54,9 +54,17 @@ test("Dolibarr and Jira sync are retry-safe and keyed to BAIS project",()=>{
  assert.match(sync,/type:"doc",version:1/);
  assert.match(sync,/jira_parent_key/);
  assert.match(sync,/project_module_integration_links/);
+ assert.match(sync,/search\/jql/);
+ assert.match(sync,/projectJiraLabel/);
+ assert.match(sync,/moduleJiraLabel/);
+ assert.match(sync,/multiple BAIS parent issues/);
+ assert.match(sync,/multiple BAIS module issues/);
  assert.match(sync,/fields\.parent=\{key:parent\.key\}/);
  assert.match(migration,/UNIQUE\(project_id,target\)/);
  assert.match(migration,/PRIMARY KEY\(project_id,module_code\)/);
+ assert.match(sync,/status=\'processing\'.*status IN\(\'pending\',\'failed\'\)/s);
+ assert.match(sync,/claim\?\.meta\?\.changes/);
+ assert.match(sync,/staleBefore/);
 });
 
 test("customer Project Portal receives contracted modules but not integration identifiers",()=>{
@@ -77,4 +85,16 @@ test("integration jobs defer when remote credentials are not configured",()=>{
  assert.match(sync,/result\.configured===false/);
  assert.match(sync,/deferred\+\+/);
  assert.match(sync,/15\*60_000/);
+});
+
+
+test("signed Dolibarr project sync promotes the existing prospect instead of creating a second customer",()=>{
+ const api=read("dolibarr/custom/bais/class/api_bais.class.php");
+ const sync=read("functions/_lib/project-sync.js");
+ assert.match(api,/Only a signed SOW may create or update a Dolibarr project/);
+ assert.match(api,/Societe::PROSPECT/);
+ assert.match(api,/Societe::CUSTOMER_AND_PROSPECT/);
+ assert.match(api,/\$company->update\(\$socid, \$this->user/);
+ assert.match(api,/ref_ext/);
+ assert.match(sync,/UPDATE erp_links SET erp_role='customer'/);
 });
