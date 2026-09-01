@@ -1,4 +1,4 @@
-import{AwsClient}from"aws4fetch";
+import{AwsClient}from"../_vendor/aws4fetch.js";
 import{ApiError}from"./api.js";
 
 export const DOCUMENT_MAX_BYTES=25*1024*1024;
