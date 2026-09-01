@@ -112,16 +112,23 @@ async function dolibarrRequest(config,path,{method="GET",body}={}){
  const text=await response.text(),contentType=response.headers.get("content-type")||"";
  let data=null;
  if(text){try{data=JSON.parse(text);}catch{}}
- if(!response.ok)throw new Error("Dolibarr HTTP "+response.status+": "+cleanError(data?.error?.message||data?.error||text||response.statusText));
+ if(!response.ok){const error=new Error("Dolibarr HTTP "+response.status+": "+cleanError(data?.error?.message||data?.error||text||response.statusText));error.status=response.status;throw error;}
  if(!contentType.includes("json")&&data===null)throw new Error("Dolibarr API returned non-JSON content; Cloudflare Access service authentication may be missing.");
  return data;
 }
 
 const filterByRefExt=ref=>"thirdparties?sortfield=t.rowid&sortorder=ASC&limit=2&sqlfilters="+encodeURIComponent("(t.ref_ext:=:'"+String(ref).replace(/'/g,"")+"')");
 async function findRemoteByCustomerNumber(config,customerNumber){
- const data=await dolibarrRequest(config,filterByRefExt(customerNumber));
- const rows=Array.isArray(data)?data:(Array.isArray(data?.data)?data.data:[]);
- return rows.find(row=>String(row?.ref_ext||"")===customerNumber)||null;
+ try{
+  const data=await dolibarrRequest(config,filterByRefExt(customerNumber));
+  const rows=Array.isArray(data)?data:(Array.isArray(data?.data)?data.data:[]);
+  return rows.find(row=>String(row?.ref_ext||"")===customerNumber)||null;
+ }catch(error){
+  // Dolibarr answers 404 when an authenticated filtered list has no matching third party.
+  // For an idempotent upsert this means "not found", not "sync failed".
+  if(Number(error?.status)===404)return null;
+  throw error;
+ }
 }
 const remoteId=data=>{
  const id=Number(typeof data==="number"?data:(data?.id??data?.rowid));
