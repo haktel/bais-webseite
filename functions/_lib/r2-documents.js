@@ -101,15 +101,18 @@ export async function headObject(env,key){
  };
 }
 
-export async function copyIncomingToFinal(env,{incomingKey,finalKey,mimeType,fileName}){
+export async function copyIncomingToFinal(env,{incomingKey,finalKey,mimeType,fileName,sourceEtag}){
  const config=r2Config(env),source="/"+encodeURIComponent(config.bucket)+"/"+encodePath(incomingKey);
+ if(!sourceEtag)throw new ApiError(502,"r2_etag_missing","Upload-Integrität konnte nicht geprüft werden.");
  const headers={
   "x-amz-copy-source":source,
+  "x-amz-copy-source-if-match":"\""+String(sourceEtag).replace(/^"|"$/g,"")+"\"",
   "x-amz-metadata-directive":"REPLACE",
   "content-type":normalizeMime(mimeType),
   "content-disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(sanitizeDocumentName(fileName))
  };
  const response=await config.client.fetch(objectUrl(config,finalKey).toString(),{method:"PUT",headers});
+ if(response.status===412)throw new ApiError(409,"upload_changed_during_finalize","Die Upload-Datei wurde während der Prüfung verändert. Bitte erneut hochladen.");
  if(!response.ok)throw new ApiError(502,"r2_copy_failed","Die Datei konnte nicht sicher in den Dokumentbereich übernommen werden.");
  return response;
 }
