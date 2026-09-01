@@ -22,7 +22,7 @@ export async function sendCustomerVerificationEmail({env,to,name,verificationTok
  const apiKey=String(env?.RESEND_API_KEY||""),from=String(env?.TRANSACTIONAL_EMAIL_FROM||"BAIS <info@bais-solutions.de>").trim();
  if(!apiKey||!from)throw new ApiError(503,"transactional_email_not_configured","Transaktionaler E-Mail-Versand ist noch nicht konfiguriert.");
  const base=String(env?.PUBLIC_BASE_URL||"https://bais-solutions.de").replace(/\/+$/,"");
- const url=new URL("/academy/konto/",base);url.searchParams.set("verify",String(verificationToken||""));
+ const url=new URL("/academy/konto/",base);url.hash="verify="+encodeURIComponent(String(verificationToken||""));
  const subject="Bitte bestätigen Sie Ihre BAIS E-Mail-Adresse";
  const html=`<div style="font-family:Arial,sans-serif;line-height:1.55;color:#111"><h2>BAIS Kundenkonto bestätigen</h2><p>Guten Tag ${escapeHtml(name||"")},</p><p>bitte bestätigen Sie Ihre E-Mail-Adresse, damit Ihr BAIS Kundenkonto aktiviert wird.</p><p><a href="${escapeHtml(url.toString())}">E-Mail-Adresse bestätigen</a></p><p>Der Link ist einmalig und gültig bis ${escapeHtml(new Date(expiresAt).toLocaleString("de-DE",{timeZone:"Europe/Berlin"}))}.</p><p>Geschützte Projektinhalte bleiben unabhängig davon standardmäßig gesperrt und werden nur ausdrücklich freigeschaltet.</p><p>Falls Sie diese Registrierung nicht ausgelöst haben, ignorieren Sie diese Nachricht.</p><p>BAIS · Bünyamin Atik – IT Solutions</p></div>`;
  const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{
