@@ -92,9 +92,11 @@ if ($found <= 0) {
  * 121 = read third parties
  * 122 = create/update third parties
  * 262 = read all third parties for internal users
- * No delete/export/accounting/project/invoice permission is granted.
+ * 50032101 = read BAIS references/events
+ * 50032103 = BAIS project upsert only
+ * No delete/export/accounting/invoice permission is granted.
  */
-foreach (array(121, 122, 262) as $rightId) {
+foreach (array(121, 122, 262, 50032101, 50032103) as $rightId) {
     $result = $service->addrights($rightId, '', '', (int) $conf->entity, 1);
     if ($result < 0) {
         $db->rollback();
@@ -146,7 +148,7 @@ rm -f /tmp/bais-api-test.json
 echo "===== BAIS DOLIBARR API ====="
 echo "Service user : bais-api"
 echo "Admin        : NEIN"
-echo "Rechte       : Dritte lesen + erstellen/aktualisieren"
+echo "Rechte       : Dritte lesen/aktualisieren + BAIS Projekt-Upsert"
 echo "Löschen      : NEIN"
 echo "API-Test     : $API_TEST_RESULT"
 echo "API-Key      : sicher gespeichert, nicht ausgegeben"
