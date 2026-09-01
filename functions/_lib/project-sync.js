@@ -77,6 +77,13 @@ async function jiraRequest(config,path,{method="GET",body}={}){
 }
 const adf=text=>({type:"doc",version:1,content:[{type:"paragraph",content:[{type:"text",text:String(text)}]}]});
 const jiraKey=data=>String(data?.key||"").trim(),jiraId=data=>String(data?.id||"").trim();
+const jiraJqlString=value=>'"'+String(value||"").replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"';
+const projectJiraLabel=row=>"bais-"+String(row.project_number||"").toLowerCase().replace(/[^a-z0-9-]/g,"-");
+const moduleJiraLabel=code=>"bais-"+String(code||"").toLowerCase().replace(/[^a-z0-9-]/g,"-");
+async function jiraSearch(config,jql){
+ const data=await jiraRequest(config,"search/jql",{method:"POST",body:{jql,maxResults:2,fields:["summary"]}});
+ return Array.isArray(data?.issues)?data.issues:[];
+}
 
 async function upsertJiraParent(db,config,row,now){
  const existing=await db.prepare("SELECT jira_parent_id,jira_parent_key FROM project_integration_links WHERE project_id=? LIMIT 1").bind(row.id).first();
