@@ -1,5 +1,5 @@
 import{ApiError}from"./api.js";
-const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8,EMAIL_VERIFICATION_SECONDS=60*60*24;export const PASSWORD_HASH_ITERATIONS=100000;
+const SESSION_COOKIE="__Host-bais_session",SESSION_SECONDS=60*60*24,IDLE_SECONDS=60*60*8,EMAIL_VERIFICATION_SECONDS=60*60*24,PASSWORD_RESET_SECONDS=60*60;export const PASSWORD_HASH_ITERATIONS=100000;
 
 const bytesToBase64Url=bytes=>{
  let value="";for(const byte of bytes)value+=String.fromCharCode(byte);
@@ -90,6 +90,20 @@ export async function findCustomerEmailVerification(db,token){
  return row?{...row,tokenHash}:null;
 }
 
+export async function issuePasswordReset(db,userId,now=new Date()){
+ const token=randomToken(32),tokenHash=await sha256(token),createdAt=now.toISOString(),expiresAt=new Date(now.getTime()+PASSWORD_RESET_SECONDS*1000).toISOString();
+ await db.prepare("INSERT INTO user_password_resets(user_id,token_hash,created_at,expires_at,used_at) VALUES(?,?,?,?,NULL) ON CONFLICT(user_id) DO UPDATE SET token_hash=excluded.token_hash,created_at=excluded.created_at,expires_at=excluded.expires_at,used_at=NULL")
+  .bind(userId,tokenHash,createdAt,expiresAt).run();
+ return{token,expiresAt};
+}
+export async function findPasswordReset(db,token){
+ const value=String(token||"").trim();
+ if(value.length<32||value.length>200)return null;
+ const tokenHash=await sha256(value);
+ const row=await db.prepare("SELECT r.user_id,r.token_hash,r.expires_at,r.used_at,u.display_name,u.email,u.organization_id FROM user_password_resets r JOIN users u ON u.id=r.user_id WHERE r.token_hash=? LIMIT 1").bind(tokenHash).first();
+ return row?{...row,tokenHash}:null;
+}
+
 export async function deleteSession(db,request){
  const token=parseCookies(request)[SESSION_COOKIE];if(!token)return;
  await db.prepare("DELETE FROM user_sessions WHERE token_hash=?").bind(await sha256(token)).run();
@@ -102,6 +116,8 @@ export async function ensureAuthSchema(db){
   db.prepare("CREATE TABLE IF NOT EXISTS auth_rate_limits(id TEXT PRIMARY KEY,attempts INTEGER NOT NULL,window_started_at TEXT NOT NULL,updated_at TEXT NOT NULL)"),
   db.prepare("CREATE TABLE IF NOT EXISTS customer_email_verifications(user_id TEXT PRIMARY KEY,token_hash TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,verified_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
   db.prepare("CREATE INDEX IF NOT EXISTS idx_customer_email_verifications_token ON customer_email_verifications(token_hash,expires_at)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS user_password_resets(user_id TEXT PRIMARY KEY,token_hash TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,used_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)"),
+  db.prepare("CREATE INDEX IF NOT EXISTS idx_user_password_resets_token ON user_password_resets(token_hash,expires_at)"),
   db.prepare("CREATE TABLE IF NOT EXISTS course_progress(user_id TEXT NOT NULL,course_id TEXT NOT NULL,progress_percent INTEGER NOT NULL DEFAULT 0 CHECK(progress_percent BETWEEN 0 AND 100),status TEXT NOT NULL DEFAULT 'not_started' CHECK(status IN('not_started','in_progress','completed')),updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS academy_module_progress(user_id TEXT NOT NULL,course_id TEXT NOT NULL,module_slug TEXT NOT NULL,completed_lessons_json TEXT NOT NULL DEFAULT '[]',lab_cases_json TEXT NOT NULL DEFAULT '[]',assessment_best INTEGER NOT NULL DEFAULT 0 CHECK(assessment_best BETWEEN 0 AND 100),module_percent INTEGER NOT NULL DEFAULT 0 CHECK(module_percent BETWEEN 0 AND 100),updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id,module_slug),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)"),
   db.prepare("CREATE TABLE IF NOT EXISTS academy_lesson_sessions(user_id TEXT NOT NULL,course_id TEXT NOT NULL,module_slug TEXT NOT NULL,lesson_id TEXT NOT NULL,started_at TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user_id,course_id,module_slug,lesson_id),FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE)")

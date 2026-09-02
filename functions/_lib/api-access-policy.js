@@ -7,6 +7,8 @@ const PUBLIC_EXACT=new Set([
  "/api/customer/auth/register",
  "/api/customer/auth/verify",
  "/api/customer/auth/resend-verification",
+ "/api/academy/auth/request-password-reset",
+ "/api/academy/auth/reset-password",
  "/api/academy/auth/logout",
  "/api/n8n-demo",
  "/api/n8n-signature-verify"

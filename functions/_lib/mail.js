@@ -34,3 +34,20 @@ export async function sendCustomerVerificationEmail({env,to,name,verificationTok
  if(!response.ok)throw new ApiError(502,"transactional_email_failed","Bestätigungs-E-Mail konnte nicht zugestellt werden.");
  return{id:data?.id||null};
 }
+
+export async function sendPasswordResetEmail({env,to,name,resetToken,expiresAt,idempotencyKey}){
+ const apiKey=String(env?.RESEND_API_KEY||""),from=String(env?.TRANSACTIONAL_EMAIL_FROM||"BAIS <info@bais-solutions.de>").trim();
+ if(!apiKey||!from)throw new ApiError(503,"transactional_email_not_configured","Transaktionaler E-Mail-Versand ist noch nicht konfiguriert.");
+ const base=String(env?.PUBLIC_BASE_URL||"https://bais-solutions.de").replace(/\/+$/,"");
+ const url=new URL("/academy/konto/",base);url.hash="reset="+encodeURIComponent(String(resetToken||""));
+ const subject="Ihr BAIS Passwort zurücksetzen";
+ const html=`<div style="font-family:Arial,sans-serif;line-height:1.55;color:#111"><h2>Passwort zurücksetzen</h2><p>Guten Tag ${escapeHtml(name||"")},</p><p>für Ihr BAIS Konto wurde eine Anfrage zum Zurücksetzen des Passworts gestellt.</p><p><a href="${escapeHtml(url.toString())}">Neues Passwort setzen</a></p><p>Der Link ist einmalig und gültig bis ${escapeHtml(new Date(expiresAt).toLocaleString("de-DE",{timeZone:"Europe/Berlin"}))}.</p><p>Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese Nachricht – Ihr Passwort bleibt unverändert.</p><p>BAIS · Bünyamin Atik – IT Solutions</p></div>`;
+ const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{
+  "authorization":"Bearer "+apiKey,
+  "content-type":"application/json",
+  "idempotency-key":String(idempotencyKey||"").slice(0,256)
+ },body:JSON.stringify({from,to:[to],subject,html})});
+ const data=await response.json().catch(()=>null);
+ if(!response.ok)throw new ApiError(502,"transactional_email_failed","E-Mail zum Zurücksetzen des Passworts konnte nicht zugestellt werden.");
+ return{id:data?.id||null};
+}
