@@ -1,26 +1,24 @@
 .baisHistoryNav{
   position:fixed;
-  left:14px;
+  right:14px;
   bottom:max(14px,env(safe-area-inset-bottom));
   z-index:1200;
   display:flex;
   align-items:center;
   gap:2px;
   padding:3px;
-  border:1px solid rgba(20,56,64,.10);
+  border:1px solid rgba(20,56,64,.14);
   border-radius:12px;
-  background:rgba(255,255,255,.78);
-  box-shadow:0 4px 16px rgba(8,35,42,.09);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  opacity:.78;
+  background:#fff;
+  box-shadow:0 4px 16px rgba(8,35,42,.16);
+  opacity:.92;
   transition:opacity .18s ease,box-shadow .18s ease,background .18s ease
 }
 .baisHistoryNav:hover,
 .baisHistoryNav:focus-within{
   opacity:1;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 6px 20px rgba(8,35,42,.12)
+  background:#fff;
+  box-shadow:0 6px 20px rgba(8,35,42,.2)
 }
 .baisHistoryNav button{
   height:32px;
@@ -60,7 +58,7 @@
 }
 @media(max-width:560px){
   .baisHistoryNav{
-    left:9px;
+    right:9px;
     bottom:max(9px,env(safe-area-inset-bottom));
     padding:2px;
     border-radius:10px
