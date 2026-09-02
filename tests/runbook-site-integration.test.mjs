@@ -35,6 +35,17 @@ test("protected runbook pages are no-store and live-audited",()=>{
  assert.match(headers,/Cache-Control: private, no-store/);
  assert.match(audit,/check_redirect "\/admin\/runbook\/" "\/academy\/konto\//);
  assert.match(audit,/check_redirect "\/kundenbereich\/betrieb\/" "\/academy\/konto\//);
+ assert.match(audit,/production D1 binding is reachable/);
+ assert.match(audit,/production R2 document binding is reachable/);
+ assert.match(audit,/health response exposes no sensitive configuration/);
+});
+
+test("BS-10 health check reports only operational dependency states",()=>{
+ const health=read("functions/api/health.js");
+ assert.match(health,/database="not_configured"/);
+ assert.match(health,/documentStorage=.*"ok":"not_configured"/);
+ assert.match(health,/service:"bais-platform-api"/);
+ assert.doesNotMatch(health,/env\.(?:API_KEY|SECRET|PASSWORD|TOKEN)/);
 });
 
 test("customer account cache version includes operations-link build",()=>{
