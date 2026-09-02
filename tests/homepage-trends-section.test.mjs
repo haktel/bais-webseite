@@ -38,4 +38,21 @@ test("trendsSection styling exists in site.css",()=>{
  assert.match(css,/\.trendsSection\{/);
  assert.match(css,/\.trendGrid\{/);
  assert.match(css,/\.trendCard\{/);
+ assert.match(css,/\.trendMedia\{/);
+});
+
+test("homepage trend cards each render an AI-generated visual with descriptive alt text",()=>{
+ const html=read("index.html");
+ assert.match(html,/trendMedia"><img src="assets\/visuals\/ki-trainer-v1\.svg"[^>]*alt="[^"]{20,}"/);
+ assert.match(html,/trendMedia"><img src="assets\/visuals\/ki-softwareentwickler-v1\.svg"[^>]*alt="[^"]{20,}"/);
+ assert.match(html,/trendMedia"><img src="assets\/visuals\/ki-automatisierung-v1\.svg"[^>]*alt="[^"]{20,}"/);
+});
+
+test("trend visual files exist and are non-trivial embedded images",()=>{
+ for(const file of["ki-trainer-v1.svg","ki-softwareentwickler-v1.svg","ki-automatisierung-v1.svg"]){
+  const svg=read(`assets/visuals/${file}`);
+  assert.match(svg,/<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+  assert.match(svg,/data:image\/webp;base64,/);
+  assert.ok(svg.length>20000,`${file} should embed a real image, not a stub`);
+ }
 });
