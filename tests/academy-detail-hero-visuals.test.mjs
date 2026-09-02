@@ -10,6 +10,7 @@ const pages=[
  {slug:"secure-ai-rag",img:"secure-ai-rag-v1"},
  {slug:"caio-masterguide",img:"caio-masterguide-v1"},
  {slug:"ai-for-sales",img:"ai-for-sales-v1"},
+ {slug:"ai-coding",img:"ai-coding-v1"},
 ];
 
 for(const {slug,img} of pages){
@@ -34,11 +35,19 @@ test("all pages reference the cache-busted bais-design-system.css",()=>{
  assert.doesNotMatch(html,/bais-design-system\.css\?v=1\.0/);
 });
 
-test("the 5 program detail hero visual files exist and are non-trivial embedded images",()=>{
+test("the 6 program detail hero visual files exist and are non-trivial embedded images",()=>{
  for(const {img} of pages){
   const svg=read(`assets/visuals/${img}.svg`);
   assert.match(svg,/<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
   assert.match(svg,/data:image\/webp;base64,/);
   assert.ok(svg.length>20000,`${img}.svg should embed a real image, not a stub`);
  }
+});
+
+test("progDetailPage hero h1 wraps long unhyphenated German compounds instead of overflowing behind the image",()=>{
+ // e.g. "Softwareentwicklung" has no space to break at, and the text column is
+ // narrower than the generic .hero h1 max-width once the heroMedia image sits beside it.
+ const css=read("assets/bais-design-system.css");
+ assert.match(css,/\.progDetailPage \.hero h1\{[^}]*overflow-wrap:break-word/);
+ assert.match(css,/\.progDetailPage \.hero h1\{[^}]*max-width:none/);
 });
