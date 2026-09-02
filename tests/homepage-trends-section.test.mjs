@@ -6,7 +6,7 @@ const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 
 test("homepage includes the KI-Arbeitsmarkt trends section with three role cards",()=>{
  const html=read("index.html");
- assert.match(html,/class="sec trendsSection"/);
+ assert.match(html,/class="sec dark trendsSection"/);
  assert.match(html,/<h3>KI-Trainer<\/h3>/);
  assert.match(html,/<h3>KI-Softwareentwickler<\/h3>/);
  assert.match(html,/<h3>KI-Automatisierungsexperte<\/h3>/);
@@ -55,4 +55,12 @@ test("trend visual files exist and are non-trivial embedded images",()=>{
   assert.match(svg,/data:image\/webp;base64,/);
   assert.ok(svg.length>20000,`${file} should embed a real image, not a stub`);
  }
+});
+
+test("trend cards keep readable colors and safe word-wrap on the dark section",()=>{
+ const css=read("assets/site.css");
+ // h3 sits on a white card inside a .dark (color:#fff) section - must not inherit white-on-white.
+ assert.match(css,/\.trendCard h3\{color:var\(--ink\)/);
+ // Long unhyphenated German compounds (e.g. "Softwareentwickler") must wrap instead of overflowing the card.
+ assert.match(css,/\.trendCard h3\{[^}]*overflow-wrap:break-word/);
 });
