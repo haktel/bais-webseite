@@ -21,6 +21,6 @@ test("admin customer access GET uses one grant query instead of per-customer N+1
 
 test("admin asset versions are bumped for resilient loading build",()=>{
  const html=read("admin/index.html");
- assert.match(html,/admin\.css\?v=1\.3/);
- assert.match(html,/admin\.js\?v=1\.6/);
+ assert.match(html,/admin\.css\?v=1\.4/);
+ assert.match(html,/admin\.js\?v=1\.7/);
 });

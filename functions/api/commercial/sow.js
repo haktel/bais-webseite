@@ -5,6 +5,7 @@ import{customerContextForSession,hasCustomerContentAccess}from"../../_lib/custom
 import{enqueueErpProspectSync,syncPendingErpJobs}from"../../_lib/erp-sync.js";
 import{getProjectSow,saveProjectSow}from"../../_lib/project-sow.js";
 import{enqueueProjectIntegrations,projectIntegrationStatus,syncPendingProjectIntegrations}from"../../_lib/project-sync.js";
+import{seedProjectMilestones}from"../../_lib/project-milestones.js";
 
 export const onRequestGet=async({request,env})=>{
  const traceId=requestId(request);
@@ -50,10 +51,11 @@ export const onRequestPost=async context=>{
   await db.prepare("UPDATE projects SET starts_at=? WHERE id=? AND organization_id=?")
    .bind(body.projectStart||null,projectId,organizationId).run();
 
-  let queued={queued:false,reason:"sow_not_signed"};
+  let queued={queued:false,reason:"sow_not_signed"},milestones={seeded:false,count:0};
   if(result.sowStatus==="signed"){
    await enqueueErpProspectSync(db,{organizationId,now:new Date().toISOString()});
    queued=await enqueueProjectIntegrations(db,{projectId,now:new Date().toISOString()});
+   milestones=await seedProjectMilestones(db,{projectId,organizationId,modules:result.modules.map(m=>m.code),actorUserId:admin.user_id,now:new Date().toISOString()});
    const task=(async()=>{
     await syncPendingErpJobs(db,env,{limit:5}).catch(error=>console.error(JSON.stringify({level:"error",area:"erp.project.prerequisite",requestId:traceId,message:error instanceof Error?error.message:"unknown"})));
     await syncPendingProjectIntegrations(db,env,{limit:6}).catch(error=>console.error(JSON.stringify({level:"error",area:"project.integrations",requestId:traceId,message:error instanceof Error?error.message:"unknown"})));
@@ -61,7 +63,7 @@ export const onRequestPost=async context=>{
    if(typeof context.waitUntil==="function")context.waitUntil(task);else void task;
   }
 
-  return json({ok:true,project:{id:result.project.id,projectNumber:result.project.project_number,name:result.project.name},sow:{status:result.sowStatus,modules:result.modules,idempotent:result.idempotent},integrations:{queued:queued.queued===true},requestId:traceId},result.idempotent?200:201);
+  return json({ok:true,project:{id:result.project.id,projectNumber:result.project.project_number,name:result.project.name},sow:{status:result.sowStatus,modules:result.modules,idempotent:result.idempotent},integrations:{queued:queued.queued===true},milestones:{seeded:milestones.seeded,count:milestones.count},requestId:traceId},result.idempotent?200:201);
  }catch(error){return handleError(error,traceId);}
 };
 
