@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {enqueueProjectIntegrations} from "../functions/_lib/project-sync.js";
 
+// Jira traceability probe: this test file is linked to BS-12 through its commit message.
+
 class FakeStatement {
  constructor(db,sql){this.db=db;this.sql=sql;this.bindings=[];}
  bind(...bindings){this.bindings=bindings;return this;}
