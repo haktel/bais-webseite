@@ -40,6 +40,12 @@ code="$(status "${BASE}/api/admin/customer-access" || true)"
 code="$(status "${BASE}/api/commercial/context" || true)"
 [ "$code" = "401" ] && pass "commercial customer context blocks anonymous access" || fail "commercial context expected 401, got ${code}"
 
+code="$(status "${BASE}/api/commercial/sow?projectId=security-probe" || true)"
+[ "$code" = "401" ] && pass "SOW API blocks anonymous access" || fail "SOW API expected 401, got ${code}"
+
+code="$(status "${BASE}/api/admin/project-integrations" || true)"
+[ "$code" = "401" ] && pass "project integration control plane blocks anonymous access" || fail "project integrations expected 401, got ${code}"
+
 code="$(status -X POST -H 'Origin: https://bais-solutions.de' -H 'Content-Type: application/json' --data '{"name":"Synthetic","email":"synthetic@example.com","company":"Demo","budget":5000}' "${BASE}/api/n8n-module-01" || true)"
 [ "$code" = "401" ] && pass "n8n Academy lab requires authenticated enrollment" || fail "n8n Academy lab expected 401, got ${code}"
 
