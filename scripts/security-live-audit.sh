@@ -56,7 +56,17 @@ code="$(status -H 'X-API-Key: bais-demo-key-read' "${BASE}/api/academy/auth-lab-
 [ "$code" = "401" ] && pass "auth lab demo credentials do not bypass Academy session" || fail "auth lab expected 401, got ${code}"
 
 code="$(status "${BASE}/api/health" || true)"
-[ "$code" = "200" ] && pass "public health endpoint remains available" || fail "health expected 200, got ${code}"
+if [ "$code" = "200" ]; then
+  pass "public health endpoint remains available"
+  grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' /tmp/body && pass "production database health is ok" || fail "health endpoint does not report database ok"
+  grep -Eq '"database"[[:space:]]*:[[:space:]]*"ok"' /tmp/body && pass "production D1 binding is reachable" || fail "production D1 binding is not reachable"
+  grep -Eq '"documentStorage"[[:space:]]*:[[:space:]]*"ok"' /tmp/body && pass "production R2 document binding is reachable" || fail "production R2 document binding is not reachable"
+  grep -Eq '"service"[[:space:]]*:[[:space:]]*"bais-platform-api"' /tmp/body && pass "health response identifies BAIS platform" || fail "health response service marker is missing"
+  grep -qi '^cache-control:.*no-store' /tmp/headers && pass "health response is not cached" || fail "health response must use Cache-Control no-store"
+  if grep -Eqi '(api[_-]?key|secret|password|token|authorization|bucket|account[_-]?id)' /tmp/body; then fail "health response may expose sensitive configuration"; else pass "health response exposes no sensitive configuration"; fi
+else
+  fail "health expected 200, got ${code}"
+fi
 
 code="$(status "${BASE}/api/definitely-not-a-real-route" || true)"
 if [ "$code" = "403" ] || [ "$code" = "404" ]; then pass "unknown API route fails closed"; else fail "unknown API route expected 403/404, got ${code}"; fi
