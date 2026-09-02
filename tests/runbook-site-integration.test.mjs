@@ -39,5 +39,5 @@ test("protected runbook pages are no-store and live-audited",()=>{
 
 test("customer account cache version includes operations-link build",()=>{
  const html=read("academy/konto/index.html");
- assert.match(html,/academy-account\.js\?v=2\.1/);
+ assert.match(html,/academy-account\.js\?v=2\.2/);
 });
