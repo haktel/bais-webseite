@@ -1,4 +1,4 @@
-name: BAIS R2 Optional S3 Direct Provisioning
+name: BAIS R2 Native Binding Provisioning
 
 on:
   workflow_dispatch:
@@ -18,19 +18,18 @@ jobs:
       R2_BUCKET_NAME: bais-project-documents
     steps:
       - uses: actions/checkout@v4
-      - name: Configure optional aws4fetch S3-direct mode
+      - name: Configure native R2 binding and optional S3-direct mode
         shell: bash
         run: |
           set -euo pipefail
           CF_TOKEN="${CF_TOKEN_PRIMARY:-${CF_TOKEN_ALT:-${CF_TOKEN_ALT2:-}}}"
-          if [ -z "${CF_TOKEN}" ] || [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ]; then
-            echo "R2_S3_DIRECT_STATUS=OPTIONAL_NOT_CONFIGURED"
-            echo "Native PROJECT_DOCUMENTS binding remains the production path."
-            exit 0
+          if [ -z "${CF_TOKEN}" ]; then
+            echo "CLOUDFLARE_API_TOKEN is required to provision PROJECT_DOCUMENTS." >&2
+            exit 1
           fi
 
-          echo "::add-mask::${R2_ACCESS_KEY_ID}"
-          echo "::add-mask::${R2_SECRET_ACCESS_KEY}"
+          [ -z "${R2_ACCESS_KEY_ID:-}" ] || echo "::add-mask::${R2_ACCESS_KEY_ID}"
+          [ -z "${R2_SECRET_ACCESS_KEY:-}" ] || echo "::add-mask::${R2_SECRET_ACCESS_KEY}"
           AUTH=(-H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json")
           ACCOUNT_ID="$(curl -fsS "${AUTH[@]}" https://api.cloudflare.com/client/v4/accounts | jq -r '.result[0].id // empty')"
           test -n "${ACCOUNT_ID}"
@@ -50,11 +49,22 @@ jobs:
           PROJECT_JSON="$(curl -fsS "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}")"
           PROD="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.production.env_vars // {}')"
           PREVIEW="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.preview.env_vars // {}')"
+          PROD_R2="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.production.r2_buckets // {}')"
+          PREVIEW_R2="$(echo "${PROJECT_JSON}" | jq -c '.result.deployment_configs.preview.r2_buckets // {}')"
+          PROD_R2_MERGED="$(jq -nc --argjson old "${PROD_R2}" --arg bucket "${R2_BUCKET_NAME}" '$old + {PROJECT_DOCUMENTS:{name:$bucket}}')"
+          PREVIEW_R2_MERGED="$(jq -nc --argjson old "${PREVIEW_R2}" --arg bucket "${R2_BUCKET_NAME}" '$old + {PROJECT_DOCUMENTS:{name:$bucket}}')"
 
-          PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
-          PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
+          PROD_MERGED="${PROD}"
+          PREVIEW_MERGED="${PREVIEW}"
+          if [ -n "${R2_ACCESS_KEY_ID:-}" ] && [ -n "${R2_SECRET_ACCESS_KEY:-}" ]; then
+            PROD_MERGED="$(jq -nc --argjson old "${PROD}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
+            PREVIEW_MERGED="$(jq -nc --argjson old "${PREVIEW}" --arg account "${ACCOUNT_ID}" --arg bucket "${R2_BUCKET_NAME}" --arg key "${R2_ACCESS_KEY_ID}" --arg secret "${R2_SECRET_ACCESS_KEY}" '$old + {R2_ACCOUNT_ID:{type:"plain_text",value:$account},R2_BUCKET_NAME:{type:"plain_text",value:$bucket},R2_ACCESS_KEY_ID:{type:"secret_text",value:$key},R2_SECRET_ACCESS_KEY:{type:"secret_text",value:$secret}}')"
+            echo "R2_S3_DIRECT_STATUS=CONFIGURED"
+          else
+            echo "R2_S3_DIRECT_STATUS=OPTIONAL_NOT_CONFIGURED"
+          fi
 
-          PATCH="$(jq -nc --argjson prod "${PROD_MERGED}" --argjson preview "${PREVIEW_MERGED}" '{deployment_configs:{production:{env_vars:$prod},preview:{env_vars:$preview}}}')"
+          PATCH="$(jq -nc --argjson prod "${PROD_MERGED}" --argjson preview "${PREVIEW_MERGED}" --argjson prodR2 "${PROD_R2_MERGED}" --argjson previewR2 "${PREVIEW_R2_MERGED}" '{deployment_configs:{production:{env_vars:$prod,r2_buckets:$prodR2},preview:{env_vars:$preview,r2_buckets:$previewR2}}}')"
           RESPONSE="$(curl -fsS -X PATCH "${AUTH[@]}" "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}" --data "${PATCH}")"
           echo "${RESPONSE}" | jq -e '.success == true' >/dev/null
-          echo "R2_S3_DIRECT_STATUS=CONFIGURED"
+          echo "PROJECT_DOCUMENTS_STATUS=CONFIGURED"
