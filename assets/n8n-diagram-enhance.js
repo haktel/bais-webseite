@@ -93,15 +93,33 @@
   // instead of forcing a false left-to-right order onto them.
   function svgCluster(center,parts){
     if(!center||!parts||parts.length<2)return null;
-    const w=640,h=300,cx=w/2,cy=h/2+6,radius=118;
-    const centerW=Math.max(150,center.length*7.4+34),centerH=52;
     const n=parts.length;
+    const centerW=Math.max(150,center.length*7.4+34),centerH=52;
+    const partWidths=parts.map(label=>Math.max(100,label.length*7.1+26));
+    const partH=38,flatten=0.72;
+    // Radius has to grow with the part count and label width, or nodes on a
+    // small fixed circle start overlapping once there are more than ~5 of
+    // them (found while adding an 8-part cluster) - same idea as sizing
+    // svgFlow/svgTree from their actual text instead of a fixed slot. Two
+    // separate constraints, both required: nodes must clear each other
+    // along the circle (radiusFromChord), AND a node sitting near the
+    // horizontal (angle 0/180) must clear the center hub itself
+    // (radiusFromCenter) - a 4-part cluster with wide labels satisfies the
+    // first without satisfying the second, and its side nodes end up
+    // overlapping the center box.
+    const maxPartW=Math.max(...partWidths);
+    const minChord=maxPartW+26;
+    const radiusFromChord=minChord/(2*Math.sin(Math.PI/n));
+    const radiusFromCenter=centerW/2+maxPartW/2+30;
+    const radius=Math.max(118,radiusFromChord,radiusFromCenter);
+    const w=Math.max(640,radius*2+maxPartW+70),h=Math.max(300,radius*2*flatten+partH+70);
+    const cx=w/2,cy=h/2;
     let lines="",nodes="";
     parts.forEach((label,i)=>{
       const angle=-Math.PI/2+(2*Math.PI*i)/n;
       const px=cx+radius*Math.cos(angle);
-      const py=cy+radius*Math.sin(angle)*0.72;
-      const partW=Math.max(100,label.length*7.1+26),partH=38;
+      const py=cy+radius*Math.sin(angle)*flatten;
+      const partW=partWidths[i];
       lines+=`<line class="dgLine dgSpoke" x1="${cx}" y1="${cy}" x2="${px}" y2="${py}"/>`;
       nodes+=`<g transform="translate(${px},${py})"><rect class="dgNode" x="${-partW/2}" y="${-partH/2}" width="${partW}" height="${partH}" rx="10"/><text class="dgText" text-anchor="middle" dy="4">${esc(label)}</text></g>`;
     });
