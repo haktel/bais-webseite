@@ -31,8 +31,9 @@ test("progDetailPage heroGrid two-column layout exists in the shared design syst
 
 test("all pages reference the cache-busted bais-design-system.css",()=>{
  const html=read("academy/index.html");
- assert.match(html,/bais-design-system\.css\?v=1\.1/);
+ assert.match(html,/bais-design-system\.css\?v=1\.2/);
  assert.doesNotMatch(html,/bais-design-system\.css\?v=1\.0/);
+ assert.doesNotMatch(html,/bais-design-system\.css\?v=1\.1"/);
 });
 
 test("the 6 program detail hero visual files exist and are non-trivial embedded images",()=>{
