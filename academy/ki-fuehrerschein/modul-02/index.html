@@ -4,7 +4,7 @@
 <meta name="description" content="Privater BAIS Academy Lernbereich: Warum KI-Modelle halluzinieren, wie Bias entsteht, welche Grenzen generative AI hat und mit welchen Strategien man Ausgaben verifiziert – mit echtem Halluzinations- &amp; Bias-Checker als Live-Lab.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://bais-solutions.de/academy/ki-fuehrerschein/modul-02/">
-<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.2"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.7"><link rel="stylesheet" href="../../../assets/kif-module-02.css?v=1.0">
+<link rel="stylesheet" href="../../../assets/site.css?v=49.9"><link rel="stylesheet" href="../../../assets/bais-design-system.css?v=1.2"><link rel="stylesheet" href="../../../assets/n8n-module-study.css?v=1.8"><link rel="stylesheet" href="../../../assets/kif-module-02.css?v=1.0">
 </head><body data-module="modul-02" data-course="ki-fuehrerschein">
 <header><div class="c"><nav><a class="brand" href="../../../" aria-label="BAIS Startseite"><img class="brandLogo" src="../../../assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="../">KI-Führerschein</a><a href="../modul-01/">Modul 01</a><a href="../../konto/">Mein Konto</a><a href="../../">Academy</a></div><span class="menu">BAIS</span></nav></div></header>
 
@@ -37,9 +37,7 @@
 </details></article>
 
 <article class="lesson" id="l2" data-lesson="02"><div class="lessonTop"><div style="display:flex;gap:14px"><span class="lessonNo">02</span><div><div class="ey">RISIKOMUSTER</div><h2>Seltene, spezifische Fakten – hohes Risiko</h2><p>Je seltener ein exaktes Detail in den Trainingsdaten vorkam, desto eher wird plausibel geraten statt korrekt wiedergegeben.</p></div></div><button class="doneButton" data-done>Als gelernt markieren</button></div>
-<div class="miniArchitecture">Häufiges Allgemeinwissen → geringes Risiko
-Seltene Zahl / Datum / Zitat → erhöhtes Risiko
-Ereignis nach Wissensstichtag → sehr hohes Risiko</div>
+<div class="decisionTree"><div class="dtRoot">Wie oft kam das Detail in Trainingsdaten vor?</div><div class="dtBranch" data-outcome="ok"><span class="dtCond">Häufiges Allgemeinwissen</span><span class="dtLeaf">Geringes Risiko</span></div><div class="dtBranch" data-outcome="warn"><span class="dtCond">Seltene Zahl / Datum / Zitat</span><span class="dtLeaf">Erhöhtes Risiko</span></div><div class="dtBranch" data-outcome="warn"><span class="dtCond">Ereignis nach Wissensstichtag</span><span class="dtLeaf">Sehr hohes Risiko</span></div></div>
 <details><summary>Vertiefung öffnen</summary>
 <div class="depthBlock"><h3>Der Bard-Vorfall vom Februar 2023</h3><p>Bei der öffentlichen Erstpräsentation von Googles Chatbot Bard behauptete das System fälschlich, das James-Webb-Weltraumteleskop habe das allererste Foto eines Planeten außerhalb unseres Sonnensystems gemacht. Tatsächlich gelang das bereits Jahre zuvor einem anderen Teleskop. Der Fehler wurde noch am selben Tag breit berichtet.</p></div>
 <div class="realCase"><div><span class="caseTag">BEKANNTER FALL · GOOGLE BARD</span><h3>Eine falsche Behauptung in der wichtigsten Produkt-Demo des Unternehmens</h3><p>Die Aussage klang selbstsicher und plausibel formuliert – genau deshalb fiel sie zunächst niemandem im Publikum auf. Erst externe Fachleute widersprachen öffentlich.</p><span class="caseTag" style="margin-top:8px;display:inline-block">Bekannter Fall · Februar 2023</span></div>
@@ -141,7 +139,7 @@ du in der Doku verifizieren."</pre></div></div>
 </div></div></section></main>
 
 <footer class="footer"><div class="c legalbar"><span>BAIS Academy · KI-Führerschein</span><span><a href="../modul-01/">← Modul 01</a> · <a href="../../konto/">Mein Konto</a> · <a href="../../../datenschutz/">Datenschutz</a></span></div></footer>
-<script src="../../../assets/n8n-diagram-enhance.js?v=1.3" defer></script>
+<script src="../../../assets/n8n-diagram-enhance.js?v=1.4" defer></script>
 <script src="../../../assets/n8n-module-study.js?v=1.7" defer></script>
 <script src="../../../assets/kif-module-02.js?v=1.0" defer></script>
 <script src="../../../assets/kif-module-02-assessment.js?v=1.0" defer></script>

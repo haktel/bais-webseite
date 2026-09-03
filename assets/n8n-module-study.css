@@ -6,6 +6,9 @@
 .assessment{border:1px solid #d8e3e6;border-radius:20px;background:#f7fafb;padding:26px}.assessmentHead{display:flex;justify-content:space-between;gap:18px;align-items:start}.assessmentHead h2{margin:.2rem 0}.assessmentCounter{font-size:.78rem;color:#627983;font-weight:800}.assessmentList{display:grid;gap:14px;margin-top:20px}.assessmentItem{padding:18px;border:1px solid #d8e3e6;border-radius:14px;background:#fff}.assessmentMeta{display:flex;justify-content:space-between;gap:8px;color:#6e858e;font-size:.68rem;font-weight:900;letter-spacing:.06em}.assessmentItem h3{margin:.55rem 0 .8rem;font-size:1rem}.assessmentOptions{display:grid;gap:7px}.assessmentOptions button{padding:10px 12px;border:1px solid #cad9dd;border-radius:9px;background:#fff;text-align:left;cursor:pointer}.assessmentOptions button:hover:not(:disabled){border-color:#7d9aa5}.assessmentOptions button.correct{background:#edf8f4;border-color:#75bba4}.assessmentOptions button.wrong{background:#fff1ee;border-color:#df9386}.assessmentOptions button:disabled{cursor:default}.assessmentExplain{margin-top:10px;padding:11px;border-radius:9px;background:#eef4f5}.assessmentExplain p{margin:.25rem 0 0}.assessmentResult{margin-top:18px;padding:16px;border-radius:12px;background:#0c2937;color:#fff}.assessmentResult p{color:#cbdce2}.assessmentActions{display:flex;justify-content:flex-end;margin-top:16px}.assessmentActions button{padding:11px 14px;border:0;border-radius:10px;background:#153f52;color:#fff;font-weight:900;cursor:pointer}
 .depthTable{width:100%;border-collapse:collapse;margin-top:14px;font-size:.86rem}.depthTable th,.depthTable td{padding:10px;border-bottom:1px solid #dfe7e9;text-align:left;vertical-align:top}.depthTable th{color:#5d747d;font-size:.72rem;letter-spacing:.05em}
 .privateNote{margin-top:14px;padding:12px 14px;border-radius:10px;background:#eaf4f7;border:1px solid #c9dce2;color:#254754}
+.decisionTree{margin-top:16px;padding:16px;border:1px solid #d4e1e4;border-radius:12px;background:#fff}.decisionTree .dtRoot{font-weight:900;margin-bottom:10px}.decisionTree .dtBranch{display:flex;gap:9px;align-items:center;padding:7px 0;font-size:.84rem;flex-wrap:wrap}.decisionTree .dtBranch:before{content:"→";color:#8098a1;font-weight:900}.decisionTree .dtCond{color:#587179}.decisionTree .dtLeaf{font-weight:800;padding:5px 10px;border-radius:7px;background:#0b2634;color:#fff}.decisionTree .dtBranch[data-outcome="ok"] .dtLeaf{background:#0c715e}.decisionTree .dtBranch[data-outcome="warn"] .dtLeaf{background:#c1512f}
+.conceptCluster{margin-top:16px;padding:16px;border:1px solid #d4e1e4;border-radius:12px;background:#fff;display:flex;flex-wrap:wrap;gap:8px}.conceptCluster .ccCenter{width:100%;font-weight:900;margin-bottom:6px}.conceptCluster .ccPart{padding:7px 11px;border-radius:8px;background:#0b2634;color:#fff;font-size:.8rem;font-weight:800}
+.decisionTree.dgEnhanced,.conceptCluster.dgEnhanced{display:block;background:none;border:0;padding:0}
 @media(max-width:900px){.courseMap{grid-template-columns:1fr 1fr}.lessonGrid{grid-template-columns:1fr}.visualFlow{grid-template-columns:1fr}.visualFlow .vfArrow{transform:rotate(90deg)}.assessmentHead{display:block}}
 @media(max-width:560px){.courseMap{grid-template-columns:1fr}}
 
@@ -31,6 +34,16 @@
 .dgArrowHead{fill:#547483}
 @keyframes dgFlow{to{stroke-dashoffset:-32}}
 .visualFlow.dgEnhanced,.caseFlow.dgEnhanced,.miniArchitecture.dgEnhanced{display:block;background:none;border:0;padding:0;white-space:normal}
+/* Decision-tree branches: outcome-colored leaf nodes and a static (non-
+   "flowing") condition label between root and leaf. */
+.dgNodeOk{fill:#0c715e;stroke:#0c715e}
+.dgNodeWarn{fill:#c1512f;stroke:#c1512f}
+.dgTreeLine{fill:none}
+.dgCondBg{fill:#eef4f5;stroke:#c7d6da;stroke-width:1;stroke-dasharray:none;animation:none}
+.dgCondText{fill:#3f5961;font:700 11px system-ui,sans-serif}
+/* Concept clusters describe a static relationship, not a data flow, so the
+   spokes stay still instead of animating like a sequential-step arrow. */
+.dgSpoke{stroke-dasharray:none;animation:none}
 
 /* Live-lab connector overlay: real animated data-flow lines between the
    interactive lab nodes, instead of just a border color change per box. */
