@@ -20,6 +20,7 @@ const SESSION_EXACT=new Set([
  "/api/academy/module-progress",
  "/api/academy/n8n-final-exam",
  "/api/academy/kif-final-exam",
+ "/api/academy/ki-it-security-final-exam",
  "/api/academy/progress",
  "/api/commercial/context",
  "/api/commercial/projects",
