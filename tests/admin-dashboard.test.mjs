@@ -7,7 +7,7 @@ const read=path=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 test("admin control center uses pinned AdminLTE 4 stylesheet with local BAIS shell",()=>{
  const html=read("admin/index.html");
  assert.match(html,/admin-lte@4\.9\.1\/dist\/css\/adminlte\.min\.css/);
- assert.match(html,/assets\/admin-dashboard\.css\?v=1\.1/);
+ assert.match(html,/assets\/admin-dashboard\.css\?v=1\.2/);
  assert.match(html,/assets\/admin-dashboard\.js\?v=1\.1/);
  assert.match(html,/class="app-sidebar/);
  assert.match(html,/data-system-health/);
