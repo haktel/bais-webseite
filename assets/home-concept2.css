@@ -14,7 +14,7 @@ body.concept2Home{background:#fff;color:var(--c2-ink)}
 .concept2Home .links .cta{padding:8px 15px;border-radius:999px;background:linear-gradient(135deg,#e0ae3b,#c88f1e);color:#fff!important;box-shadow:0 6px 16px rgba(212,168,51,.2)}
 
 /* exact approved hero composition */
-.concept2Home .homeHero{position:relative;isolation:isolate;overflow:hidden;padding:0;min-height:clamp(320px,27vw,420px);border:0;background:#0b2d45 url('/assets/visuals/home-concept2-hero.svg?v=4') center/cover no-repeat}
+.concept2Home .homeHero{position:relative;isolation:isolate;overflow:hidden;padding:0;min-height:clamp(320px,27vw,420px);border:0;background:#0b2d45 url('/assets/visuals/home-concept2-hero.svg?v=5') center/cover no-repeat}
 .concept2Home .homeHero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(5,25,38,.82) 0%,rgba(5,25,38,.58) 34%,rgba(5,25,38,.12) 63%,rgba(5,25,38,0) 100%);mask-image:none}
 .concept2Home .homeHero:after{content:"";position:absolute;inset:auto 0 0;height:84px;z-index:-1;background:linear-gradient(to top,rgba(5,20,30,.72),transparent)}
 .concept2Home .homeHero .c{width:min(1020px,calc(100% - 44px));margin:auto}
