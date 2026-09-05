@@ -1,4 +1,6 @@
 const EXCLUDED_PREFIXES=["/admin/","/bais-control-center/","/api/","/assets/","/kundenbereich/","/project-portal/"];
+const BRAND_FAVICON='<link rel="icon" href="/assets/bais-favicon.svg" type="image/svg+xml">';
+const BRAND_THEME_COLOR='<meta name="theme-color" content="#0B2D45">';
 
 const shouldTrack=pathname=>!EXCLUDED_PREFIXES.some(prefix=>pathname.startsWith(prefix));
 
@@ -19,7 +21,15 @@ export const onRequest=async context=>{
   const type=response.headers.get("content-type")||"";
   if(!type.includes("text/html")||typeof HTMLRewriter==="undefined")return response;
 
+  const bodyText=await response.clone().text();
   let rewriter=new HTMLRewriter();
+
+  if(!/<link[^>]+rel=["'][^"']*icon[^"']*["']/i.test(bodyText)){
+   rewriter=rewriter.on("head",{element(element){element.append(BRAND_FAVICON,{html:true});}});
+  }
+  if(!/<meta[^>]+name=["']theme-color["']/i.test(bodyText)){
+   rewriter=rewriter.on("head",{element(element){element.append(BRAND_THEME_COLOR,{html:true});}});
+  }
 
   if(shouldTrack(url.pathname)){
    rewriter=rewriter.on("body",{
@@ -29,7 +39,6 @@ export const onRequest=async context=>{
    });
   }
 
-  const bodyText=await response.clone().text();
   if(!/>AGB<\/a>/.test(bodyText)&&/class="[^"]*legalbar/.test(bodyText)){
    rewriter=rewriter.on('.legalbar a[href*="datenschutz"]',new LegalLinkFixer());
   }
