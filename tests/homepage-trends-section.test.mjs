@@ -22,9 +22,9 @@ test("homepage trend cards link directly to the real Academy program pages",()=>
  assert.match(home,/href="academy\/ki-fuehrerschein\/"/);
  assert.match(home,/href="academy\/ai-coding\/"/);
  assert.match(home,/href="academy\/n8n-bootcamp\/"/);
- assert.match(kiFuehrerschein,/<title>[^<]*KI-Führerschein[^<]*<\/title>/i);
- assert.match(aiCoding,/<title>[^<]*AI Coding[^<]*<\/title>/i);
- assert.match(n8n,/<title>[^<]*n8n[^<]*<\/title>/i);
+ assert.match(kiFuehrerschein,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/ki-fuehrerschein\/"/);
+ assert.match(aiCoding,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/ai-coding\/"/);
+ assert.match(n8n,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/n8n-bootcamp\/"/);
 });
 
 test("homepage trend cards cite real, named sources",()=>{
