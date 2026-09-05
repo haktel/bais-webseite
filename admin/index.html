@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/assets/site.css?v=50.0">
   <link rel="stylesheet" href="/assets/bais-design-system.css?v=1.2">
   <link rel="stylesheet" href="/assets/admin.css?v=1.4">
-  <link rel="stylesheet" href="/assets/admin-dashboard.css?v=1.0">
+  <link rel="stylesheet" href="/assets/admin-dashboard.css?v=1.1">
 </head>
 <body class="layout-fixed sidebar-expand-lg baisAdminBody">
   <div class="app-wrapper">
@@ -23,7 +23,7 @@
         </div>
         <div class="baisTopbarActions">
           <a class="baisTopLink" href="/" target="_blank" rel="noopener">Website ↗</a>
-          <a class="baisTopLink" href="/academy/konto/">Mein Konto</a>
+          <a class="baisTopLink" href="/academy/konto/" target="_blank" rel="noopener">Mein Konto ↗</a>
           <button class="baisTopLogout" type="button" data-admin-logout>Abmelden</button>
         </div>
       </div>
@@ -56,11 +56,11 @@
           </ul>
         </nav>
 
-        <div class="baisQuickLinks" aria-label="Schnellzugriffe">
-          <a href="/admin/runbook/">Runbook</a>
-          <a href="/admin/rechnung/">Rechnung</a>
-          <a href="/project-portal/">Project Portal</a>
-          <a href="/academy/">Academy</a>
+        <div class="baisQuickLinks" aria-label="Control Center Module">
+          <button type="button" data-internal-view="runbook">Runbook</button>
+          <button type="button" data-internal-view="billing">Rechnung</button>
+          <button type="button" data-internal-view="portal">Project Portal</button>
+          <button type="button" data-internal-view="academy">Academy</button>
         </div>
       </div>
     </aside>
@@ -69,9 +69,9 @@
       <div class="app-content-header baisContentHeader">
         <div class="baisPageHeading">
           <div>
-            <div class="baisEyebrow">GESCHÜTZTER ADMIN-BEREICH</div>
-            <h1>Dashboard</h1>
-            <p>Kunden, Academy, Integrationen und Systemstatus in einer Oberfläche.</p>
+            <div class="baisEyebrow" data-admin-eyebrow>GESCHÜTZTER ADMIN-BEREICH</div>
+            <h1 data-admin-page-title>Dashboard</h1>
+            <p data-admin-page-description>Kunden, Academy, Integrationen und Systemstatus in einer Oberfläche.</p>
           </div>
           <button class="baisRefresh" type="button" data-refresh>↻ Aktualisieren</button>
         </div>
@@ -100,7 +100,7 @@
             </div>
           </section>
 
-          <section class="baisWorkspace" aria-label="Arbeitsbereich">
+          <section class="baisWorkspace" aria-label="Arbeitsbereich" data-standard-workspace>
             <div class="baisWorkspaceIntro">
               <strong>Arbeitsbereich</strong>
               <small>Bereich links auswählen. Die vorhandenen BAIS Admin-APIs bleiben unverändert angebunden.</small>
@@ -128,18 +128,33 @@
             <section data-view="approvals" hidden></section>
             <section data-view="erp" hidden></section>
           </section>
+
+          <section class="baisWorkspace baisInternalWorkspace" data-internal-workspace hidden aria-live="polite">
+            <div class="baisInternalHead">
+              <div>
+                <span class="baisInternalKicker">CONTROL CENTER MODULE</span>
+                <h2 data-internal-title>Modul</h2>
+                <p data-internal-description></p>
+              </div>
+              <button type="button" class="baisInternalClose" data-internal-close>← Zur Verwaltung</button>
+            </div>
+            <div class="baisInternalBody" data-internal-body>
+              <p class="adminMessage">Modul wird geladen …</p>
+            </div>
+          </section>
         </div>
       </div>
     </main>
 
     <footer class="app-footer">
-      <div class="baisFooter"><span>BAIS · Bünyamin Atik – IT Solutions</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div>
+      <div class="baisFooter"><span>BAIS · Bünyamin Atik – IT Solutions</span><span><a href="/impressum/" target="_blank" rel="noopener">Impressum ↗</a> · <a href="/datenschutz/" target="_blank" rel="noopener">Datenschutz ↗</a></span></div>
     </footer>
   </div>
 
   <script type="module" src="/assets/admin-logout.js?v=1.0"></script>
   <script type="module" src="/assets/admin.js?v=1.7"></script>
   <script type="module" src="/assets/admin-dashboard.js?v=1.0"></script>
+  <script type="module" src="/assets/admin-internal-nav.js?v=1.0"></script>
   <script type="module" src="/assets/admin-certificates.js?v=1.0"></script>
   <script type="module" src="/assets/admin-erp.js?v=1.0"></script>
 </body>
