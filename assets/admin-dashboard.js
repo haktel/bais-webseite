@@ -1,7 +1,9 @@
 const healthRoot=document.querySelector("[data-system-health]");
 const healthChecked=document.querySelector("[data-health-checked]");
 const sidebarToggle=document.querySelector("[data-sidebar-toggle]");
+const sidebar=document.querySelector(".app-sidebar");
 const tabs=[...document.querySelectorAll("[data-tab]")];
+const mobileSidebarQuery=matchMedia("(max-width: 991.98px)");
 
 const labels={cloudflare:"Cloudflare",d1:"D1 Database",r2:"R2 Storage",dolibarr:"Dolibarr ERP",n8n:"n8n Automation",mail:"E-Mail"};
 const statusLabels={healthy:"Online",configured:"Konfiguriert",degraded:"Prüfen",missing:"Fehlt",disabled:"Deaktiviert"};
@@ -47,15 +49,25 @@ async function loadHealth(){
 }
 
 function setSidebar(open){
- document.body.classList.toggle("sidebar-open",open);
- sidebarToggle?.setAttribute("aria-expanded",String(open));
+ const shouldOpen=Boolean(open&&mobileSidebarQuery.matches);
+ document.body.classList.toggle("sidebar-open",shouldOpen);
+ sidebarToggle?.setAttribute("aria-expanded",String(shouldOpen));
 }
+
 sidebarToggle?.addEventListener("click",()=>setSidebar(!document.body.classList.contains("sidebar-open")));
 document.addEventListener("keydown",event=>{if(event.key==="Escape")setSidebar(false);});
+document.addEventListener("click",event=>{
+ if(!mobileSidebarQuery.matches||!document.body.classList.contains("sidebar-open"))return;
+ const target=event.target;
+ if(!(target instanceof Node))return;
+ if(sidebar?.contains(target)||sidebarToggle?.contains(target))return;
+ setSidebar(false);
+});
+mobileSidebarQuery.addEventListener?.("change",event=>{if(!event.matches)setSidebar(false);});
 
 tabs.forEach(tab=>tab.addEventListener("click",()=>{
  tabs.forEach(item=>item.classList.toggle("active",item===tab));
- if(matchMedia("(max-width: 991.98px)").matches)setSidebar(false);
+ if(mobileSidebarQuery.matches)setSidebar(false);
 }));
 
 document.querySelector("[data-refresh]")?.addEventListener("click",loadHealth);
