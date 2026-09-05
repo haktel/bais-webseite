@@ -24,11 +24,14 @@ test("admin login presents password and MFA as separate screens",()=>{
 
 test("admin login verifies password before exposing MFA and redirects only after MFA success",()=>{
  const js=read("assets/admin-login.js");
- const loginPos=js.indexOf('/api/academy/auth/login');
- const mfaPos=js.indexOf('/api/admin/mfa');
- assert.ok(loginPos>=0&&mfaPos>loginPos,"password endpoint must be wired before MFA endpoint");
- assert.match(js,/data\.user\?\.role!=="admin"/);
- assert.match(js,/showStep\("mfa"\)/);
+ const passwordHandler=js.match(/passwordForm\?\.addEventListener\("submit",async event=>\{([\s\S]*?)\n\}\);/);
+ assert.ok(passwordHandler,"password submit handler must exist");
+ const flow=passwordHandler[1];
+ assert.match(flow,/api\("\/api\/academy\/auth\/login"/);
+ assert.match(flow,/data\.user\?\.role!=="admin"/);
+ assert.match(flow,/showStep\("mfa"\)/);
+ assert.match(flow,/await loadMfaState\(\)/);
+ assert.ok(flow.indexOf('/api/academy/auth/login')<flow.indexOf('showStep("mfa")'),"password must be accepted before the MFA screen is shown");
  assert.match(js,/action:"verify"/);
  assert.match(js,/goControlCenter\(\)/);
  assert.doesNotMatch(js,/loadProgress|loadCommercial|loadAccess/);
