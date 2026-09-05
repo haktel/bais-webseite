@@ -1,7 +1,7 @@
 import{BRAND_DEFAULTS,getBrandSettings}from"../_lib/brand-settings.js";
 
 const cssValue=value=>String(value??"").replace(/[{};<>\\]/g,"");
-const render=s=>`:root{--bais-navy:${cssValue(s.primaryNavy)};--bais-navy-2:${cssValue(s.primaryNavy)};--bais-teal:${cssValue(s.teal)};--bais-teal-bright:${cssValue(s.teal)};--bais-gold:${cssValue(s.gold)};--bais-bg:${cssValue(s.neutral)};--bais-radius:${cssValue(s.radius)}px;--bais-container:${cssValue(s.containerWidth)}px;--bais-font:"${cssValue(s.fontBody)}",Arial,"Helvetica Neue",Helvetica,sans-serif;--bais-display:"${cssValue(s.fontHeading)}",Georgia,"Times New Roman",serif;}`;
+const render=s=>`html:root{--bais-navy:${cssValue(s.primaryNavy)};--bais-navy-2:${cssValue(s.primaryNavy)};--bais-teal:${cssValue(s.teal)};--bais-teal-bright:${cssValue(s.teal)};--bais-gold:${cssValue(s.gold)};--bais-bg:${cssValue(s.neutral)};--bais-radius:${cssValue(s.radius)}px;--bais-container:${cssValue(s.containerWidth)}px;--bais-font:"${cssValue(s.fontBody)}",Arial,"Helvetica Neue",Helvetica,sans-serif;--bais-display:"${cssValue(s.fontHeading)}",Georgia,"Times New Roman",serif;}`;
 
 export const onRequestGet=async({env})=>{
  let settings=BRAND_DEFAULTS;
