@@ -67,7 +67,7 @@ test("customer number and ERP mapping are schema-unique and keyed by the same BA
  assert.match(erp,/findRemoteByCustomerNumber\(config,row\.customer_number\)/);
  assert.match(erp,/remote_ref=excluded\.remote_ref/);
  assert.match(migration,/organization_id TEXT PRIMARY KEY/);
- assert.match(migration,/CREATE UNIQUE INDEX IF NOT EXISTS idx_erp_links_customer_number ON erp_links\(bais_customer_number\)/);
+ assert.match(migration,/CREATE UNIQUE INDEX IF NOT EXISTS idx_erp_links_customer_number\s+ON erp_links\(bais_customer_number\)/);
 });
 
 test("public lead entry points converge on one commercial identity allocator",()=>{
