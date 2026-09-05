@@ -7,7 +7,7 @@ const enhanceModule01=response=>{
   return new HTMLRewriter().on(".privateNote",{
     element(element){
       element.after(
-        '<div style="margin-top:14px;padding:14px 16px;border:1px solid #9bcdbd;border-radius:12px;background:#f0faf6"><strong style="display:block;margin-bottom:5px">Neu · Praxiswerkstatt mit realen Produktionsfällen</strong><span style="display:block;margin-bottom:9px">Delivery Hero, Stepstone, Vodafone, Formula Bot und System AI: Architekturaufgaben, Break/Fix, Diagramme und Musterlösungen.</span><a href="./praxiswerkstatt/" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#173f52;color:#fff;font-weight:900;text-decoration:none">Praxiswerkstatt öffnen →</a></div>',
+        '<div style="margin-top:14px;padding:14px 16px;border:1px solid #9bcdbd;border-radius:12px;background:#f0faf6"><strong style="display:block;margin-bottom:5px;color:#173f52">Neu · Praxiswerkstatt mit realen Produktionsfällen</strong><span style="display:block;margin-bottom:9px;color:#173f52">Delivery Hero, Stepstone, Vodafone, Formula Bot und System AI: Architekturaufgaben, Break/Fix, Diagramme und Musterlösungen.</span><a href="./praxiswerkstatt/" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#173f52;color:#fff;font-weight:900;text-decoration:none">Praxiswerkstatt öffnen →</a></div>',
         {html:true}
       );
     }
