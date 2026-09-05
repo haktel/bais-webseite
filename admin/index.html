@@ -8,12 +8,13 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.9.1/dist/css/adminlte.min.css" crossorigin="anonymous">
   <link rel="stylesheet" href="/assets/site.css?v=50.0">
-  <link rel="stylesheet" href="/assets/bais-design-system.css?v=1.2">
+  <link rel="stylesheet" href="/assets/bais-design-system.css?v=2.0">
   <link rel="stylesheet" href="/assets/admin.css?v=1.4">
   <link rel="stylesheet" href="/assets/admin-dashboard.css?v=1.2">
   <link rel="stylesheet" href="/assets/admin-internal-nav.css?v=1.0">
   <link rel="stylesheet" href="/assets/admin-sidebar-fix.css?v=1.0">
   <link rel="stylesheet" href="/assets/admin-theme.css?v=1.1">
+  <link rel="stylesheet" href="/assets/admin-brand-system.css?v=1.0">
 </head>
 <body class="baisAdminBody">
   <div class="app-wrapper">
@@ -47,6 +48,11 @@
             <li class="nav-item"><button type="button" class="nav-link" data-tab="contacts" aria-selected="false"><span class="adminNavIcon">KO</span><span>Kontakt</span></button></li>
             <li class="nav-item"><button type="button" class="nav-link" data-tab="privacy" aria-selected="false"><span class="adminNavIcon">DS</span><span>Datenschutz</span></button></li>
           </ul>
+          <div class="baisNavLabel">Marke & Dokumente</div>
+          <ul class="nav sidebar-menu flex-column" role="list">
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="branding" aria-selected="false"><span class="adminNavIcon">BI</span><span>Branding & Identity</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="documents" aria-selected="false"><span class="adminNavIcon">DO</span><span>Dokumente & Vorlagen</span></button></li>
+          </ul>
         </nav>
         <div class="baisQuickLinks" aria-label="Control Center Module">
           <button type="button" data-internal-view="runbook" data-full-page="/admin/runbook/">Runbook</button>
@@ -66,9 +72,9 @@
           <section class="baisWorkspace" aria-label="Arbeitsbereich" data-standard-workspace>
             <div class="baisWorkspaceIntro"><strong>Arbeitsbereich</strong><small>Bereich links auswählen. Die vorhandenen BAIS Admin-APIs bleiben unverändert angebunden.</small></div>
             <nav class="adminTabs" aria-label="Verwaltungsbereiche Fallback">
-              <button type="button" data-tab="students" aria-selected="true">Studierende</button><button type="button" data-tab="requests" aria-selected="false">Academy-Anfragen</button><button type="button" data-tab="contacts" aria-selected="false">Kontakt</button><button type="button" data-tab="courses" aria-selected="false">Programme</button><button type="button" data-tab="certificates" aria-selected="false">Nachweise</button><button type="button" data-tab="visitors" aria-selected="false">Besucher</button><button type="button" data-tab="privacy" aria-selected="false">Datenschutz</button><button type="button" data-tab="customers" aria-selected="false">Kunden &amp; Freigaben</button><button type="button" data-tab="approvals" aria-selected="false">Kunden-Freigaben</button><button type="button" data-tab="erp" aria-selected="false">ERP Sync</button>
+              <button type="button" data-tab="students" aria-selected="true">Studierende</button><button type="button" data-tab="requests" aria-selected="false">Academy-Anfragen</button><button type="button" data-tab="contacts" aria-selected="false">Kontakt</button><button type="button" data-tab="courses" aria-selected="false">Programme</button><button type="button" data-tab="certificates" aria-selected="false">Nachweise</button><button type="button" data-tab="visitors" aria-selected="false">Besucher</button><button type="button" data-tab="privacy" aria-selected="false">Datenschutz</button><button type="button" data-tab="customers" aria-selected="false">Kunden &amp; Freigaben</button><button type="button" data-tab="approvals" aria-selected="false">Kunden-Freigaben</button><button type="button" data-tab="erp" aria-selected="false">ERP Sync</button><button type="button" data-tab="branding" aria-selected="false">Branding</button><button type="button" data-tab="documents" aria-selected="false">Dokumente</button>
             </nav>
-            <section data-view="students"></section><section data-view="requests" hidden></section><section data-view="contacts" hidden></section><section data-view="courses" hidden></section><section data-view="certificates" hidden></section><section data-view="visitors" hidden></section><section data-view="privacy" hidden></section><section data-view="customers" hidden></section><section data-view="approvals" hidden></section><section data-view="erp" hidden></section>
+            <section data-view="students"></section><section data-view="requests" hidden></section><section data-view="contacts" hidden></section><section data-view="courses" hidden></section><section data-view="certificates" hidden></section><section data-view="visitors" hidden></section><section data-view="privacy" hidden></section><section data-view="customers" hidden></section><section data-view="approvals" hidden></section><section data-view="erp" hidden></section><section data-view="branding" hidden></section><section data-view="documents" hidden></section>
           </section>
           <section class="baisWorkspace baisInternalWorkspace" data-internal-workspace hidden aria-live="polite"><div class="baisInternalHead"><div><span class="baisInternalKicker">CONTROL CENTER MODULE</span><h2 data-internal-title>Modul</h2><p data-internal-description></p></div><button type="button" class="baisInternalClose" data-internal-close>← Zur Verwaltung</button></div><div class="baisInternalBody" data-internal-body><p class="adminMessage">Modul wird geladen …</p></div></section>
         </div>
@@ -80,6 +86,7 @@
   <script type="module" src="/assets/admin.js?v=1.7"></script>
   <script type="module" src="/assets/admin-dashboard.js?v=1.1"></script>
   <script type="module" src="/assets/admin-internal-nav.js?v=1.0"></script>
+  <script type="module" src="/assets/admin-brand-system.js?v=1.0"></script>
   <script type="module" src="/assets/admin-certificates.js?v=1.0"></script><script type="module" src="/assets/admin-visitors.js?v=1.1"></script>
   <script type="module" src="/assets/admin-erp.js?v=1.0"></script>
 </body>
