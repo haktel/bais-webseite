@@ -1,5 +1,6 @@
 const PUBLIC_EXACT=new Set([
  "/api/health",
+ "/api/brand-theme",
  "/api/contact",
  "/api/academy/enrollments",
  "/api/academy/auth/login",
