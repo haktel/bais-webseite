@@ -1,1 +1,265 @@
-:root{--bais-admin-sidebar:#0c2430;--bais-admin-sidebar-2:#123848;--bais-admin-accent:#10a58f;--bais-admin-bg:#f4f7f9;--bais-admin-card:#fff;--bais-admin-border:#dfe7ea;--bais-admin-text:#17303b;--bais-admin-muted:#647984}.baisAdminBody{background:var(--bais-admin-bg);color:var(--bais-admin-text)}.baisAdminBody .app-wrapper{min-height:100vh}.baisAdminBody .app-header{border-bottom:1px solid var(--bais-admin-border);background:#fff;box-shadow:0 4px 18px rgba(13,41,54,.05)}.baisTopbar{display:flex;align-items:center;gap:12px;width:100%;padding:0 18px;min-height:64px}.baisSidebarToggle{display:inline-grid;place-items:center;width:40px;height:40px;border:1px solid var(--bais-admin-border);border-radius:10px;background:#fff;color:var(--bais-admin-text);font-size:22px;cursor:pointer}.baisTopbarTitle{display:grid;gap:1px}.baisTopbarTitle strong{font-size:15px}.baisTopbarTitle span{font-size:12px;color:var(--bais-admin-muted)}.baisTopbarActions{margin-left:auto;display:flex;align-items:center;gap:8px}.baisTopLink,.baisTopLogout{border:1px solid var(--bais-admin-border);border-radius:9px;background:#fff;color:var(--bais-admin-text);padding:9px 12px;text-decoration:none;font-weight:800;font-size:13px}.baisTopLogout{background:var(--bais-admin-sidebar);color:#fff;cursor:pointer}.baisAdminBody .app-sidebar{background:linear-gradient(180deg,var(--bais-admin-sidebar),var(--bais-admin-sidebar-2));color:#fff}.baisAdminBody .sidebar-brand{height:auto;min-height:82px;padding:18px;border-bottom:1px solid rgba(255,255,255,.1)}.baisBrand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none}.baisBrand img{width:92px;max-height:34px;filter:brightness(0) invert(1)}.baisBrandText{display:grid;gap:1px}.baisBrandText strong{font-size:13px}.baisBrandText span{font-size:11px;color:#a8c5cf}.baisAdminBody .sidebar-wrapper{padding:14px 12px 28px}.baisNavLabel{margin:16px 10px 8px;color:#88aab6;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.baisAdminBody .sidebar-menu .nav-item{margin:3px 0}.baisAdminBody .sidebar-menu .nav-link{width:100%;display:flex;align-items:center;gap:10px;border:0;border-radius:10px;background:transparent;color:#cfe0e6;padding:10px 12px;text-align:left;font-weight:800;cursor:pointer}.baisAdminBody .sidebar-menu .nav-link:hover,.baisAdminBody .sidebar-menu .nav-link:focus-visible{background:rgba(255,255,255,.08);color:#fff}.baisAdminBody .sidebar-menu .nav-link.active,.baisAdminBody .sidebar-menu .nav-link[aria-selected="true"]{background:rgba(16,165,143,.2);color:#fff;box-shadow:inset 3px 0 0 var(--bais-admin-accent)}.adminNavIcon{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:rgba(255,255,255,.09);font-size:10px;letter-spacing:.03em}.baisQuickLinks{display:grid;gap:6px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}.baisQuickLinks a{color:#bcd3dc;text-decoration:none;font-size:12px;padding:7px 10px;border-radius:8px}.baisQuickLinks a:hover{background:rgba(255,255,255,.07);color:#fff}.baisAdminBody .app-main{background:var(--bais-admin-bg)}.baisContentHeader{padding:26px 24px 14px}.baisPageHeading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}.baisPageHeading h1{margin:2px 0 4px;font-size:30px;letter-spacing:-.03em}.baisPageHeading p{margin:0;color:var(--bais-admin-muted)}.baisEyebrow{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--bais-admin-accent)}.baisRefresh{border:1px solid var(--bais-admin-border);border-radius:10px;background:#fff;color:var(--bais-admin-text);padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(13,41,54,.06)}.baisAdminContent{padding:0 24px 28px}.baisAdminBody .adminNotice{margin:0 0 18px;border-radius:12px;box-shadow:none}.baisAdminBody .adminPanel{border:0;background:transparent;overflow:visible}.baisAdminBody .adminMetrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px}.baisAdminBody .adminMetric{position:relative;border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05);overflow:hidden}.baisAdminBody .adminMetric:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--bais-admin-accent)}.baisAdminBody .adminMetric span{font-weight:800}.baisAdminBody .adminMetric strong{font-size:34px}.baisHealthSection{margin-bottom:18px;border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05)}.baisHealthHead{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--bais-admin-border)}.baisHealthHead h2{margin:0;font-size:18px}.baisHealthHead small{color:var(--bais-admin-muted)}.baisHealthGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px}.baisHealthCard{display:grid;gap:8px;padding:13px 14px;border:1px solid var(--bais-admin-border);border-radius:11px;background:#fbfdfd}.baisHealthTop{display:flex;justify-content:space-between;align-items:center;gap:10px}.baisHealthCard small{color:var(--bais-admin-muted);line-height:1.35}.baisHealthBadge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap}.status-healthy,.status-configured{background:#dcf5eb;color:#116347}.status-degraded{background:#fff2cf;color:#875a00}.status-missing,.status-disabled{background:#fde5e5;color:#8c2020}.baisWorkspace{border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05);overflow:hidden}.baisWorkspaceIntro{padding:16px 18px;border-bottom:1px solid var(--bais-admin-border);background:#fbfdfd}.baisWorkspaceIntro strong{display:block}.baisWorkspaceIntro small{color:var(--bais-admin-muted)}.baisAdminBody .adminTabs{display:none}.baisAdminBody [data-view]{background:#fff}.baisAdminBody .adminPanelHead{padding:20px 22px}.baisAdminBody .adminTableWrap{border-top:1px solid var(--bais-admin-border)}.baisAdminBody .adminTable th{background:#f5f8f9}.baisAdminBody .app-footer{border-top:1px solid var(--bais-admin-border);background:#fff;color:var(--bais-admin-muted);font-size:12px}.baisFooter{display:flex;justify-content:space-between;gap:12px;padding:12px 18px}.baisFooter a{color:inherit}.baisAdminBody .customerAccessCard{background:#fff}@media(max-width:1200px){.baisHealthGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.baisAdminBody .adminMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:991.98px){.baisTopbar{padding:0 12px}.baisTopbarTitle span{display:none}.baisContentHeader,.baisAdminContent{padding-left:16px;padding-right:16px}.baisPageHeading h1{font-size:25px}.baisAdminBody .app-sidebar{position:fixed;inset:0 auto 0 0;z-index:1045;width:280px;transform:translateX(-102%);transition:transform .22s ease}.baisAdminBody.sidebar-open .app-sidebar{transform:translateX(0)}.baisAdminBody.sidebar-open:after{content:"";position:fixed;inset:0;z-index:1040;background:rgba(4,18,24,.46)}.baisAdminBody.sidebar-open .app-header,.baisAdminBody.sidebar-open .app-main,.baisAdminBody.sidebar-open .app-footer{position:relative;z-index:auto}}@media(max-width:640px){.baisTopLink{display:none}.baisPageHeading{align-items:stretch;flex-direction:column}.baisRefresh{align-self:flex-start}.baisHealthGrid,.baisAdminBody .adminMetrics{grid-template-columns:1fr}.baisHealthHead{align-items:flex-start;flex-direction:column}.baisAdminContent{padding-bottom:18px}.baisFooter{flex-direction:column}.baisAdminBody .adminTable{min-width:760px}}@media(prefers-reduced-motion:reduce){.baisAdminBody .app-sidebar{transition:none}}
+:root{
+  --bais-admin-sidebar:#0c2430;
+  --bais-admin-sidebar-2:#123848;
+  --bais-admin-accent:#10a58f;
+  --bais-admin-bg:#f4f7f9;
+  --bais-admin-card:#fff;
+  --bais-admin-border:#dfe7ea;
+  --bais-admin-text:#17303b;
+  --bais-admin-muted:#647984;
+  --bais-admin-sidebar-width:276px;
+}
+
+.baisAdminBody{
+  margin:0;
+  background:var(--bais-admin-bg);
+  color:var(--bais-admin-text);
+  min-width:0;
+}
+
+.baisAdminBody .app-wrapper{
+  display:grid!important;
+  grid-template-columns:var(--bais-admin-sidebar-width) minmax(0,1fr)!important;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main"
+    "sidebar footer";
+  min-height:100vh;
+  min-height:100dvh;
+  width:100%;
+  overflow:clip;
+}
+
+.baisAdminBody .app-header{
+  grid-area:header!important;
+  position:sticky!important;
+  top:0;
+  z-index:1030;
+  width:auto!important;
+  min-width:0;
+  margin:0!important;
+  border-bottom:1px solid var(--bais-admin-border);
+  background:#fff;
+  box-shadow:0 4px 18px rgba(13,41,54,.05);
+}
+
+.baisTopbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  min-height:64px;
+  padding:0 18px;
+}
+
+.baisSidebarToggle{
+  display:none;
+  place-items:center;
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  border:1px solid var(--bais-admin-border);
+  border-radius:10px;
+  background:#fff;
+  color:var(--bais-admin-text);
+  font-size:22px;
+  cursor:pointer;
+}
+
+.baisTopbarTitle{display:grid;gap:1px;min-width:0}
+.baisTopbarTitle strong{font-size:15px;white-space:nowrap}
+.baisTopbarTitle span{font-size:12px;color:var(--bais-admin-muted);white-space:nowrap}
+.baisTopbarActions{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.baisTopLink,.baisTopLogout{border:1px solid var(--bais-admin-border);border-radius:9px;background:#fff;color:var(--bais-admin-text);padding:9px 12px;text-decoration:none;font-weight:800;font-size:13px;white-space:nowrap}
+.baisTopLogout{background:var(--bais-admin-sidebar);color:#fff;cursor:pointer}
+
+.baisAdminBody .app-sidebar{
+  grid-area:sidebar!important;
+  position:sticky!important;
+  inset:auto!important;
+  top:0!important;
+  z-index:1040;
+  width:var(--bais-admin-sidebar-width)!important;
+  min-width:var(--bais-admin-sidebar-width)!important;
+  max-width:var(--bais-admin-sidebar-width)!important;
+  height:100vh;
+  height:100dvh;
+  margin:0!important;
+  transform:none!important;
+  visibility:visible!important;
+  overflow:hidden;
+  background:linear-gradient(180deg,var(--bais-admin-sidebar),var(--bais-admin-sidebar-2));
+  color:#fff;
+}
+
+.baisAdminBody .sidebar-brand{
+  height:auto;
+  min-height:82px;
+  padding:18px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.baisBrand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;min-width:0}
+.baisBrand img{width:92px;max-height:34px;filter:brightness(0) invert(1);flex:0 0 auto}
+.baisBrandText{display:grid;gap:1px;min-width:0}
+.baisBrandText strong{font-size:13px;white-space:nowrap}
+.baisBrandText span{font-size:11px;color:#a8c5cf;white-space:nowrap}
+
+.baisAdminBody .sidebar-wrapper{
+  height:calc(100vh - 82px);
+  height:calc(100dvh - 82px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:14px 12px 28px;
+  scrollbar-width:thin;
+}
+
+.baisNavLabel{margin:16px 10px 8px;color:#88aab6;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.baisAdminBody .sidebar-menu{width:100%;min-width:0}
+.baisAdminBody .sidebar-menu .nav-item{margin:3px 0;width:100%}
+.baisAdminBody .sidebar-menu .nav-link{width:100%;min-width:0;display:flex;align-items:center;gap:10px;border:0;border-radius:10px;background:transparent;color:#cfe0e6;padding:10px 12px;text-align:left;font-weight:800;cursor:pointer;overflow:hidden}
+.baisAdminBody .sidebar-menu .nav-link>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.baisAdminBody .sidebar-menu .nav-link:hover,.baisAdminBody .sidebar-menu .nav-link:focus-visible{background:rgba(255,255,255,.08);color:#fff}
+.baisAdminBody .sidebar-menu .nav-link.active,.baisAdminBody .sidebar-menu .nav-link[aria-selected="true"]{background:rgba(16,165,143,.2);color:#fff;box-shadow:inset 3px 0 0 var(--bais-admin-accent)}
+.adminNavIcon{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:rgba(255,255,255,.09);font-size:10px;letter-spacing:.03em}
+
+.baisQuickLinks{display:grid;gap:6px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}
+.baisQuickLinks a{color:#bcd3dc;text-decoration:none;font-size:12px;padding:7px 10px;border-radius:8px}
+.baisQuickLinks a:hover{background:rgba(255,255,255,.07);color:#fff}
+
+.baisAdminBody .app-main{
+  grid-area:main!important;
+  min-width:0!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  background:var(--bais-admin-bg);
+  overflow-x:hidden;
+}
+
+.baisContentHeader{padding:26px clamp(18px,2.2vw,32px) 14px}
+.baisPageHeading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;min-width:0}
+.baisPageHeading>div{min-width:0}
+.baisPageHeading h1{margin:2px 0 4px;font-size:30px;letter-spacing:-.03em}
+.baisPageHeading p{margin:0;color:var(--bais-admin-muted);overflow-wrap:anywhere}
+.baisEyebrow{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--bais-admin-accent)}
+.baisRefresh{flex:0 0 auto;border:1px solid var(--bais-admin-border);border-radius:10px;background:#fff;color:var(--bais-admin-text);padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(13,41,54,.06)}
+.baisAdminContent{width:100%;min-width:0;max-width:1600px;margin:0 auto;padding:0 clamp(18px,2.2vw,32px) 28px}
+
+.baisAdminBody .adminNotice{margin:0 0 18px;border-radius:12px;box-shadow:none}
+.baisAdminBody .adminPanel{min-width:0;border:0;background:transparent;overflow:visible}
+.baisAdminBody .adminMetrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px}
+.baisAdminBody .adminMetric{position:relative;min-width:0;border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05);overflow:hidden}
+.baisAdminBody .adminMetric:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--bais-admin-accent)}
+.baisAdminBody .adminMetric span{font-weight:800}
+.baisAdminBody .adminMetric strong{font-size:34px}
+
+.baisHealthSection{min-width:0;margin-bottom:18px;border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05);overflow:hidden}
+.baisHealthHead{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--bais-admin-border)}
+.baisHealthHead h2{margin:0;font-size:18px}
+.baisHealthHead small{color:var(--bais-admin-muted)}
+.baisHealthGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px}
+.baisHealthCard{display:grid;gap:8px;min-width:0;padding:13px 14px;border:1px solid var(--bais-admin-border);border-radius:11px;background:#fbfdfd}
+.baisHealthTop{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0}
+.baisHealthTop strong{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.baisHealthCard small{color:var(--bais-admin-muted);line-height:1.35;overflow-wrap:anywhere}
+.baisHealthBadge{display:inline-flex;flex:0 0 auto;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap}
+.status-healthy,.status-configured{background:#dcf5eb;color:#116347}
+.status-degraded{background:#fff2cf;color:#875a00}
+.status-missing,.status-disabled{background:#fde5e5;color:#8c2020}
+
+.baisWorkspace{min-width:0;border:1px solid var(--bais-admin-border);border-radius:14px;background:#fff;box-shadow:0 8px 22px rgba(13,41,54,.05);overflow:hidden}
+.baisWorkspaceIntro{padding:16px 18px;border-bottom:1px solid var(--bais-admin-border);background:#fbfdfd}
+.baisWorkspaceIntro strong{display:block}
+.baisWorkspaceIntro small{color:var(--bais-admin-muted)}
+.baisAdminBody .adminTabs{display:none}
+.baisAdminBody [data-view]{min-width:0;background:#fff}
+.baisAdminBody .adminPanelHead{padding:20px 22px}
+.baisAdminBody .adminTableWrap{max-width:100%;overflow-x:auto;border-top:1px solid var(--bais-admin-border)}
+.baisAdminBody .adminTable th{background:#f5f8f9}
+
+.baisAdminBody .app-footer{
+  grid-area:footer!important;
+  width:auto!important;
+  min-width:0;
+  margin:0!important;
+  border-top:1px solid var(--bais-admin-border);
+  background:#fff;
+  color:var(--bais-admin-muted);
+  font-size:12px;
+}
+.baisFooter{display:flex;justify-content:space-between;gap:12px;padding:12px 18px}
+.baisFooter a{color:inherit}
+.baisAdminBody .customerAccessCard{background:#fff}
+
+@media(max-width:1200px){
+  .baisHealthGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .baisAdminBody .adminMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:991.98px){
+  .baisAdminBody .app-wrapper{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"header" "main" "footer";
+    overflow:visible;
+  }
+  .baisSidebarToggle{display:grid}
+  .baisTopbar{padding:0 12px}
+  .baisTopbarTitle span{display:none}
+  .baisContentHeader,.baisAdminContent{padding-left:16px;padding-right:16px}
+  .baisPageHeading h1{font-size:25px}
+  .baisAdminBody .app-sidebar{
+    position:fixed!important;
+    inset:0 auto 0 0!important;
+    top:0!important;
+    z-index:1060;
+    width:min(320px,calc(100vw - 44px))!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:100vh;
+    height:100dvh;
+    transform:translateX(-104%)!important;
+    transition:transform .22s ease;
+    box-shadow:18px 0 46px rgba(4,18,24,.26);
+  }
+  .baisAdminBody.sidebar-open{overflow:hidden}
+  .baisAdminBody.sidebar-open .app-sidebar{transform:translateX(0)!important}
+  .baisAdminBody.sidebar-open .app-wrapper:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:1050;
+    background:rgba(4,18,24,.52);
+    backdrop-filter:blur(1px);
+  }
+  .baisAdminBody .app-header{z-index:1040}
+  .baisAdminBody .app-main,.baisAdminBody .app-footer{width:100%!important;max-width:100%!important}
+}
+
+@media(max-width:640px){
+  .baisTopLink{display:none}
+  .baisPageHeading{align-items:stretch;flex-direction:column}
+  .baisRefresh{align-self:flex-start}
+  .baisHealthGrid,.baisAdminBody .adminMetrics{grid-template-columns:1fr}
+  .baisHealthHead{align-items:flex-start;flex-direction:column}
+  .baisAdminContent{padding-bottom:18px}
+  .baisFooter{flex-direction:column}
+  .baisAdminBody .adminTable{min-width:760px}
+}
+
+@media(max-width:420px){
+  .baisTopbar{gap:8px}
+  .baisTopbarTitle strong{font-size:13px}
+  .baisTopLogout{padding:8px 10px;font-size:12px}
+  .baisContentHeader,.baisAdminContent{padding-left:12px;padding-right:12px}
+  .baisAdminBody .app-sidebar{width:min(304px,calc(100vw - 28px))!important}
+  .baisPageHeading h1{font-size:23px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .baisAdminBody .app-sidebar{transition:none}
+}
