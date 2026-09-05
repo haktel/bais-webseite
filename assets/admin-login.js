@@ -1,6 +1,6 @@
 const params=new URLSearchParams(location.search);
 const requested=params.get("continue")||"/admin/";
-const continuePath=requested==="/admin"?"/admin/":requested.startsWith("/admin/")?requested:"/admin/";
+const continuePath=requested==="/admin"?"/admin/":requested==="/bais-control-center"?"/bais-control-center/":requested.startsWith("/admin/")||requested.startsWith("/bais-control-center/")?requested:"/admin/";
 const passwordStep=document.querySelector('[data-admin-step="password"]'),mfaStep=document.querySelector('[data-admin-step="mfa"]');
 const passwordIndicator=document.querySelector('[data-step-indicator="password"]'),mfaIndicator=document.querySelector('[data-step-indicator="mfa"]');
 const passwordForm=document.querySelector("[data-admin-password-form]"),mfaVerifyForm=document.querySelector("[data-mfa-verify-form]"),mfaConfirmForm=document.querySelector("[data-mfa-confirm-form]");
