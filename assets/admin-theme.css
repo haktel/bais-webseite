@@ -1,0 +1,140 @@
+:root{
+  --bais-admin-menu-text:#d9e8ed;
+  --bais-admin-menu-active:#ffffff;
+  --bais-admin-cyan:#22c7d6;
+  --bais-admin-blue:#4f8cff;
+  --bais-admin-violet:#8b6cf6;
+  --bais-admin-green:#22b573;
+  --bais-admin-amber:#e5a93d;
+  --bais-admin-red:#e36a6a;
+}
+
+/* One typography system across the whole Control Center. */
+.baisAdminBody,
+.baisAdminBody *{
+  font-family:var(--bais-font)!important;
+}
+
+/* Sidebar: same type scale and base text color everywhere. */
+.baisAdminBody .baisNavLabel,
+.baisAdminBody .sidebar-menu .nav-link,
+.baisAdminBody .sidebar-menu .nav-link>span:last-child,
+.baisAdminBody .baisQuickLinks button{
+  font-family:var(--bais-font)!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+  color:var(--bais-admin-menu-text)!important;
+  letter-spacing:0!important;
+}
+
+.baisAdminBody .baisNavLabel{
+  text-transform:none!important;
+  padding:8px 10px 4px!important;
+  margin:16px 0 6px!important;
+  opacity:1!important;
+}
+
+.baisAdminBody .sidebar-menu .nav-link{
+  min-height:44px!important;
+  border:1px solid transparent!important;
+  border-radius:10px!important;
+}
+
+.baisAdminBody .sidebar-menu .nav-link:hover,
+.baisAdminBody .sidebar-menu .nav-link:focus-visible{
+  color:var(--bais-admin-menu-active)!important;
+  background:rgba(255,255,255,.075)!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+
+.baisAdminBody .sidebar-menu .nav-link.active,
+.baisAdminBody .sidebar-menu .nav-link[aria-selected="true"]{
+  color:var(--bais-admin-menu-active)!important;
+  background:linear-gradient(90deg,rgba(16,165,143,.28),rgba(16,165,143,.08))!important;
+  border-color:rgba(54,207,189,.18)!important;
+  box-shadow:inset 3px 0 0 var(--bais-teal-bright)!important;
+}
+
+.baisAdminBody .sidebar-menu .nav-link.active>span:last-child,
+.baisAdminBody .sidebar-menu .nav-link[aria-selected="true"]>span:last-child{
+  color:var(--bais-admin-menu-active)!important;
+}
+
+/* Icons carry the color; labels stay consistent. */
+.baisAdminBody .adminNavIcon{
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+.baisAdminBody [data-tab="students"] .adminNavIcon{background:rgba(16,165,143,.42)!important}
+.baisAdminBody [data-tab="requests"] .adminNavIcon{background:rgba(79,140,255,.42)!important}
+.baisAdminBody [data-tab="courses"] .adminNavIcon{background:rgba(139,108,246,.42)!important}
+.baisAdminBody [data-tab="certificates"] .adminNavIcon{background:rgba(229,169,61,.44)!important}
+.baisAdminBody [data-tab="visitors"] .adminNavIcon{background:rgba(34,199,214,.40)!important}
+.baisAdminBody [data-tab="customers"] .adminNavIcon{background:rgba(34,181,115,.42)!important}
+.baisAdminBody [data-tab="approvals"] .adminNavIcon{background:rgba(229,169,61,.44)!important}
+.baisAdminBody [data-tab="erp"] .adminNavIcon{background:rgba(139,108,246,.42)!important}
+.baisAdminBody [data-tab="contacts"] .adminNavIcon{background:rgba(79,140,255,.42)!important}
+.baisAdminBody [data-tab="privacy"] .adminNavIcon{background:rgba(227,106,106,.42)!important}
+
+.baisAdminBody .baisQuickLinks{
+  gap:4px!important;
+  padding-top:14px!important;
+}
+.baisAdminBody .baisQuickLinks button{
+  width:100%!important;
+  min-height:40px!important;
+  padding:9px 10px!important;
+  text-align:left!important;
+  border:1px solid transparent!important;
+  border-radius:9px!important;
+  background:transparent!important;
+}
+.baisAdminBody .baisQuickLinks button:hover,
+.baisAdminBody .baisQuickLinks button:focus-visible,
+.baisAdminBody .baisQuickLinks button.active{
+  color:#fff!important;
+  background:rgba(255,255,255,.075)!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+
+/* A restrained, colorful operations dashboard. */
+.baisAdminBody .adminMetric{
+  border-top:3px solid var(--metric-color,var(--bais-teal))!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--metric-color,var(--bais-teal)) 7%,#fff),#fff 48%)!important;
+}
+.baisAdminBody .adminMetric:before{background:var(--metric-color,var(--bais-teal))!important}
+.baisAdminBody .adminMetric:nth-child(6n+1){--metric-color:var(--bais-teal)}
+.baisAdminBody .adminMetric:nth-child(6n+2){--metric-color:var(--bais-admin-blue)}
+.baisAdminBody .adminMetric:nth-child(6n+3){--metric-color:var(--bais-admin-violet)}
+.baisAdminBody .adminMetric:nth-child(6n+4){--metric-color:var(--bais-admin-green)}
+.baisAdminBody .adminMetric:nth-child(6n+5){--metric-color:var(--bais-admin-amber)}
+.baisAdminBody .adminMetric:nth-child(6n+6){--metric-color:var(--bais-admin-cyan)}
+.baisAdminBody .adminMetric strong{color:var(--metric-color,var(--bais-navy))!important}
+
+.baisAdminBody .baisHealthHead{
+  background:linear-gradient(90deg,rgba(8,127,112,.08),rgba(79,140,255,.05),transparent 70%)!important;
+}
+.baisAdminBody .baisHealthCard{
+  border-left:4px solid var(--health-color,var(--bais-teal))!important;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--health-color,var(--bais-teal)) 5%,#fff),#fff 45%)!important;
+}
+.baisAdminBody .baisHealthCard:nth-child(6n+1){--health-color:var(--bais-teal)}
+.baisAdminBody .baisHealthCard:nth-child(6n+2){--health-color:var(--bais-admin-blue)}
+.baisAdminBody .baisHealthCard:nth-child(6n+3){--health-color:var(--bais-admin-cyan)}
+.baisAdminBody .baisHealthCard:nth-child(6n+4){--health-color:var(--bais-admin-violet)}
+.baisAdminBody .baisHealthCard:nth-child(6n+5){--health-color:var(--bais-admin-green)}
+.baisAdminBody .baisHealthCard:nth-child(6n+6){--health-color:var(--bais-admin-amber)}
+
+.baisAdminBody .baisWorkspaceIntro{
+  border-left:4px solid var(--bais-admin-blue)!important;
+  background:linear-gradient(90deg,rgba(79,140,255,.075),rgba(139,108,246,.035),#fbfdfd 65%)!important;
+}
+.baisAdminBody .baisEyebrow{color:var(--bais-teal)!important}
+.baisAdminBody .baisRefresh{border-color:rgba(8,127,112,.28)!important}
+
+@media (prefers-reduced-motion:reduce){
+  .baisAdminBody *{scroll-behavior:auto!important}
+}
