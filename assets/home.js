@@ -1,9 +1,11 @@
 document.documentElement.classList.add('js');
 
-const conceptCss=document.createElement('link');
-conceptCss.rel='stylesheet';
-conceptCss.href='/assets/home-concept2.css?v=1.0';
-document.head.appendChild(conceptCss);
+if(!document.querySelector('link[href*="home-concept2.css"]')){
+ const conceptCss=document.createElement('link');
+ conceptCss.rel='stylesheet';
+ conceptCss.href='/assets/home-concept2.css?v=2.0';
+ document.head.appendChild(conceptCss);
+}
 document.body.classList.add('concept2Home');
 
 const navLinks=document.querySelector('header .links');
