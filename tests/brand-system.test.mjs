@@ -50,3 +50,12 @@ test("logo family includes production variants",()=>{
  assert.match(primary,/IT \/ AI \/ SECURITY/);
  assert.match(primary,/#00B3A4/);
 });
+
+test("HTML middleware injects the BAIS favicon and mobile browser theme color globally",()=>{
+ const middleware=read("functions/_middleware.js");
+ assert.match(middleware,/\/assets\/bais-favicon\.svg/);
+ assert.match(middleware,/rel=\\"icon\\"/);
+ assert.match(middleware,/name=\\"theme-color\\"/);
+ assert.match(middleware,/#0B2D45/);
+ assert.match(middleware,/rewriter\.on\(\"head\"/);
+});
