@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" role="img" aria-labelledby="t d">
+<title id="t">BAIS Secure Technology Landscape</title><desc id="d">Alpine digital landscape with secure network infrastructure and modern BAIS architecture.</desc>
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0a3149"/><stop offset=".48" stop-color="#163f57"/><stop offset="1" stop-color="#071b28"/></linearGradient>
+ <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5d9a0" stop-opacity=".9"/><stop offset="1" stop-color="#d4a833" stop-opacity="0"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#284b5d"/><stop offset="1" stop-color="#0a1e29"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#ffe7bd" stop-opacity=".95"/><stop offset=".2" stop-color="#eeb967" stop-opacity=".45"/><stop offset="1" stop-color="#eeb967" stop-opacity="0"/></radialGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="12"/></filter>
+ <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+ <filter id="node"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#40d8cf" flood-opacity=".8"/></filter>
+</defs>
+<rect width="1600" height="520" fill="url(#sky)"/>
+<circle cx="1120" cy="82" r="160" fill="url(#sun)"/>
+<path d="M0 270 160 185 245 240 360 145 480 242 610 112 738 232 900 130 1045 250 1180 125 1320 220 1475 112 1600 210V520H0Z" fill="#17384a"/>
+<path d="M0 295 180 210 258 260 370 170 480 260 610 135 741 255 900 155 1050 270 1180 150 1330 245 1480 140 1600 230V520H0Z" fill="#20495f" opacity=".76"/>
+<path d="M40 286 180 215 260 260 371 176 470 260 610 141 730 250 900 161 1040 268 1180 156 1325 241 1480 146 1570 220" fill="none" stroke="#e7f1f5" stroke-opacity=".48" stroke-width="5"/>
+<path d="M0 360C210 330 330 350 500 320s290-4 420 18 250 38 410 4 210-21 270-14V520H0Z" fill="#0c2635"/>
+<g opacity=".84">
+ <path d="M160 430 410 320 650 401 883 315 1090 405" fill="none" stroke="#2bd0c7" stroke-width="2"/>
+ <path d="M275 402 525 342 760 414 980 336 1200 395" fill="none" stroke="#55e3da" stroke-opacity=".72" stroke-width="1.5"/>
+ <path d="M410 320 525 342M650 401 760 414M883 315 980 336" stroke="#7ef3eb" stroke-width="1.5"/>
+ <g fill="#83fff5" filter="url(#node)"><circle cx="160" cy="430" r="4"/><circle cx="275" cy="402" r="4"/><circle cx="410" cy="320" r="5"/><circle cx="525" cy="342" r="4"/><circle cx="650" cy="401" r="5"/><circle cx="760" cy="414" r="4"/><circle cx="883" cy="315" r="5"/><circle cx="980" cy="336" r="4"/><circle cx="1090" cy="405" r="4"/><circle cx="1200" cy="395" r="4"/></g>
+</g>
+<g opacity=".72" fill="#f1b84a"><circle cx="214" cy="447" r="2"/><circle cx="246" cy="441" r="2"/><circle cx="304" cy="452" r="2"/><circle cx="356" cy="438" r="2"/><circle cx="420" cy="456" r="2"/><circle cx="477" cy="441" r="2"/><circle cx="540" cy="453" r="2"/><circle cx="598" cy="437" r="2"/></g>
+<g transform="translate(1055 216)">
+ <path d="M0 86 102 0h380v304H0Z" fill="#102b3b" opacity=".96"/>
+ <path d="M110 8h355v292H24V90Z" fill="url(#glass)" stroke="#617d8b" stroke-opacity=".55"/>
+ <path d="M30 96h190v192H30Z" fill="#0b1e29"/>
+ <g stroke="#4f7182" stroke-width="2" opacity=".76"><path d="M70 96v192M115 96v192M160 96v192M205 96v192"/><path d="M30 142h190M30 190h190M30 238h190"/></g>
+ <rect x="234" y="73" width="205" height="113" fill="#1a3443"/>
+ <text x="255" y="118" fill="#dfe9ed" font-family="Arial,Helvetica,sans-serif" font-size="26" font-weight="900" letter-spacing="2">BAIS</text>
+ <text x="255" y="145" fill="#8da5b0" font-family="Arial,Helvetica,sans-serif" font-size="8" letter-spacing="4">IT / AI / SECURITY</text>
+ <path d="M326 256 355 187l29 69h-16l-13-32-13 32h-16Z" fill="#32d9d0"/>
+ <path d="M355 187v77" stroke="#8dfff8" stroke-width="4"/>
+ <ellipse cx="355" cy="263" rx="55" ry="12" fill="#2ee4da" opacity=".18" filter="url(#soft)"/>
+</g>
+<g opacity=".65" fill="#dce8ed"><text x="1250" y="74" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" letter-spacing="7">BERATUNG · BILDUNG · LÖSUNGEN</text></g>
+<g transform="translate(1000 158)" fill="#e8f1f4" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" letter-spacing="5"><text y="0">SICHERN</text><text y="36">VERSTEHEN</text><text y="72">GESTALTEN</text></g>
+<rect width="1600" height="520" fill="url(#glow)" opacity=".12"/>
+<rect width="1600" height="520" fill="#03111b" opacity=".14"/>
+</svg>
