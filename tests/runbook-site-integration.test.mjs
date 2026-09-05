@@ -50,5 +50,5 @@ test("BS-10 health check reports only operational dependency states",()=>{
 
 test("customer account cache version includes operations-link build",()=>{
  const html=read("academy/konto/index.html");
- assert.match(html,/academy-account\.js\?v=2\.2/);
+ assert.match(html,/academy-account\.js\?v=2\.3/);
 });

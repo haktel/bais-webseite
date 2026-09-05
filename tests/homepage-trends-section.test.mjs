@@ -14,15 +14,17 @@ test("homepage includes the KI-Arbeitsmarkt trends section with three role cards
  assert.equal(cardCount,3);
 });
 
-test("homepage trend cards link to real Academy anchors",()=>{
+test("homepage trend cards link directly to the real Academy program pages",()=>{
  const home=read("index.html");
- const academy=read("academy/index.html");
- assert.match(home,/href="academy\/index\.html#ki-fuehrerschein"/);
- assert.match(home,/href="academy\/index\.html#ai-coding"/);
- assert.match(home,/href="academy\/index\.html#n8n"/);
- assert.match(academy,/id="ki-fuehrerschein"/);
- assert.match(academy,/id="ai-coding"/);
- assert.match(academy,/id="n8n"/);
+ const kiFuehrerschein=read("academy/ki-fuehrerschein/index.html");
+ const aiCoding=read("academy/ai-coding/index.html");
+ const n8n=read("academy/n8n-bootcamp/index.html");
+ assert.match(home,/href="academy\/ki-fuehrerschein\/"/);
+ assert.match(home,/href="academy\/ai-coding\/"/);
+ assert.match(home,/href="academy\/n8n-bootcamp\/"/);
+ assert.match(kiFuehrerschein,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/ki-fuehrerschein\/"/);
+ assert.match(aiCoding,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/ai-coding\/"/);
+ assert.match(n8n,/rel="canonical" href="https:\/\/bais-solutions\.de\/academy\/n8n-bootcamp\/"/);
 });
 
 test("homepage trend cards cite real, named sources",()=>{
