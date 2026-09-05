@@ -102,7 +102,7 @@
 }
 
 .baisBrand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;min-width:0}
-.baisBrand img{width:92px;max-height:34px;filter:brightness(0) invert(1);flex:0 0 auto}
+.baisBrand img{width:92px;max-height:34px;border-radius:8px;flex:0 0 auto}
 .baisBrandText{display:grid;gap:1px;min-width:0}
 .baisBrandText strong{font-size:13px;white-space:nowrap}
 .baisBrandText span{font-size:11px;color:#a8c5cf;white-space:nowrap}
