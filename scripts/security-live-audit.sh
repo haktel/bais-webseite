@@ -13,6 +13,7 @@ check_redirect(){
 }
 
 check_redirect "/admin/" "/admin-login/"
+check_redirect "/bais-control-center/" "/admin-login/"
 check_redirect "/admin/runbook/" "/admin-login/"
 check_redirect "/admin/rechnung/" "/admin-login/"
 check_redirect "/angebot/" "/academy/konto/"
