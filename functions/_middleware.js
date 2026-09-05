@@ -1,7 +1,7 @@
 const EXCLUDED_PREFIXES=["/admin/","/bais-control-center/","/api/","/assets/","/kundenbereich/","/project-portal/"];
 const BRAND_FAVICON='<link rel="icon" href="/assets/bais-favicon.svg?v=4" type="image/svg+xml">';
 const BRAND_THEME_COLOR='<meta name="theme-color" content="#0B2D45">';
-const HOME_CONCEPT_CSS='<link rel="stylesheet" href="/assets/home-concept2.css?v=4">';
+const HOME_CONCEPT_CSS='<link rel="stylesheet" href="/assets/home-concept2.css?v=5">';
 const HOME_CONCEPT_JS='<script src="/assets/home.js?v=4" defer></script>';
 
 const shouldTrack=pathname=>!EXCLUDED_PREFIXES.some(prefix=>pathname.startsWith(prefix));
