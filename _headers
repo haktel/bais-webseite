@@ -12,6 +12,10 @@
 /robots.txt
   Cache-Control: public, max-age=14400, must-revalidate
 
+/admin-login/*
+  Cache-Control: private, no-store, max-age=0
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
 
 /zertifikat/*
   Referrer-Policy: no-referrer
