@@ -5,7 +5,7 @@ const pageDescription=document.querySelector('[data-admin-page-description]');
 
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
 const api=async(url,options={})=>{const response=await fetch(url,{credentials:"same-origin",headers:{"content-type":"application/json",...(options.headers||{})},...options});const data=await response.json().catch(()=>({error:{message:"Ungültige Serverantwort."}}));if(!response.ok)throw new Error(data.error?.message||"Anfrage fehlgeschlagen.");return data;};
-const assets={primary:"/assets/bais-wordmark.svg",mark:"/assets/bais-mark.svg",mono:"/assets/bais-wordmark-mono.svg",dark:"/assets/bais-wordmark-dark.svg",light:"/assets/bais-wordmark-light.svg"};
+const assets={primary:"/assets/bais-wordmark.svg?v=2",mark:"/assets/bais-mark.svg?v=2",mono:"/assets/bais-wordmark-mono.svg?v=2",dark:"/assets/bais-wordmark-dark.svg?v=2",light:"/assets/bais-wordmark-light.svg?v=2"};
 let settings=null;
 
 const colorField=(key,label,help)=>`<label class="brandField"><span>${esc(label)}</span><div class="brandColorInput"><input type="color" data-setting="${key}" value="${esc(settings[key])}" aria-label="${esc(label)} Farbe"><input type="text" data-setting-text="${key}" value="${esc(settings[key])}" maxlength="7" aria-label="${esc(label)} Hex-Wert"></div><small>${esc(help)}</small></label>`;
