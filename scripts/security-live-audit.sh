@@ -12,9 +12,9 @@ check_redirect(){
  if [ "$code" = "302" ] && grep -qi "location:.*${expected}" /tmp/headers; then pass "${path} anonymous redirect protected"; else fail "${path} expected protected redirect, got HTTP ${code}"; fi
 }
 
-check_redirect "/admin/" "/academy/konto/"
-check_redirect "/admin/runbook/" "/academy/konto/"
-check_redirect "/admin/rechnung/" "/academy/konto/"
+check_redirect "/admin/" "/admin-login/"
+check_redirect "/admin/runbook/" "/admin-login/"
+check_redirect "/admin/rechnung/" "/admin-login/"
 check_redirect "/angebot/" "/academy/konto/"
 check_redirect "/abnahme/" "/academy/konto/"
 check_redirect "/project-portal/kunde/" "/academy/konto/"
