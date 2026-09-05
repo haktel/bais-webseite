@@ -11,7 +11,8 @@ const PUBLIC_EXACT=new Set([
  "/api/academy/auth/reset-password",
  "/api/academy/auth/logout",
  "/api/n8n-demo",
- "/api/n8n-signature-verify"
+ "/api/n8n-signature-verify",
+ "/api/track"
 ]);
 const SESSION_EXACT=new Set([
  "/api/academy/auth/me",
