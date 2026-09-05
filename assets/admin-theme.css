@@ -135,6 +135,25 @@
 .baisAdminBody .baisEyebrow{color:var(--bais-teal)!important}
 .baisAdminBody .baisRefresh{border-color:rgba(8,127,112,.28)!important}
 
+/* Besucher-Monitoring: lightweight bar charts, no chart library needed. */
+.baisAdminBody .adminBarCell{display:flex;align-items:center;gap:10px;min-width:140px}
+.baisAdminBody .adminBarTrack{flex:1 1 auto;height:8px;border-radius:99px;background:rgba(8,127,112,.09);overflow:hidden}
+.baisAdminBody .adminBarFill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--bais-admin-cyan),var(--bais-teal))}
+.baisAdminBody .adminBarFill--blue{background:linear-gradient(90deg,var(--bais-admin-blue),var(--bais-admin-violet))}
+.baisAdminBody .adminBarValue{flex:0 0 auto;font-variant-numeric:tabular-nums;font-weight:800;color:var(--bais-navy);min-width:1.6em;text-align:right}
+
+/* A small sign of life for real-time visitor counts. */
+.baisAdminBody .adminMetric--live{border-top-color:var(--bais-admin-green)!important}
+.baisAdminBody .adminMetric--live strong{color:var(--bais-admin-green)!important}
+.baisAdminBody .adminLiveDot{display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--bais-admin-green);box-shadow:0 0 0 0 rgba(34,181,115,.55);animation:baisLivePulse 1.8s ease-out infinite}
+.baisAdminBody .adminLiveDot--inline{width:9px;height:9px;margin-left:2px}
+@keyframes baisLivePulse{
+  0%{box-shadow:0 0 0 0 rgba(34,181,115,.55)}
+  70%{box-shadow:0 0 0 8px rgba(34,181,115,0)}
+  100%{box-shadow:0 0 0 0 rgba(34,181,115,0)}
+}
+
 @media (prefers-reduced-motion:reduce){
   .baisAdminBody *{scroll-behavior:auto!important}
+  .baisAdminBody .adminLiveDot{animation:none!important}
 }
