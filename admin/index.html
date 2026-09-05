@@ -1,1 +1,145 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BAIS Control Center</title><meta name="description" content="Geschütztes BAIS Verwaltungsportal."><meta name="robots" content="noindex,nofollow,noarchive"><link rel="stylesheet" href="/assets/site.css?v=50.0"><link rel="stylesheet" href="/assets/admin.css?v=1.4"><link rel="stylesheet" href="/assets/bais-design-system.css?v=1.2"></head><body><header><div class="c"><nav><a class="brand" href="/" aria-label="BAIS Startseite"><img class="brandLogo" src="/assets/bais-wordmark.svg" alt="BAIS"></a><div class="links"><a href="/academy/">Academy</a><a href="/admin/runbook/">Runbook</a><a href="/admin/rechnung/">Rechnung</a><a href="/academy/konto/">Mein Konto</a><a href="/">Website</a><button type="button" class="adminRefresh" data-admin-logout>Abmelden</button></div><span class="menu">BAIS</span></nav></div></header><main><section class="hero adminHero"><div class="c adminTop"><div><div class="ey">GESCHÜTZTER BEREICH</div><h1>BAIS Control Center.</h1><p class="lead">Academy, Anfragen und Lernfortschritt in einer gemeinsamen Verwaltungsoberfläche.</p></div><button class="adminRefresh" type="button" data-refresh>Aktualisieren</button></div></section><section class="sec"><div class="c adminShell"><div class="adminNotice" data-access-message><p class="adminMessage" role="status" aria-live="polite">Berechtigung wird geprüft …</p></div><div class="adminPanel" data-admin-app hidden><div class="adminMetrics" data-metrics></div><nav class="adminTabs" aria-label="Verwaltungsbereiche"><button type="button" data-tab="students" aria-selected="true">Studierende</button><button type="button" data-tab="requests" aria-selected="false">Academy-Anfragen</button><button type="button" data-tab="contacts" aria-selected="false">Kontakt</button><button type="button" data-tab="courses" aria-selected="false">Programme</button><button type="button" data-tab="certificates" aria-selected="false">Nachweise</button><button type="button" data-tab="privacy" aria-selected="false">Datenschutz</button><button type="button" data-tab="customers" aria-selected="false">Kunden &amp; Freigaben</button><button type="button" data-tab="approvals" aria-selected="false">Kunden-Freigaben</button><button type="button" data-tab="erp" aria-selected="false">ERP Sync</button></nav><section data-view="students"></section><section data-view="requests" hidden></section><section data-view="contacts" hidden></section><section data-view="courses" hidden></section><section data-view="certificates" hidden></section><section data-view="privacy" hidden></section><section data-view="customers" hidden></section><section data-view="approvals" hidden></section><section data-view="erp" hidden></section></div></div></section></main><footer class="footer"><div class="c legalbar"><span>BAIT Solution · Admin Control Center</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div></footer><script type="module" src="/assets/admin.js?v=1.7"></script><script type="module" src="/assets/admin-certificates.js?v=1.0"></script><script type="module" src="/assets/admin-erp.js?v=1.0"></script></body></html>
+<!doctype html>
+<html lang="de" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BAIS Control Center</title>
+  <meta name="description" content="Geschütztes BAIS Verwaltungsportal.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.9.1/dist/css/adminlte.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="/assets/site.css?v=50.0">
+  <link rel="stylesheet" href="/assets/bais-design-system.css?v=1.2">
+  <link rel="stylesheet" href="/assets/admin.css?v=1.4">
+  <link rel="stylesheet" href="/assets/admin-dashboard.css?v=1.0">
+</head>
+<body class="layout-fixed sidebar-expand-lg baisAdminBody">
+  <div class="app-wrapper">
+    <nav class="app-header navbar navbar-expand" aria-label="Control Center Kopfzeile">
+      <div class="baisTopbar">
+        <button class="baisSidebarToggle" type="button" data-sidebar-toggle aria-label="Navigation öffnen" aria-expanded="false">☰</button>
+        <div class="baisTopbarTitle">
+          <strong>BAIS Control Center</strong>
+          <span>Production Administration</span>
+        </div>
+        <div class="baisTopbarActions">
+          <a class="baisTopLink" href="/" target="_blank" rel="noopener">Website ↗</a>
+          <a class="baisTopLink" href="/academy/konto/">Mein Konto</a>
+          <button class="baisTopLogout" type="button" data-admin-logout>Abmelden</button>
+        </div>
+      </div>
+    </nav>
+
+    <aside class="app-sidebar shadow" aria-label="Control Center Navigation">
+      <div class="sidebar-brand">
+        <a class="baisBrand" href="/admin/" aria-label="BAIS Control Center Startseite">
+          <img src="/assets/bais-wordmark.svg" alt="BAIS">
+          <span class="baisBrandText"><strong>CONTROL CENTER</strong><span>IT · AI · Academy</span></span>
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        <nav aria-label="Verwaltungsbereiche">
+          <div class="baisNavLabel">Übersicht & Academy</div>
+          <ul class="nav sidebar-menu flex-column" role="list">
+            <li class="nav-item"><button type="button" class="nav-link active" data-tab="students" aria-selected="true"><span class="adminNavIcon">ST</span><span>Studierende</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="requests" aria-selected="false"><span class="adminNavIcon">AN</span><span>Academy-Anfragen</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="courses" aria-selected="false"><span class="adminNavIcon">PR</span><span>Programme</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="certificates" aria-selected="false"><span class="adminNavIcon">ZE</span><span>Nachweise</span></button></li>
+          </ul>
+
+          <div class="baisNavLabel">Kunden & Betrieb</div>
+          <ul class="nav sidebar-menu flex-column" role="list">
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="customers" aria-selected="false"><span class="adminNavIcon">KU</span><span>Kunden & Freigaben</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="approvals" aria-selected="false"><span class="adminNavIcon">FR</span><span>Kunden-Freigaben</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="erp" aria-selected="false"><span class="adminNavIcon">ERP</span><span>ERP Sync</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="contacts" aria-selected="false"><span class="adminNavIcon">KO</span><span>Kontakt</span></button></li>
+            <li class="nav-item"><button type="button" class="nav-link" data-tab="privacy" aria-selected="false"><span class="adminNavIcon">DS</span><span>Datenschutz</span></button></li>
+          </ul>
+        </nav>
+
+        <div class="baisQuickLinks" aria-label="Schnellzugriffe">
+          <a href="/admin/runbook/">Runbook</a>
+          <a href="/admin/rechnung/">Rechnung</a>
+          <a href="/project-portal/">Project Portal</a>
+          <a href="/academy/">Academy</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-content-header baisContentHeader">
+        <div class="baisPageHeading">
+          <div>
+            <div class="baisEyebrow">GESCHÜTZTER ADMIN-BEREICH</div>
+            <h1>Dashboard</h1>
+            <p>Kunden, Academy, Integrationen und Systemstatus in einer Oberfläche.</p>
+          </div>
+          <button class="baisRefresh" type="button" data-refresh>↻ Aktualisieren</button>
+        </div>
+      </div>
+
+      <div class="app-content baisAdminContent">
+        <div class="adminNotice" data-access-message>
+          <p class="adminMessage" role="status" aria-live="polite">Berechtigung wird geprüft …</p>
+        </div>
+
+        <div class="adminPanel" data-admin-app hidden>
+          <section aria-label="Kennzahlen">
+            <div class="adminMetrics" data-metrics></div>
+          </section>
+
+          <section class="baisHealthSection" aria-labelledby="system-health-title">
+            <div class="baisHealthHead">
+              <div>
+                <h2 id="system-health-title">System Health</h2>
+                <small>D1, R2 und Runtime-Konfiguration ohne Secret-Ausgabe.</small>
+              </div>
+              <small data-health-checked>Prüfung läuft …</small>
+            </div>
+            <div class="baisHealthGrid" data-system-health aria-live="polite">
+              <p class="adminMessage">Systemstatus wird geladen …</p>
+            </div>
+          </section>
+
+          <section class="baisWorkspace" aria-label="Arbeitsbereich">
+            <div class="baisWorkspaceIntro">
+              <strong>Arbeitsbereich</strong>
+              <small>Bereich links auswählen. Die vorhandenen BAIS Admin-APIs bleiben unverändert angebunden.</small>
+            </div>
+
+            <nav class="adminTabs" aria-label="Verwaltungsbereiche Fallback">
+              <button type="button" data-tab="students" aria-selected="true">Studierende</button>
+              <button type="button" data-tab="requests" aria-selected="false">Academy-Anfragen</button>
+              <button type="button" data-tab="contacts" aria-selected="false">Kontakt</button>
+              <button type="button" data-tab="courses" aria-selected="false">Programme</button>
+              <button type="button" data-tab="certificates" aria-selected="false">Nachweise</button>
+              <button type="button" data-tab="privacy" aria-selected="false">Datenschutz</button>
+              <button type="button" data-tab="customers" aria-selected="false">Kunden &amp; Freigaben</button>
+              <button type="button" data-tab="approvals" aria-selected="false">Kunden-Freigaben</button>
+              <button type="button" data-tab="erp" aria-selected="false">ERP Sync</button>
+            </nav>
+
+            <section data-view="students"></section>
+            <section data-view="requests" hidden></section>
+            <section data-view="contacts" hidden></section>
+            <section data-view="courses" hidden></section>
+            <section data-view="certificates" hidden></section>
+            <section data-view="privacy" hidden></section>
+            <section data-view="customers" hidden></section>
+            <section data-view="approvals" hidden></section>
+            <section data-view="erp" hidden></section>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="baisFooter"><span>BAIS · Bünyamin Atik – IT Solutions</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div>
+    </footer>
+  </div>
+
+  <script type="module" src="/assets/admin.js?v=1.7"></script>
+  <script type="module" src="/assets/admin-dashboard.js?v=1.0"></script>
+  <script type="module" src="/assets/admin-certificates.js?v=1.0"></script>
+  <script type="module" src="/assets/admin-erp.js?v=1.0"></script>
+</body>
+</html>
