@@ -9,6 +9,10 @@ const privateResponse=response=>{
  headers.set("referrer-policy","no-referrer");
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 };
+const adminContinue=request=>{
+ const path=new URL(request.url).pathname;
+ return path.startsWith("/admin/")?path:"/admin/";
+};
 
 export const onRequest=async context=>{
  try{
@@ -17,8 +21,8 @@ export const onRequest=async context=>{
   return privateResponse(await context.next());
  }catch(error){
   if(error?.status===401||error?.code==="mfa_setup_required"){
-   const target=new URL("/academy/konto/",context.request.url);
-   target.searchParams.set("continue","/admin/");
+   const target=new URL("/admin-login/",context.request.url);
+   target.searchParams.set("continue",adminContinue(context.request));
    target.searchParams.set("reason",error?.code==="mfa_setup_required"?"mfa_setup_required":error?.code==="mfa_required"?"mfa_required":"admin_login_required");
    return Response.redirect(target,302);
   }
