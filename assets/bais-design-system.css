@@ -1,84 +1,57 @@
+@import url("/api/brand-theme");
 /*
- * BAIS Design System v1.0
- * Site-wide visual contract. Loaded last on every HTML page.
+ * BAIS Design System v2.0
+ * Concept 2 corporate identity. Loaded last on every HTML page.
  */
 :root{
-  --bais-font:Arial,"Helvetica Neue",Helvetica,sans-serif;
-  --bais-navy:#071b28;
-  --bais-navy-2:#0d2936;
+  --bais-font:"Inter",Arial,"Helvetica Neue",Helvetica,sans-serif;
+  --bais-display:Georgia,"Times New Roman",serif;
+  --bais-navy:#0B2D45;
+  --bais-navy-2:#123E59;
   --bais-ink:#10212c;
   --bais-muted:#61727c;
-  --bais-line:#cfdcdf;
+  --bais-line:#d7e1e5;
   --bais-surface:#fff;
-  --bais-bg:#f4f7f8;
-  --bais-teal:#087f70;
-  --bais-teal-bright:#36cfbd;
-  --bais-gold:#b88435;
-  --bais-radius:12px;
-  --bais-radius-lg:18px;
-  --bais-shadow:0 18px 48px rgba(7,27,40,.09);
+  --bais-bg:#F4F7FA;
+  --bais-teal:#00B3A4;
+  --bais-teal-bright:#22c8bb;
+  --bais-gold:#D4A833;
+  --bais-radius:8px;
+  --bais-radius-lg:16px;
+  --bais-container:1280px;
+  --bais-shadow:0 18px 48px rgba(11,45,69,.09);
 }
 html{font-family:var(--bais-font);font-size:100%;-webkit-text-size-adjust:100%}
 body,body *{font-family:var(--bais-font)}
 body{font-size:15px;line-height:1.65;color:var(--bais-ink);background:var(--bais-bg)}
 button,input,select,textarea{font:inherit}
-h1,h2,h3,h4,h5,h6,strong,b{font-family:var(--bais-font);font-weight:800}
+h1,h2{font-family:var(--bais-display);font-weight:700;letter-spacing:-.035em}
+h3,h4,h5,h6,strong,b{font-family:var(--bais-font);font-weight:800}
 h1,h2,h3{color:inherit;text-wrap:balance}
 p,li{line-height:1.65}
-.ey,[class*="eyebrow" i],[class*="kicker" i]{
-  font-family:var(--bais-font);
-  font-weight:800;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-}
-:where(.card,.formPanel,.stat,.activity,.step,.proofFeature,.proofSmall,.serviceCard,.academyMetric,.academyPath,.wikiCard,.articleCard,.portalCard){
-  border-radius:var(--bais-radius);
-}
-:where(.card,.formPanel,.stat,.activity,.step,.proofFeature,.proofSmall,.serviceCard,.wikiCard,.articleCard,.portalCard){
-  border-color:var(--bais-line);
-  box-shadow:0 1px 0 rgba(7,27,40,.02);
-}
-:where(.btn,.submit,button,.cta):focus-visible,
-:where(a,input,select,textarea):focus-visible{
-  outline:3px solid rgba(54,207,189,.28);
-  outline-offset:3px;
-}
-:where(.btn,.submit,.cta){
-  border-radius:8px;
-  font-weight:800;
-}
-:where(input,select,textarea){
-  border-radius:8px;
-  border-color:var(--bais-line);
-  background:#f8fbfb;
-  color:var(--bais-ink);
-}
-:where(input,select,textarea):focus{
-  border-color:var(--bais-teal);
-  box-shadow:0 0 0 3px rgba(8,127,112,.14);
-}
-:where(.academyLab,.riskApp,.securityMonitor,.docsHub,.portalShowcase,[class*="Lab"],[class*="lab-shell"]){
-  font-family:var(--bais-font);
-}
-.academyLab{
-  border-radius:var(--bais-radius-lg);
-  box-shadow:0 24px 60px rgba(7,27,40,.12);
-}
+.ey,[class*="eyebrow" i],[class*="kicker" i]{font-family:var(--bais-font);font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.brandLogo{display:block;width:168px;height:auto;max-height:58px;object-fit:contain}
+:where(.card,.formPanel,.stat,.activity,.step,.proofFeature,.proofSmall,.serviceCard,.academyMetric,.academyPath,.wikiCard,.articleCard,.portalCard){border-radius:var(--bais-radius)}
+:where(.card,.formPanel,.stat,.activity,.step,.proofFeature,.proofSmall,.serviceCard,.wikiCard,.articleCard,.portalCard){border-color:var(--bais-line);box-shadow:0 1px 0 rgba(11,45,69,.02)}
+:where(.btn,.submit,button,.cta):focus-visible,:where(a,input,select,textarea):focus-visible{outline:3px solid rgba(0,179,164,.28);outline-offset:3px}
+:where(.btn,.submit,.cta){border-radius:var(--bais-radius);font-weight:800}
+:where(input,select,textarea){border-radius:var(--bais-radius);border-color:var(--bais-line);background:#f8fbfb;color:var(--bais-ink)}
+:where(input,select,textarea):focus{border-color:var(--bais-teal);box-shadow:0 0 0 3px rgba(0,179,164,.14)}
+:where(.academyLab,.riskApp,.securityMonitor,.docsHub,.portalShowcase,[class*="Lab"],[class*="lab-shell"]){font-family:var(--bais-font)}
+.academyLab{border-radius:var(--bais-radius-lg);box-shadow:0 24px 60px rgba(11,45,69,.12)}
 .academyLab :where(h2,h3,strong,button){color:var(--lab-text,#eef7f7)}
 .academyLab :where(p,span,small){font-family:inherit}
 header nav,.links,.links a,.brand,.cta{font-family:var(--bais-font)}
-.links a{font-weight:750}
+.links a{font-weight:750}.cta,.btn:not(.secondary),.submit{background:var(--bais-navy);border-color:var(--bais-navy)}
 .footer,.footer *{font-family:var(--bais-font)}
 img,svg,video{max-width:100%}
-@media(max-width:620px){
-  body{font-size:15px}
-  .c{width:min(100% - 28px,1180px)}
-  :where(.hero h1,.heroCopy h1){overflow-wrap:anywhere}
-  :where(.card,.formPanel,.serviceCard){padding-left:20px;padding-right:20px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
+.homePage .homeHero{background:radial-gradient(circle at 78% 24%,rgba(0,179,164,.15),transparent 29%),linear-gradient(135deg,#fbfcfd,#eef5f6 67%,#e8f2f0)}
+.homePage .heroCopy h1 span{color:var(--bais-teal)}
+.homePage .heroActions .btn:first-child{background:var(--bais-gold);border-color:var(--bais-gold);color:#fff}
+.homePage .serviceIcon{background:var(--bais-navy);color:#b8f2eb}
+.homePage .cardLink,.homePage .textLink{color:var(--bais-teal)}
+@media(max-width:620px){body{font-size:15px}.c{width:min(100% - 28px,var(--bais-container))}:where(.hero h1,.heroCopy h1){overflow-wrap:anywhere}:where(.card,.formPanel,.serviceCard){padding-left:20px;padding-right:20px}.brandLogo{width:146px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 .progDetailPage .heroGrid{grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:40px;align-items:center}
 @media(max-width:980px){.progDetailPage .heroGrid{grid-template-columns:1fr}}
 .progDetailPage .hero h1{font-size:clamp(34px,4vw,54px);max-width:none;overflow-wrap:break-word;hyphens:auto}

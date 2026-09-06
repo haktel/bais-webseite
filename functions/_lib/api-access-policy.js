@@ -1,5 +1,6 @@
 const PUBLIC_EXACT=new Set([
  "/api/health",
+ "/api/brand-theme",
  "/api/contact",
  "/api/academy/enrollments",
  "/api/academy/auth/login",
@@ -11,7 +12,8 @@ const PUBLIC_EXACT=new Set([
  "/api/academy/auth/reset-password",
  "/api/academy/auth/logout",
  "/api/n8n-demo",
- "/api/n8n-signature-verify"
+ "/api/n8n-signature-verify",
+ "/api/track"
 ]);
 const SESSION_EXACT=new Set([
  "/api/academy/auth/me",
@@ -21,6 +23,7 @@ const SESSION_EXACT=new Set([
  "/api/academy/n8n-final-exam",
  "/api/academy/kif-final-exam",
  "/api/academy/secure-ai-rag-final-exam",
+ "/api/academy/eu-ai-act-final-exam",
  "/api/academy/progress",
  "/api/commercial/context",
  "/api/commercial/projects",
