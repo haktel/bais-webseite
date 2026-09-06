@@ -24,6 +24,7 @@ const SESSION_EXACT=new Set([
  "/api/academy/kif-final-exam",
  "/api/academy/secure-ai-rag-final-exam",
  "/api/academy/eu-ai-act-final-exam",
+ "/api/academy/ki-health-final-exam",
  "/api/academy/progress",
  "/api/commercial/context",
  "/api/commercial/projects",

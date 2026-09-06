@@ -70,6 +70,16 @@ test("unknown future API routes fail closed",()=>{
  assert.equal(classifyApiPath("/api/internal/debug").mode,"deny");
 });
 
+test("Academy final exams require a session and unknown exam paths stay denied",()=>{
+ for(const slug of["n8n","kif","secure-ai-rag","eu-ai-act","ki-health"]){
+  const route=`/api/academy/${slug}-final-exam`;
+  assert.equal(classifyApiPath(route).mode,"session",route);
+  assert.equal(classifyApiPath(route+"/").mode,"session",route+"/");
+  assert.equal(classifyApiPath(route+"/answers").mode,"deny",route+"/answers");
+ }
+ assert.equal(classifyApiPath("/api/academy/unknown-final-exam").mode,"deny");
+});
+
 
 test("SOW and integration control plane have explicit firewall policies",()=>{
  assert.equal(classifyApiPath("/api/commercial/sow").mode,"session");
