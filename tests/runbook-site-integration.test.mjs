@@ -33,7 +33,7 @@ test("protected runbook pages are no-store and live-audited",()=>{
  const audit=read("scripts/security-live-audit.sh");
  assert.match(headers,/\/kundenbereich\/\*/);
  assert.match(headers,/Cache-Control: private, no-store/);
- assert.match(audit,/check_redirect "\/admin\/runbook\/" "\/academy\/konto\//);
+ assert.match(audit,/check_redirect "\/admin\/runbook\/" "\/admin-login\//);
  assert.match(audit,/check_redirect "\/kundenbereich\/betrieb\/" "\/academy\/konto\//);
  assert.match(audit,/production D1 binding is reachable/);
  assert.match(audit,/production R2 document binding is reachable/);
@@ -50,5 +50,5 @@ test("BS-10 health check reports only operational dependency states",()=>{
 
 test("customer account cache version includes operations-link build",()=>{
  const html=read("academy/konto/index.html");
- assert.match(html,/academy-account\.js\?v=2\.2/);
+ assert.match(html,/academy-account\.js\?v=2\.3/);
 });

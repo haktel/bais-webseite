@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BAIS Admin Login</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="/assets/site.css?v=50.0">
+  <link rel="stylesheet" href="/assets/bais-design-system.css?v=1.2">
+  <link rel="stylesheet" href="/assets/academy-account.css?v=1.6">
+  <link rel="stylesheet" href="/assets/admin-login.css?v=1.0">
+</head>
+<body class="adminLoginBody">
+<header><div class="c"><nav><a class="brand" href="/" aria-label="BAIS Startseite"><img class="brandLogo" src="/assets/bais-wordmark.svg" alt="BAIS"></a><div class="adminLoginHeaderText">Admin-Zugang</div></nav></div></header>
+<main>
+  <section class="hero adminLoginHero"><div class="c"><div class="ey">BAIS CONTROL CENTER · GESCHÜTZTER ZUGANG</div><h1>Administrator-Anmeldung</h1><p class="lead">Zwei getrennte Sicherheitsstufen: zuerst Passwort, danach MFA. Erst anschließend wird das Control Center geöffnet.</p></div></section>
+  <section class="sec"><div class="c adminLoginShell">
+    <ol class="adminLoginSteps" aria-label="Anmeldeschritte">
+      <li data-step-indicator="password" class="active"><strong>1</strong><span>E-Mail &amp; Passwort</span></li>
+      <li data-step-indicator="mfa"><strong>2</strong><span>MFA</span></li>
+      <li><strong>3</strong><span>Control Center</span></li>
+    </ol>
+
+    <section class="accountPanel adminLoginCard" data-admin-step="password" aria-labelledby="admin-password-title">
+      <div class="ey">SCHRITT 1 VON 2</div>
+      <h2 id="admin-password-title">Administrator identifizieren</h2>
+      <p>Geben Sie zuerst Ihre Administrator-Zugangsdaten ein. Der zweite Faktor wird erst nach erfolgreicher Passwortprüfung abgefragt.</p>
+      <form class="formGrid" data-admin-password-form>
+        <div class="field"><label for="admin-email">E-Mail</label><input id="admin-email" name="email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="admin-password">Passwort</label><input id="admin-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div>
+        <div class="field"><button class="submit" type="submit">Weiter zu MFA</button><p class="accountMessage" role="status" aria-live="polite"></p></div>
+      </form>
+      <a class="backLink" href="/academy/konto/">Zum normalen Kunden-/Academy-Login</a>
+    </section>
+
+    <section class="accountPanel adminLoginCard" data-admin-step="mfa" hidden aria-labelledby="admin-mfa-title">
+      <div class="ey">SCHRITT 2 VON 2</div>
+      <h2 id="admin-mfa-title">Zweiten Faktor bestätigen</h2>
+      <p data-admin-mfa-status>Administrator-MFA wird geprüft …</p>
+      <p class="adminIdentity" data-admin-identity></p>
+
+      <div data-mfa-setup-actions hidden>
+        <p>Für dieses Administrator-Konto ist MFA noch nicht eingerichtet. Richten Sie jetzt einen TOTP-Faktor ein.</p>
+        <button class="submit" type="button" data-mfa-begin>MFA einrichten</button>
+      </div>
+
+      <div data-mfa-setup hidden>
+        <div class="mfaSetupGrid">
+          <div class="mfaQrPanel">
+            <div class="mfaQr" data-mfa-qr role="img" aria-label="QR-Code für BAIS Administrator-MFA"></div>
+            <p class="note">QR-Code mit einer TOTP-App scannen. Der QR-Code wird lokal im Browser erzeugt.</p>
+          </div>
+          <div class="mfaSetupSteps">
+            <h3>Authenticator verbinden</h3>
+            <p>QR-Code scannen und anschließend den 6-stelligen Code eingeben.</p>
+            <details class="mfaManual"><summary>Manuellen Schlüssel anzeigen</summary><code class="mfaSecret" data-mfa-secret></code></details>
+            <form class="formGrid" data-mfa-confirm-form>
+              <div class="field"><label for="mfa-confirm-code">6-stelliger Code</label><input id="mfa-confirm-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></div>
+              <div class="field"><button class="submit" type="submit">MFA aktivieren</button><p class="accountMessage" role="status" aria-live="polite"></p></div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <form class="formGrid" data-mfa-verify-form hidden>
+        <div class="field"><label for="mfa-login-code">MFA- oder Recovery-Code</label><input id="mfa-login-code" name="code" autocomplete="one-time-code" maxlength="16" required autofocus></div>
+        <div class="field"><button class="submit" type="submit">MFA bestätigen</button><p class="accountMessage" role="status" aria-live="polite"></p></div>
+      </form>
+
+      <div class="adminRecovery" data-mfa-recovery hidden>
+        <h3>Recovery-Codes – nur einmal sichtbar</h3>
+        <p>Diese Codes offline speichern. Jeder Code ist nur einmal nutzbar.</p>
+        <pre data-mfa-recovery-codes></pre>
+        <button class="submit" type="button" data-mfa-continue>Recovery-Codes gespeichert · Control Center öffnen</button>
+      </div>
+
+      <button class="adminSecondaryAction" type="button" data-admin-cancel>Abmelden und zurück</button>
+    </section>
+  </div></section>
+</main>
+<footer class="footer"><div class="c legalbar"><span>BAIS · Bünyamin Atik – IT Solutions</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div></footer>
+<script type="module" src="/assets/admin-login.js?v=1.0"></script>
+</body>
+</html>

@@ -76,7 +76,7 @@ test("account page wires up a forgot-password request form and a token-gated new
 test("account script extracts the reset token from the URL fragment and only reveals the new-password form when one is present",()=>{
  const script=read("assets/academy-account.js");
  assert.match(script,/get\("reset"\)/);
- assert.match(script,/if\(passwordResetToken\)\{showAuth\(\);const confirmForm=document\.querySelector\("\[data-password-reset-confirm-form\]"\);if\(confirmForm\)confirmForm\.hidden=false;/);
+ assert.match(script,/if\(passwordResetToken\)\{showAuth\(\);setAccountView\("login"\);setLoginView\("reset"\);const confirmForm=document\.querySelector\("\[data-password-reset-confirm-form\]"\);if\(confirmForm\)confirmForm\.hidden=false;/);
  assert.match(script,/api\("\/api\/academy\/auth\/request-password-reset"/);
  assert.match(script,/api\("\/api\/academy\/auth\/reset-password"/);
 });

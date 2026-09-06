@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BAIS Control Center</title>
+  <meta name="description" content="Geschütztes BAIS Administrations- und Operations-Dashboard.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.9.1/dist/css/adminlte.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="/assets/bais-control-center.css?v=1.0">
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary bais-cc-body">
+<div class="app-wrapper">
+  <nav class="app-header navbar navbar-expand bg-body" aria-label="BAIS Control Center Kopfzeile">
+    <div class="bais-topbar">
+      <div class="bais-top-left">
+        <button class="bais-icon-button" type="button" data-sidebar-toggle aria-label="Navigation ein- oder ausblenden" aria-expanded="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="bais-top-title"><strong>BAIS Control Center</strong><small>Production Administration & Operations</small></div>
+      </div>
+      <div class="bais-top-actions">
+        <span class="bais-live">Production</span>
+        <a class="bais-action secondary" href="/" target="_blank" rel="noopener">Website ↗</a>
+        <button class="bais-action primary" type="button" data-admin-logout>Abmelden</button>
+      </div>
+    </div>
+  </nav>
+
+  <aside class="app-sidebar shadow" data-bs-theme="dark" aria-label="BAIS Control Center Navigation">
+    <div class="sidebar-brand">
+      <a class="bais-brandline" href="/bais-control-center/" aria-label="BAIS Control Center Startseite">
+        <img src="/assets/bais-wordmark.svg" alt="BAIS">
+        <span class="bais-brand-copy"><strong>CONTROL CENTER</strong><span>Bünyamin Atik · IT Solutions</span></span>
+      </a>
+    </div>
+    <div class="sidebar-wrapper">
+      <nav aria-label="Hauptnavigation">
+        <div class="bais-nav-label">Übersicht</div>
+        <ul class="nav sidebar-menu flex-column" role="list">
+          <li class="nav-item"><a class="nav-link bais-side-link active" href="#dashboard"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v4h-6zM14 12h6v8h-6zM4 14h6v6H4z"/></svg></span><span>Dashboard</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="#customers"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Kunden</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="#projects"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M3 7h18v13H3zM8 7V4h8v3"/></svg></span><span>Projekte & Freigaben</span></a></li>
+        </ul>
+
+        <div class="bais-nav-label">Betrieb</div>
+        <ul class="nav sidebar-menu flex-column" role="list">
+          <li class="nav-item"><a class="nav-link bais-side-link" href="#integrations"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M8 12h8M12 8v8M5 5l3 3M19 5l-3 3M5 19l3-3M19 19l-3-3"/></svg></span><span>Integrationen</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="#health"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span><span>System Health</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="/admin/runbook/"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg></span><span>Runbook</span></a></li>
+        </ul>
+
+        <div class="bais-nav-label">Bereiche</div>
+        <ul class="nav sidebar-menu flex-column" role="list">
+          <li class="nav-item"><a class="nav-link bais-side-link" href="/project-portal/"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM7 9h10M7 13h6"/></svg></span><span>Project Portal</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="/academy/"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5zM7 12v5c3 2 7 2 10 0v-5"/></svg></span><span>Academy</span></a></li>
+          <li class="nav-item"><a class="nav-link bais-side-link" href="/admin/rechnung/"><span class="bais-side-icon"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg></span><span>Rechnung</span></a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="app-main" id="dashboard">
+    <div class="app-content-header bais-content-header">
+      <div class="container-fluid">
+        <div class="bais-page-head">
+          <div>
+            <div class="bais-eyebrow">BAIS · PRODUCTION CONTROL</div>
+            <h1>Unternehmensübersicht</h1>
+            <p>Kunden, Projekte, Academy und technische Integrationen in einer zentralen Oberfläche.</p>
+          </div>
+          <button class="bais-refresh" type="button" data-refresh>↻ Daten aktualisieren</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <div class="container-fluid">
+        <div class="bais-note" data-global-message>Live-Daten werden geladen …</div>
+
+        <section class="bais-kpi-grid" aria-label="Kennzahlen">
+          <article class="bais-kpi"><small>Kunden</small><strong data-kpi="customers">—</strong><span>registrierte Kundenkonten</span></article>
+          <article class="bais-kpi"><small>Aktive Projekte</small><strong data-kpi="projects">—</strong><span>signierte Projektfreigaben</span></article>
+          <article class="bais-kpi"><small>Aktive Academy-Anmeldungen</small><strong data-kpi="enrollments">—</strong><span>laufende Lernzugänge</span></article>
+          <article class="bais-kpi"><small>Neue Kontakte</small><strong data-kpi="contacts">—</strong><span>noch nicht bearbeitet</span></article>
+        </section>
+
+        <div class="bais-grid-2">
+          <section class="bais-card" id="health" aria-labelledby="health-title">
+            <div class="bais-card-head"><div><h2 id="health-title">System Health</h2><small data-health-time>Letzte Prüfung: —</small></div><span class="bais-live">Live</span></div>
+            <div class="bais-card-body"><div class="bais-health-grid" data-health-grid><div class="bais-empty">Systemstatus wird geladen …</div></div></div>
+          </section>
+
+          <section class="bais-card" id="integrations" aria-labelledby="integration-title">
+            <div class="bais-card-head"><div><h2 id="integration-title">Integrationen</h2><small>Produktionsverbindungen</small></div></div>
+            <div class="bais-card-body"><div class="bais-integrations" data-integrations><div class="bais-empty">Integrationen werden geprüft …</div></div></div>
+          </section>
+        </div>
+
+        <div class="bais-grid-2">
+          <section class="bais-card" id="customers" aria-labelledby="customers-title">
+            <div class="bais-card-head"><div><h2 id="customers-title">Kunden</h2><small>BAIS Kunden-Nr. und Account-Status</small></div><a class="bais-action secondary" href="/admin/">Verwalten ↗</a></div>
+            <div class="bais-table-wrap">
+              <table class="bais-table"><thead><tr><th>Kunden-Nr.</th><th>Organisation</th><th>Status</th></tr></thead><tbody data-customer-rows><tr><td colspan="3" class="bais-empty">Kundendaten werden geladen …</td></tr></tbody></table>
+            </div>
+          </section>
+
+          <section class="bais-card" id="projects" aria-labelledby="projects-title">
+            <div class="bais-card-head"><div><h2 id="projects-title">Projekte & Freigaben</h2><small>signierte Projekte und aktuelle Entscheidungen</small></div></div>
+            <div class="bais-table-wrap">
+              <table class="bais-table"><thead><tr><th>Projekt</th><th>Kunde</th><th>Status</th></tr></thead><tbody data-project-rows><tr><td colspan="3" class="bais-empty">Projektdaten werden geladen …</td></tr></tbody></table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer"><div class="bais-footer"><span>© BAIS · Bünyamin Atik – IT Solutions</span><span><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a></span></div></footer>
+</div>
+<script type="module" src="/assets/bais-control-center.js?v=1.0"></script>
+<script type="module" src="/assets/admin-logout.js?v=1.0"></script>
+</body>
+</html>
