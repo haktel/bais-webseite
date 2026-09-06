@@ -47,7 +47,10 @@ test("design system loads runtime theme and approved concept colors",()=>{
 test("logo family includes production variants",()=>{
  for(const file of ["assets/bais-wordmark.svg","assets/bais-wordmark-light.svg","assets/bais-wordmark-dark.svg","assets/bais-wordmark-mono.svg","assets/bais-mark.svg","assets/bais-favicon.svg"])assert.ok(fs.existsSync(file),`${file} missing`);
  const primary=read("assets/bais-wordmark.svg");
- assert.match(primary,/IT \/ AI \/ SECURITY/);
+ // The approved vector wordmark outlines its lettering. Its accessible
+ // description carries the brand meaning without requiring visible SVG text.
+ assert.match(primary,/<title\b[^>]*>BAIS<\/title>/);
+ assert.match(primary,/<desc\b[^>]*>[^<]*IT, AI and Security<\/desc>/);
  assert.match(primary,/#00B3A4/);
 });
 
